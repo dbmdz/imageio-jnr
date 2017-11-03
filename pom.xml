@@ -23,6 +23,7 @@
 
   <modules>
     <module>imageio-openjpeg</module>
+    <module>imageio-turbojpeg</module>
   </modules>
 
   <properties>
