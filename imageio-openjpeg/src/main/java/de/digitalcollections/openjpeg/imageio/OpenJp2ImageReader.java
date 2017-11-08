@@ -95,6 +95,18 @@ public class OpenJp2ImageReader extends ImageReader {
                       .iterator();
   }
 
+  private Rectangle adjustRegion(int imageIndex, Rectangle sourceRegion) throws IOException {
+    if (sourceRegion == null) {
+      return null;
+    }
+    double scaleFactor = (double) getWidth(0) / (double) getWidth(imageIndex);
+    return new Rectangle(
+        (int) Math.ceil(scaleFactor * sourceRegion.x),
+        (int) Math.ceil(scaleFactor * sourceRegion.y),
+        (int) Math.ceil(scaleFactor * sourceRegion.width),
+        (int) Math.ceil(scaleFactor * sourceRegion.height));
+  }
+
   /**
    * Decode the image. Note that the source region (if set via params) is always relative to the full-resolution image, not the requested resolution.*/
   @Override
@@ -103,7 +115,7 @@ public class OpenJp2ImageReader extends ImageReader {
     try {
       Rectangle sourceRegion = null;
       if (param != null) {
-        sourceRegion = param.getSourceRegion();
+        sourceRegion = adjustRegion(imageIndex, param.getSourceRegion());
       }
       return OpenJpeg.decode(streamWrapper, sourceRegion, imageIndex);
     } finally {

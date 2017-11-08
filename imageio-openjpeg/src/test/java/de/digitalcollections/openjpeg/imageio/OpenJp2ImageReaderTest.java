@@ -62,7 +62,7 @@ class OpenJp2ImageReaderTest {
   public void testReadRGBTileScaled() throws Exception {
     OpenJp2ImageReader reader = getReader("hires.jp2");
     ImageReadParam param = reader.getDefaultReadParam();
-    param.setSourceRegion(new Rectangle(1024, 1024, 1024, 1024));
+    param.setSourceRegion(new Rectangle(1024, 1024, 512, 512));
     BufferedImage img = reader.read(1, param);
     assertThat(img.getWidth()).isEqualTo(512);
     assertThat(img.getHeight()).isEqualTo(512);
