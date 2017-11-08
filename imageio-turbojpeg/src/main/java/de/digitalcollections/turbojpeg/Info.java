@@ -38,7 +38,7 @@ public class Info {
     this.height = height;
     this.subsampling = subsampling;
     this.availableSizes = Arrays.stream(factors)
-        .sorted(Comparator.comparing(f -> getScaled(width, f.num.get(), f.denom.get())))
+        .sorted(Comparator.comparing(f -> -getScaled(width, f.num.get(), f.denom.get())))
         .map(f -> new Dimension(getScaled(width, f.num.get(), f.denom.get()),
                                 getScaled(height, f.num.get(), f.denom.get())))
         .filter(d -> d.width <= width && d.height <= height && d.width > 1 && d.height > 1)

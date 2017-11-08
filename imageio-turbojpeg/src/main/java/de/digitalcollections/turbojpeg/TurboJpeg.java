@@ -12,6 +12,7 @@ import java.awt.Dimension;
 import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferByte;
+import java.awt.image.Raster;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -59,12 +60,21 @@ public class TurboJpeg {
     }
   }
 
-  public static BufferedImage decode(byte[] jpegData, Info info) throws TurboJpegException {
+  public static BufferedImage decode(byte[] jpegData, Info info, Dimension size) throws TurboJpegException {
     Pointer codec = null;
     try {
       codec = LIB.tjInitDecompress();
       int width = info.getWidth();
       int height = info.getHeight();
+      if (size != null) {
+        if (!info.getAvailableSizes().contains(size)) {
+          throw new IllegalArgumentException(String.format(
+              "Invalid size, must be one of %s", info.getAvailableSizes()));
+        } else {
+          width = size.width;
+          height = size.height;
+        }
+      }
       BufferedImage img = new BufferedImage(width, height, BufferedImage.TYPE_3BYTE_BGR);
       ByteBuffer outBuf = ByteBuffer.wrap(((DataBufferByte) img.getRaster().getDataBuffer()).getData())
                                     .order(RUNTIME.byteOrder());
@@ -80,7 +90,7 @@ public class TurboJpeg {
     }
   }
 
-  public static ByteBuffer encode(BufferedImage img, int quality) throws TurboJpegException {
+  public static ByteBuffer encode(Raster img, int quality) throws TurboJpegException {
     Pointer codec = null;
     Pointer bufPtr = null;
     try {
@@ -88,10 +98,24 @@ public class TurboJpeg {
       int bufSize = (int) LIB.tjBufSize(img.getWidth(), img.getHeight(), TJSAMP.TJSAMP_444);
       bufPtr = LIB.tjAlloc(bufSize);
       NativeLongByReference lenPtr = new NativeLongByReference(bufSize);
-      ByteBuffer inBuf = ByteBuffer.wrap(((DataBufferByte) img.getData().getDataBuffer()).getData())
+      ByteBuffer inBuf = ByteBuffer.wrap(((DataBufferByte) img.getDataBuffer()).getData())
                                    .order(RUNTIME.byteOrder());
+      TJPF pixelFmt;
+      switch (img.getNumBands()) {
+        case 4:
+          pixelFmt = TJPF.TJPF_BGRX; // 4BYTE_BGRA
+          break;
+        case 3:
+          pixelFmt = TJPF.TJPF_BGR;  // 3BYTE_BGR
+          break;
+        case 1:
+          pixelFmt = TJPF.TJPF_GRAY; // 1BYTE_GRAY
+          break;
+        default:
+          throw new IllegalArgumentException("Illegal sample format");
+      }
       int rv = LIB.tjCompress2(
-          codec, inBuf, img.getWidth(), 0, img.getHeight(), TJPF.fromImageType(img.getType()),
+          codec, inBuf, img.getWidth(), 0, img.getHeight(),  pixelFmt,
           new PointerByReference(bufPtr), lenPtr, TJSAMP.TJSAMP_444, quality, 0);
       if (rv != 0) {
         throw new TurboJpegException(LIB.tjGetErrorStr());
@@ -179,20 +203,24 @@ public class TurboJpeg {
     for (Dimension size : info.getAvailableSizes()) {
       System.out.printf("%dx%d\n", size.width, size.height);
     }
-    BufferedImage img = decode(jpegData, getInfo(jpegData));
+    BufferedImage img = decode(jpegData, getInfo(jpegData), info.getAvailableSizes().get(2));
+    System.out.printf("Image size: %dx%d\n", img.getWidth(), img.getHeight());
     ImageIO.write(img, "png", new File("/tmp/test.png"));
 
     BufferedImage in = ImageIO.read(new File("/tmp/test.png"));
-    ByteBuffer data = encode(in, 85);
+    ByteBuffer data = encode(in.getRaster(), 85);
     try (FileOutputStream fos = new FileOutputStream(new File("/tmp/test.jpg"))) {
       fos.getChannel().write(data);
     };
 
-    ByteBuffer transformedData = transform(jpegData, info, new Rectangle(16, 16, 164, 164), 270);
+    ByteBuffer transformedData = transform(jpegData, info, new Rectangle(15, 16, 165, 165), 270);
     Info transInfo = getInfo(transformedData.array());
     System.out.printf("Transformed size: %dx%d\n", transInfo.getWidth(), transInfo.getHeight());
     try (FileOutputStream fos = new FileOutputStream(new File("/tmp/test_transformed.jpg"))) {
       fos.getChannel().write(transformedData);
     }
+    BufferedImage transformedImg = decode(transformedData.array(), transInfo, transInfo.getAvailableSizes().get(1));
+    System.out.printf("Transformed and scaled size: %dx%d\n", transformedImg.getWidth(), transformedImg.getHeight());
+    ImageIO.write(img, "png", new File("/tmp/test_transformed_decoded.png"));
   }
 }

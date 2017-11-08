@@ -1,3 +1,5 @@
 target
 .idea
 *.iml
+core
+hs_err_*.log

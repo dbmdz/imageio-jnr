@@ -37,7 +37,7 @@ public class TurboJpegImageReaderSpi extends ImageReaderSpi {
       return false;
     }
     ImageInputStream stream = (ImageInputStream)input;
-    byte[] b = new byte[12];
+    byte[] b = new byte[2];
     try {
       stream.mark();
       stream.readFully(b);
