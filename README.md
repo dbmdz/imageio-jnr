@@ -10,16 +10,47 @@ libraries and you can install them directly from Maven Central.
 
 ## Currently available plugins
 
-|     Artifact     |   Format  |      Backing native library         |             Required version               |
-| ---------------- | --------- | ----------------------------------- | ------------------------------------------ |
-| imageio-openjpeg | JPEG2000  | [OpenJPEG](http://www.openjpeg.org) | >= 2.0 (>=2.3 recommended for performance) |
+|       Module      |   Format  |      Backing native library         |             Required version               |
+| ----------------- | --------- | ----------------------------------- | ------------------------------------------ |
+| imageio-openjpeg  | JPEG2000  | [OpenJPEG](http://www.openjpeg.org) | \>= 2.0 (>=2.3 recommended for performance) |
+| imageio-turbojpeg |    JPEG   | [TurboJPEG/libjpeg-turbo](https://www.libjpeg-turbo.org/) | \>= 1.0               |
+
+
+## Supported features
+
+### imageio-openjpeg
+
+- [x] **Decoding:**
+  * [x] Tiled decoding
+  * [x] Decoding of arbitrary regions
+  * [x] Decoding of only a specific resolution
+- [x] **Encoding:**
+  * [x] Lossless compression
+  * [x] Lossy compression with user-defined quality
+  * [x] Tiled encoding
+  * [x] Encoding of multiple resolutions
+  
+  
+### imageio-turbojpeg
+- [x] **Decoding:**
+  * [x] Decoding of arbitrary regions
+  * [x] Decoding of only a specific resolution
+  * [x] Rotate image before decoding
+- [x] **Encoding:**
+  * [x] Lossy compression with user-defined quality
+
+
+## Platform-(In)Dependence
+
+JNR-FFI itself is compatible with [a large number of architectures](https://github.com/jnr/jffi/tree/master/archive),
+so you merely need to make sure that the backing native libraries are compatible with your architecture.
+Both [OpenJPEG](https://packages.debian.org/stretch/libopenjp2-7) and [TurboJPEG](https://packages.debian.org/stretch/libturbojpeg0)
+are available for the majority of commonly used platforms.
 
 
 ## Planned plugins
-- libjpeg-turbo (via TurboJPEG API)
+
 - libpng
 - libtiff
 - libwebp
 
-## Documentation
-Coming up...
