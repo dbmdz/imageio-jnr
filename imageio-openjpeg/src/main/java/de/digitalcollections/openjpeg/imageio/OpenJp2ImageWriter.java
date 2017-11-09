@@ -14,6 +14,9 @@ import javax.imageio.metadata.IIOMetadata;
 import javax.imageio.spi.ImageWriterSpi;
 import javax.imageio.stream.ImageOutputStream;
 
+/**
+ * ImageWriter for JPEG2000 images, based on the openjp2 library from the OpenJPEG project, accessed via JNR-FFI.
+ */
 public class OpenJp2ImageWriter extends ImageWriter {
   private OpenJpeg lib;
 

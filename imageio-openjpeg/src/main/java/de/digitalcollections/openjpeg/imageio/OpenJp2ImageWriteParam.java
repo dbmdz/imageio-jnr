@@ -7,6 +7,9 @@ import java.util.Arrays;
 import java.util.stream.Stream;
 import javax.imageio.ImageWriteParam;
 
+/**
+ * Parameters for encoding JPEG2000 images
+ */
 public class OpenJp2ImageWriteParam extends ImageWriteParam {
   public enum ProgressionOrder {
     LRCP(0), RLCP(1), RPCL(2), PCRL(3), CPRL(4);
@@ -39,9 +42,10 @@ public class OpenJp2ImageWriteParam extends ImageWriteParam {
   /** Number of resolutions to encode **/
   int numResolutions = 6;
 
+  /** Progession order. Defaults to LRCP. **/
   ProgressionOrder progOrder = ProgressionOrder.LRCP;
 
-  public opj_cparameters toNativeParams(OpenJpeg lib) {
+  protected opj_cparameters toNativeParams(OpenJpeg lib) {
     opj_cparameters params = new opj_cparameters(lib.runtime);
     lib.lib.opj_set_default_encoder_parameters(params);
 
@@ -104,6 +108,9 @@ public class OpenJp2ImageWriteParam extends ImageWriteParam {
     return new String[]{"lossless", "lossy"};
   }
 
+  /**
+   * Set the compression type. Must be 'lossless' (default) or 'lossy'.
+   */
   public void setCompressionType(String compressionType) {
     if (Stream.of(COMPRESS_TYPE_LOSSLESS, COMPRESS_TYPE_LOSSY).noneMatch(compressionType::equals)) {
       throw new IllegalArgumentException("Unknown compression type");
@@ -133,6 +140,9 @@ public class OpenJp2ImageWriteParam extends ImageWriteParam {
     return writeSOPMarkers;
   }
 
+  /**
+   * Write SOP markers after each packet.
+   */
   public void setWriteSOPMarkers(boolean writeSOPMarkers) {
     this.writeSOPMarkers = writeSOPMarkers;
   }
@@ -141,10 +151,19 @@ public class OpenJp2ImageWriteParam extends ImageWriteParam {
     return writeEPHMarkers;
   }
 
+  /**
+   * Write EPH marker after each header packet.
+   */
   public void setWriteEPHMarkers(boolean writeEPHMarkers) {
     this.writeEPHMarkers = writeEPHMarkers;
   }
 
+  /**
+   * Set the compression quality. Automatically switches compression type to lossy.
+   * {@link ImageWriteParam::setCompressionType} must have been set to {@link ImageWriteParam::MODE_EXPLICIT}.
+   *
+   * Quality must be between 0.0 (worst) and 1.0 (best).
+   */
   @Override
   public void setCompressionQuality(float quality) {
     super.setCompressionQuality(quality);
@@ -155,15 +174,23 @@ public class OpenJp2ImageWriteParam extends ImageWriteParam {
     return numResolutions;
   }
 
+  /**
+   * Set the number of resolutions to encode in the output image.
+   *
+   * Each resolution will be 2^num times smaller than the native resolution.
+   */
   public void setNumResolutions(int numResolutions) {
     this.numResolutions = numResolutions;
   }
 
-  public ProgressionOrder getProgOrder() {
+  public ProgressionOrder getProgressionOrder() {
     return progOrder;
   }
 
-  public void setProgOrder(ProgressionOrder progOrder) {
+  /**
+   * Set the progression order of the encoded image.
+   */
+  public void setProgressionOrder(ProgressionOrder progOrder) {
     this.progOrder = progOrder;
   }
 }

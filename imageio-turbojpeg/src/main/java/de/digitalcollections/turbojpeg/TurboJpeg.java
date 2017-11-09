@@ -1,7 +1,6 @@
 package de.digitalcollections.turbojpeg;
 
 import com.google.common.collect.Streams;
-import com.sun.xml.internal.messaging.saaj.util.ByteOutputStream;
 import de.digitalcollections.turbojpeg.imageio.TurboJpegImageReader;
 import de.digitalcollections.turbojpeg.imageio.TurboJpegImageWriter;
 import de.digitalcollections.turbojpeg.lib.enums.TJPF;
@@ -16,6 +15,7 @@ import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferByte;
 import java.awt.image.Raster;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -223,7 +223,7 @@ public class TurboJpeg {
     param.setCompressionQuality(0.85f);
     Instant start = Instant.now();
     for (int i=0; i < 100; i++) {
-      ByteOutputStream bos = new ByteOutputStream();
+      ByteArrayOutputStream bos = new ByteArrayOutputStream();
       writer.setOutput(ImageIO.createImageOutputStream(bos));
       writer.write(null, img, null);
     }

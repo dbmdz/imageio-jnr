@@ -16,6 +16,9 @@ import javax.imageio.stream.ImageInputStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * ImageReader for JPEG2000 images, based on the openjp2 library from the OpenJPEG project, accessed via JNR-FFI.
+ */
 public class OpenJp2ImageReader extends ImageReader {
   private static final Logger LOGGER = LoggerFactory.getLogger(OpenJp2ImageReader.class);
 
@@ -43,6 +46,11 @@ public class OpenJp2ImageReader extends ImageReader {
     this.streamWrapper = new ImageInputStreamWrapper(stream, lib);
   }
 
+  /**
+   * Corresponds to the number of resolutions in the image.
+   *
+   * Image 0 has the native resolution, all following indices are 1/2^idx times smaller.
+   */
   @Override
   public int getNumImages(boolean allowSearch) throws IOException {
     return getInfo().getNumResolutions();
@@ -72,12 +80,18 @@ public class OpenJp2ImageReader extends ImageReader {
     return (int) (size / Math.pow(2, (double) imageIndex));
   }
 
+  /**
+   * Get the width of the given resolution of the image.
+   */
   @Override
   public int getWidth(int imageIndex) throws IOException {
     checkIndex(imageIndex);
     return adjustSize(info.getNativeSize().width, imageIndex);
   }
 
+  /**
+   * Get the height of the given resolution of the image.
+   */
   @Override
   public int getHeight(int imageIndex) throws IOException {
     checkIndex(imageIndex);
@@ -105,7 +119,8 @@ public class OpenJp2ImageReader extends ImageReader {
   }
 
   /**
-   * Decode the image. Note that the source region (if set via params) is always relative to the full-resolution image, not the requested resolution.*/
+   * Read the image in the given resolution.
+   */
   @Override
   public BufferedImage read(int imageIndex, ImageReadParam param) throws IOException {
     checkIndex(imageIndex);

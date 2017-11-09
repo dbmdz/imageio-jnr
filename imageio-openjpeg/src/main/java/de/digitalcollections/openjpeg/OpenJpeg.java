@@ -1,6 +1,5 @@
 package de.digitalcollections.openjpeg;
 
-import de.digitalcollections.openjpeg.imageio.OpenJp2ImageWriteParam;
 import de.digitalcollections.openjpeg.lib.callbacks.opj_msg_callback;
 import de.digitalcollections.openjpeg.lib.enums.CODEC_FORMAT;
 import de.digitalcollections.openjpeg.lib.enums.COLOR_SPACE;
@@ -231,7 +230,8 @@ public class OpenJpeg {
       setupLogger(codec);
 
       if (params == null) {
-        params = new OpenJp2ImageWriteParam().toNativeParams(this);
+        params = new opj_cparameters(runtime);
+        lib.opj_set_default_encoder_parameters(params);
       }
 
       if (!lib.opj_setup_encoder(codec, params, image)) {
