@@ -32,11 +32,6 @@ public class OpenJp2ImageReader extends ImageReader {
   @Override
   public void setInput(Object input, boolean seekForwardOnly, boolean ignoreMetadata) {
     super.setInput(input, seekForwardOnly, ignoreMetadata);
-    if (seekForwardOnly) {
-      throw new IllegalArgumentException(
-          "Only streams that can be seeked backwards are supported." +
-          "If you used ImageIO.read(), please switch to using the reader directly.");
-    }
     if (input == null) {
       return;
     }
