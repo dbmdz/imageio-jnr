@@ -6,6 +6,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.security.MessageDigest;
 import javax.imageio.IIOImage;
@@ -39,11 +40,12 @@ class OpenJp2ImageWriterTest {
 
   @BeforeEach
   void beforeEach() {
+    OpenJpeg lib = new OpenJpeg();
     // We need to pin the version so we can reliably compare checksums
-    if (!OpenJpeg.LIB.opj_version().equals("2.3.0")) {
+    if (!lib.lib.opj_version().equals("2.3.0")) {
       throw new RuntimeException(String.format(
           "Writer tests must be run with version 2.3.0 of the shared library (installed version is %s)",
-          OpenJpeg.LIB.opj_version()));
+          lib.lib.opj_version()));
     }
     writer = (OpenJp2ImageWriter) ImageIO.getImageWritersByFormatName("jpeg2000").next();
   }
@@ -100,5 +102,26 @@ class OpenJp2ImageWriterTest {
     param.setTilingMode(ImageWriteParam.MODE_EXPLICIT);
     param.setTiling(128, 128, 0, 0);
     compressAndCompare("lenna_tiled_lossy_r10.jp2", param);
+  }
+
+  @Test
+  public void testCanReuseWriter() throws IOException {
+    BufferedImage in = ImageIO.read(ClassLoader.getSystemResource("lenna.png"));
+    ByteArrayOutputStream lenna = new ByteArrayOutputStream();
+    try (ImageOutputStream ios = ImageIO.createImageOutputStream(lenna)) {
+      writer.setOutput(ios);
+      writer.write(null, new IIOImage(in, null, null), null);
+    }
+    lenna.flush();
+
+    in = ImageIO.read(ClassLoader.getSystemResource("hires.jp2"));
+    ByteArrayOutputStream hires = new ByteArrayOutputStream();
+    try (ImageOutputStream ios = ImageIO.createImageOutputStream(lenna)) {
+      writer.setOutput(ios);
+      writer.write(null, new IIOImage(in, null, null), null);
+    }
+    hires.flush();
+
+    assertThat(lenna.toByteArray().length).isNotEqualTo(hires.toByteArray().length);
   }
 }

@@ -1,5 +1,6 @@
 package de.digitalcollections.openjpeg.imageio;
 
+import de.digitalcollections.openjpeg.OpenJpeg;
 import java.io.IOException;
 import java.util.Locale;
 import javax.imageio.ImageTypeSpecifier;
@@ -19,12 +20,24 @@ public class OpenJp2ImageWriterSpi extends ImageWriterSpi {
   private static final String[] readerSpiNames = { "de.digitalcollections.openjpeg.imageio.OpenJp2ImageWriterSpi" };
   private static final Class[] outputTypes = { ImageOutputStream.class };
 
+  private OpenJpeg lib;
+
   public OpenJp2ImageWriterSpi() {
     super(vendorName, version, names, suffixes, MIMETypes, writerClassName, outputTypes, readerSpiNames,
         false, null, null,
         null, null, false,
         null, null, null,
         null);
+  }
+
+  private void loadLibrary() throws IOException {
+    if (this.lib == null) {
+      try {
+        this.lib = new OpenJpeg();
+      } catch (UnsatisfiedLinkError e) {
+        throw new IOException(e);
+      }
+    }
   }
 
   @Override
@@ -35,7 +48,8 @@ public class OpenJp2ImageWriterSpi extends ImageWriterSpi {
 
   @Override
   public ImageWriter createWriterInstance(Object extension) throws IOException {
-    return new OpenJp2ImageWriter(this);
+    this.loadLibrary();
+    return new OpenJp2ImageWriter(this, lib);
   }
 
   @Override

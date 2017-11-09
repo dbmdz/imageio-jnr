@@ -1,15 +1,16 @@
 package de.digitalcollections.openjpeg.imageio;
 
+import de.digitalcollections.openjpeg.OpenJpeg;
 import de.digitalcollections.openjpeg.OutStreamWrapper;
 import java.io.IOException;
 import javax.imageio.stream.ImageOutputStream;
 import jnr.ffi.Pointer;
 
-public class ImageOutputStreamWrapper extends OutStreamWrapper {
+class ImageOutputStreamWrapper extends OutStreamWrapper {
   private ImageOutputStream os;
 
-  public ImageOutputStreamWrapper(ImageOutputStream os) {
-    super();
+  public ImageOutputStreamWrapper(ImageOutputStream os, OpenJpeg lib) {
+    super(lib.lib);
     this.os = os;
   }
 

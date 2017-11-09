@@ -23,11 +23,14 @@ import static java.awt.image.BufferedImage.TYPE_4BYTE_ABGR_PRE;
 import static java.awt.image.BufferedImage.TYPE_BYTE_GRAY;
 
 public class TurboJpegImageReader extends ImageReader {
+
+  private final TurboJpeg lib;
   private ByteBuffer jpegData;
   private Info info;
 
-  protected TurboJpegImageReader(ImageReaderSpi originatingProvider) {
+  protected TurboJpegImageReader(ImageReaderSpi originatingProvider, TurboJpeg lib) {
     super(originatingProvider);
+    this.lib = lib;
   }
 
   @Override
@@ -39,7 +42,7 @@ public class TurboJpegImageReader extends ImageReader {
     if (input instanceof ImageInputStream) {
       try {
         jpegData = bufferFromStream((ImageInputStream) input);
-        info = TurboJpeg.getInfo(jpegData.array());
+        info = lib.getInfo(jpegData.array());
       } catch (IOException e) {
         throw new IllegalArgumentException("Failed to read input.");
       } catch (TurboJpegException e) {
@@ -75,7 +78,7 @@ public class TurboJpegImageReader extends ImageReader {
       readData();
     }
     try {
-      info = TurboJpeg.getInfo(jpegData.array());
+      info = lib.getInfo(jpegData.array());
     } catch (TurboJpegException e) {
       throw new IOException(e);
     }
@@ -211,10 +214,10 @@ public class TurboJpegImageReader extends ImageReader {
         extraCrop = adjustRegion(region);
       }
       if (region != null || rotation != 0) {
-        data = TurboJpeg.transform(data.array(), info, region, rotation);
+        data = lib.transform(data.array(), info, region, rotation);
       }
-      Info transformedInfo = TurboJpeg.getInfo(data.array());
-      BufferedImage img = TurboJpeg.decode(
+      Info transformedInfo = lib.getInfo(data.array());
+      BufferedImage img = lib.decode(
           data.array(), transformedInfo, transformedInfo.getAvailableSizes().get(imageIndex));
       if (extraCrop != null) {
         adjustExtraCrop(imageIndex, transformedInfo, rotation, extraCrop);

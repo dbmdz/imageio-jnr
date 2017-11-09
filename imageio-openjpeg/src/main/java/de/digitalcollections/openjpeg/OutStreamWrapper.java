@@ -8,6 +8,7 @@ import java.io.IOException;
 import jnr.ffi.Pointer;
 
 public abstract class OutStreamWrapper {
+  private libopenjp2 lib;
   private Pointer stream;
 
   // NOTE: We cannot use method references, since their evaluation creates a temporary instance of the functional
@@ -17,17 +18,18 @@ public abstract class OutStreamWrapper {
   private opj_stream_skip_fn skip_cb;
   private opj_stream_seek_fn seek_cb;
 
-  protected OutStreamWrapper() {
-    stream = OpenJpeg.LIB.opj_stream_create(libopenjp2.OPJ_J2K_STREAM_CHUNK_SIZE, false);
+  protected OutStreamWrapper(libopenjp2 lib) {
+    this.lib = lib;
+    this.stream = lib.opj_stream_create(libopenjp2.OPJ_J2K_STREAM_CHUNK_SIZE, false);
     this.skip_cb = this::skip;
     this.seek_cb = this::seek;
     this.write_cb = this::write;
-    OpenJpeg.LIB.opj_stream_set_write_function(stream, write_cb);
-    OpenJpeg.LIB.opj_stream_set_skip_function(stream, skip_cb);
-    OpenJpeg.LIB.opj_stream_set_seek_function(stream, seek_cb);
+    lib.opj_stream_set_write_function(stream, write_cb);
+    lib.opj_stream_set_skip_function(stream, skip_cb);
+    lib.opj_stream_set_seek_function(stream, seek_cb);
     // NOTE: This should not be 0 and >= the size of the actual file. However, if we set it to the maximum value,
     //       it works with streams of any length without any drawbacks (as far as I could tell...)
-    OpenJpeg.LIB.opj_stream_set_user_data_length(stream, (long) Math.pow(2, 32));
+    lib.opj_stream_set_user_data_length(stream, (long) Math.pow(2, 32));
   }
 
   public Pointer getNativeStream() {
@@ -39,7 +41,7 @@ public abstract class OutStreamWrapper {
   protected abstract boolean seek(long numBytes, Pointer userData);
 
   public void close() throws IOException {
-    OpenJpeg.LIB.opj_stream_destroy(this.stream);
+    this.lib.opj_stream_destroy(this.stream);
     this.stream = null;
   }
 }

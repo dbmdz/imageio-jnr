@@ -1,5 +1,6 @@
 package de.digitalcollections.turbojpeg.imageio;
 
+import de.digitalcollections.turbojpeg.TurboJpeg;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Locale;
@@ -7,10 +8,12 @@ import javax.imageio.ImageIO;
 import javax.imageio.ImageReader;
 import javax.imageio.spi.ImageReaderSpi;
 import javax.imageio.stream.ImageInputStream;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class TurboJpegImageReaderSpi extends ImageReaderSpi {
+  private static final Logger LOGGER = LoggerFactory.getLogger(TurboJpegImageReaderSpi.class);
   private static byte[] HEADER_MAGIC = new byte[]{(byte) 0xff, (byte) 0xd8};
-
   private static final String vendorName = "Münchener Digitalisierungszentrum/Digitale Bibliothek, Bayerische Staatsbibliothek";
   private static final String version = "0.1.0";
   private static final String readerClassName = "de.digitalcollections.openjpeg.turbojpeg.TurboJpegImageReader";
@@ -18,6 +21,8 @@ public class TurboJpegImageReaderSpi extends ImageReaderSpi {
   private static final String[] suffixes = { "jpg", "jpeg" };
   private static final String[] MIMETypes = { "image/jpeg" };
   private static final String[] writerSpiNames = { "de.digitalcollections.turbojpeg.imageio.TurboJpegImageWriterSpi" };
+
+  private TurboJpeg lib;
 
   public TurboJpegImageReaderSpi() {
     super(vendorName, version, names, suffixes, MIMETypes, readerClassName,
@@ -27,6 +32,18 @@ public class TurboJpegImageReaderSpi extends ImageReaderSpi {
         null, null, null,
         null);
   }
+
+  private void loadLibrary() throws IOException {
+    if (this.lib == null) {
+      try {
+        this.lib = new TurboJpeg();
+      } catch (UnsatisfiedLinkError e) {
+        LOGGER.error("Could not load libturbojpeg", e);
+        throw new IOException(e);
+      }
+    }
+  }
+
 
   @Override
   public boolean canDecodeInput(Object input) throws IOException {
@@ -49,7 +66,8 @@ public class TurboJpegImageReaderSpi extends ImageReaderSpi {
 
   @Override
   public ImageReader createReaderInstance(Object extension) throws IOException {
-    return new TurboJpegImageReader(this);
+    loadLibrary();
+    return new TurboJpegImageReader(this, lib);
   }
 
   @Override

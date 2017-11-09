@@ -13,7 +13,7 @@ import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-/** NOTE: This tests can only be superficial, since TurboJPEG is merely a wrapping API for a number
+/** NOTE: These tests can only be superficial, since TurboJPEG is merely a wrapping API for a number
  *  of different JPEG implementations and versions, which is why we cannot make bit-accurate assertions on the
  *  generated data. */
 class TurboJpegImageWriterTest {
@@ -39,5 +39,30 @@ class TurboJpegImageWriterTest {
     }
     os.flush();
     assertThat(os.toByteArray()).isNotEmpty();
+  }
+
+  @Test
+  public void testCanReuseWriter() throws IOException {
+    ImageWriter writer = Streams.stream(ImageIO.getImageWritersByFormatName("jpeg"))
+        .filter(TurboJpegImageWriter.class::isInstance)
+        .findFirst().get();
+
+    BufferedImage in = ImageIO.read(ClassLoader.getSystemResource("rgb.jpg"));
+    ByteArrayOutputStream rgb = new ByteArrayOutputStream();
+    try (ImageOutputStream ios = ImageIO.createImageOutputStream(rgb)) {
+      writer.setOutput(ios);
+      writer.write(null, new IIOImage(in, null, null), null);
+    }
+    rgb.flush();
+
+    in = ImageIO.read(ClassLoader.getSystemResource("crop_aligned.jpg"));
+    ByteArrayOutputStream bw = new ByteArrayOutputStream();
+    try (ImageOutputStream ios = ImageIO.createImageOutputStream(bw)) {
+      writer.setOutput(ios);
+      writer.write(null, new IIOImage(in, null, null), null);
+    }
+    bw.flush();
+
+    assertThat(rgb.toByteArray()).isNotEqualTo(bw.toByteArray());
   }
 }

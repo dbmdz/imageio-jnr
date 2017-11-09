@@ -16,9 +16,11 @@ import javax.imageio.stream.ImageOutputStream;
 
 public class TurboJpegImageWriter extends ImageWriter {
   private ImageOutputStream stream;
+  private final TurboJpeg lib;
 
-  protected TurboJpegImageWriter(ImageWriterSpi originatingProvider) {
+  protected TurboJpegImageWriter(ImageWriterSpi originatingProvider, TurboJpeg lib) {
     super(originatingProvider);
+    this.lib = lib;
   }
 
   @Override
@@ -78,7 +80,7 @@ public class TurboJpegImageWriter extends ImageWriter {
       quality = (int) (param.getCompressionQuality() * 100);
     }
     try {
-      stream.write(TurboJpeg.encode(raster, quality).array());
+      stream.write(lib.encode(raster, quality).array());
     } catch (TurboJpegException e) {
       throw new IOException(e);
     }

@@ -1,11 +1,11 @@
 package de.digitalcollections.openjpeg.lib.structs;
 
-import de.digitalcollections.openjpeg.OpenJpeg;
 import de.digitalcollections.openjpeg.lib.enums.COLOR_SPACE;
+import de.digitalcollections.openjpeg.lib.libopenjp2;
 import jnr.ffi.Runtime;
 import jnr.ffi.Struct;
 
-public class opj_image extends Struct implements AutoCloseable {
+public class opj_image extends Struct {
   /** XOsiz: horizontal offset from the origin of the reference grid to the left side of the image area */
   public u_int32_t x0 = new u_int32_t();
   /** YOsiz: vertical offset from the origin of the reference grid to the top side of the image area */
@@ -29,10 +29,9 @@ public class opj_image extends Struct implements AutoCloseable {
     super(runtime);
   }
 
-  @Override
-  public void close() {
+  public void free(libopenjp2 lib) {
     if (this.x0.getMemory().address() != 0) {
-      OpenJpeg.LIB.opj_image_destroy(this.x0.getMemory());
+      lib.opj_image_destroy(this.x0.getMemory());
     }
   }
 }

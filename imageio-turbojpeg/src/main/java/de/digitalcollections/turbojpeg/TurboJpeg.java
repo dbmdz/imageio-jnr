@@ -1,6 +1,9 @@
 package de.digitalcollections.turbojpeg;
 
-import com.google.common.io.ByteStreams;
+import com.google.common.collect.Streams;
+import com.sun.xml.internal.messaging.saaj.util.ByteOutputStream;
+import de.digitalcollections.turbojpeg.imageio.TurboJpegImageReader;
+import de.digitalcollections.turbojpeg.imageio.TurboJpegImageWriter;
 import de.digitalcollections.turbojpeg.lib.enums.TJPF;
 import de.digitalcollections.turbojpeg.lib.enums.TJSAMP;
 import de.digitalcollections.turbojpeg.lib.enums.TJXOP;
@@ -15,10 +18,16 @@ import java.awt.image.DataBufferByte;
 import java.awt.image.Raster;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileOutputStream;
+import java.io.IOException;
 import java.nio.Buffer;
 import java.nio.ByteBuffer;
+import java.time.Duration;
+import java.time.Instant;
+import javax.imageio.IIOImage;
 import javax.imageio.ImageIO;
+import javax.imageio.ImageReader;
+import javax.imageio.ImageWriteParam;
+import javax.imageio.ImageWriter;
 import jnr.ffi.LibraryLoader;
 import jnr.ffi.Pointer;
 import jnr.ffi.Runtime;
@@ -28,42 +37,47 @@ import jnr.ffi.byref.NativeLongByReference;
 import jnr.ffi.byref.PointerByReference;
 
 public class TurboJpeg {
-  public static libturbojpeg LIB = LibraryLoader.create(libturbojpeg.class).load("turbojpeg");
-  public static Runtime RUNTIME = Runtime.getRuntime(LIB);
+  public libturbojpeg lib;
+  public Runtime runtime;
 
-  public static Info getInfo(byte[] jpegData) throws TurboJpegException {
+  public TurboJpeg() {
+    lib = LibraryLoader.create(libturbojpeg.class).load("turbojpeg");
+    runtime = Runtime.getRuntime(lib);
+  }
+
+  public Info getInfo(byte[] jpegData) throws TurboJpegException {
     Pointer codec = null;
     try {
-      codec = LIB.tjInitDecompress();
+      codec = lib.tjInitDecompress();
 
       IntByReference width = new IntByReference();
       IntByReference height = new IntByReference();
       IntByReference jpegSubsamp = new IntByReference();
-      int rv = LIB.tjDecompressHeader2(
+      int rv = lib.tjDecompressHeader2(
           codec, ByteBuffer.wrap(jpegData), jpegData.length, width, height, jpegSubsamp);
       if (rv != 0) {
-        throw new TurboJpegException(LIB.tjGetErrorStr());
+        throw new TurboJpegException(lib.tjGetErrorStr());
       }
 
       IntByReference numRef = new IntByReference();
-      Pointer factorPtr = LIB.tjGetScalingFactors(numRef);
+      Pointer factorPtr = lib.tjGetScalingFactors(numRef);
       tjscalingfactor[] factors = new tjscalingfactor[numRef.getValue()];
       for (int i=0; i < numRef.getValue(); i++) {
-        tjscalingfactor f = new tjscalingfactor(RUNTIME);
+        tjscalingfactor f = new tjscalingfactor(runtime);
         factorPtr = factorPtr.slice(i * Struct.size(f));
         f.useMemory(factorPtr);
         factors[i] = f;
       }
       return new Info(width.getValue(), height.getValue(), jpegSubsamp.getValue(), factors);
     } finally {
-      if (codec != null && codec.address() != 0) LIB.tjDestroy(codec);
+      if (codec != null && codec.address() != 0) lib.tjDestroy(codec);
     }
   }
 
-  public static BufferedImage decode(byte[] jpegData, Info info, Dimension size) throws TurboJpegException {
+  public BufferedImage decode(byte[] jpegData, Info info, Dimension size) throws TurboJpegException {
     Pointer codec = null;
     try {
-      codec = LIB.tjInitDecompress();
+      codec = lib.tjInitDecompress();
       int width = info.getWidth();
       int height = info.getHeight();
       if (size != null) {
@@ -77,29 +91,29 @@ public class TurboJpeg {
       }
       BufferedImage img = new BufferedImage(width, height, BufferedImage.TYPE_3BYTE_BGR);
       ByteBuffer outBuf = ByteBuffer.wrap(((DataBufferByte) img.getRaster().getDataBuffer()).getData())
-                                    .order(RUNTIME.byteOrder());
-      int rv = LIB.tjDecompress2(
+                                    .order(runtime.byteOrder());
+      int rv = lib.tjDecompress2(
           codec, ByteBuffer.wrap(jpegData), jpegData.length, outBuf,
           width, width * 3, height, TJPF.TJPF_BGR, 0);
       if (rv != 0) {
-        throw new TurboJpegException(LIB.tjGetErrorStr());
+        throw new TurboJpegException(lib.tjGetErrorStr());
       }
       return img;
     } finally {
-      if (codec != null && codec.address() != 0) LIB.tjDestroy(codec);
+      if (codec != null && codec.address() != 0) lib.tjDestroy(codec);
     }
   }
 
-  public static ByteBuffer encode(Raster img, int quality) throws TurboJpegException {
+  public ByteBuffer encode(Raster img, int quality) throws TurboJpegException {
     Pointer codec = null;
     Pointer bufPtr = null;
     try {
-      codec = LIB.tjInitCompress();
-      int bufSize = (int) LIB.tjBufSize(img.getWidth(), img.getHeight(), TJSAMP.TJSAMP_444);
-      bufPtr = LIB.tjAlloc(bufSize);
+      codec = lib.tjInitCompress();
+      int bufSize = (int) lib.tjBufSize(img.getWidth(), img.getHeight(), TJSAMP.TJSAMP_444);
+      bufPtr = lib.tjAlloc(bufSize);
       NativeLongByReference lenPtr = new NativeLongByReference(bufSize);
       ByteBuffer inBuf = ByteBuffer.wrap(((DataBufferByte) img.getDataBuffer()).getData())
-                                   .order(RUNTIME.byteOrder());
+                                   .order(runtime.byteOrder());
       TJPF pixelFmt;
       switch (img.getNumBands()) {
         case 4:
@@ -114,28 +128,28 @@ public class TurboJpeg {
         default:
           throw new IllegalArgumentException("Illegal sample format");
       }
-      int rv = LIB.tjCompress2(
+      int rv = lib.tjCompress2(
           codec, inBuf, img.getWidth(), 0, img.getHeight(),  pixelFmt,
           new PointerByReference(bufPtr), lenPtr, TJSAMP.TJSAMP_444, quality, 0);
       if (rv != 0) {
-        throw new TurboJpegException(LIB.tjGetErrorStr());
+        throw new TurboJpegException(lib.tjGetErrorStr());
       }
-      ByteBuffer outBuf = ByteBuffer.allocate(lenPtr.getValue().intValue()).order(RUNTIME.byteOrder());
+      ByteBuffer outBuf = ByteBuffer.allocate(lenPtr.getValue().intValue()).order(runtime.byteOrder());
       bufPtr.get(0, outBuf.array(), 0, lenPtr.getValue().intValue());
       outBuf.rewind();
       return outBuf;
     } finally {
-      if (codec != null && codec.address() != 0) LIB.tjDestroy(codec);
-      if (bufPtr != null && bufPtr.address() != 0) LIB.tjFree(bufPtr);
+      if (codec != null && codec.address() != 0) lib.tjDestroy(codec);
+      if (bufPtr != null && bufPtr.address() != 0) lib.tjFree(bufPtr);
     }
   }
 
-  public static ByteBuffer transform(byte[] jpegData, Info info, Rectangle region, int rotation) throws TurboJpegException {
+  public ByteBuffer transform(byte[] jpegData, Info info, Rectangle region, int rotation) throws TurboJpegException {
     Pointer codec = null;
     Pointer bufPtr = null;
     try {
-      codec = LIB.tjInitTransform();
-      tjtransform transform = new tjtransform(RUNTIME);
+      codec = lib.tjInitTransform();
+      tjtransform transform = new tjtransform(runtime);
 
       int width = info.getWidth();
       int height = info.getHeight();
@@ -173,54 +187,78 @@ public class TurboJpeg {
         }
         transform.op.set(transform.op.get() | op.intValue());
       }
-      int bufSize = (int) LIB.tjBufSize(width, height, TJSAMP.TJSAMP_444);
-      bufPtr = LIB.tjAlloc(bufSize);
+      int bufSize = (int) lib.tjBufSize(width, height, TJSAMP.TJSAMP_444);
+      bufPtr = lib.tjAlloc(bufSize);
       NativeLongByReference lenRef = new NativeLongByReference(bufSize);
-      Buffer inBuf = ByteBuffer.wrap(jpegData).order(RUNTIME.byteOrder());
-      int rv = LIB.tjTransform(
+      Buffer inBuf = ByteBuffer.wrap(jpegData).order(runtime.byteOrder());
+      int rv = lib.tjTransform(
           codec, inBuf, jpegData.length, 1, new PointerByReference(bufPtr),
           lenRef, transform, 0);
       if (rv != 0) {
-        throw new TurboJpegException(LIB.tjGetErrorStr());
+        throw new TurboJpegException(lib.tjGetErrorStr());
       }
-      ByteBuffer outBuf = ByteBuffer.allocate(lenRef.getValue().intValue()).order(RUNTIME.byteOrder());
+      ByteBuffer outBuf = ByteBuffer.allocate(lenRef.getValue().intValue()).order(runtime.byteOrder());
       bufPtr.get(0, outBuf.array(), 0, lenRef.getValue().intValue());
       outBuf.rewind();
       return outBuf;
     } finally {
-      if (codec != null && codec.address() != 0) LIB.tjDestroy(codec);
-      if (bufPtr != null && bufPtr.address() != 0) LIB.tjFree(bufPtr);
+      if (codec != null && codec.address() != 0) lib.tjDestroy(codec);
+      if (bufPtr != null && bufPtr.address() != 0) lib.tjFree(bufPtr);
     }
   }
 
+  private static Duration benchmarkDecode(ImageReader reader) throws IOException {
+    Instant start = Instant.now();
+    for (int i=0; i < 100; i++) {
+      reader.setInput(ImageIO.createImageInputStream(new FileInputStream(new File("/tmp/bench/artificial.jpg"))));
+      BufferedImage img = reader.read(0, null);
+    }
+    return Duration.between(start, Instant.now());
+  }
+
+  private static Duration benchmarkEncode(ImageWriter writer) throws IOException {
+    IIOImage img = new IIOImage(ImageIO.read(new File("/tmp/bench/big_building.png")), null, null);
+    ImageWriteParam param = writer.getDefaultWriteParam();
+    param.setCompressionMode(ImageWriteParam.MODE_EXPLICIT);
+    param.setCompressionQuality(0.85f);
+    Instant start = Instant.now();
+    for (int i=0; i < 100; i++) {
+      ByteOutputStream bos = new ByteOutputStream();
+      writer.setOutput(ImageIO.createImageOutputStream(bos));
+      writer.write(null, img, null);
+    }
+    return Duration.between(start, Instant.now());
+  }
+
   public static void main(String[] args) throws Exception {
-    byte[] jpegData = ByteStreams.toByteArray(new FileInputStream(new File("/tmp/lenna.jpg")));
-    Info info = getInfo(jpegData);
-    System.out.printf(
-        "Width: %d, Height: %d, Subsampling: %d\n",
-        info.getWidth(), info.getHeight(), info.getSubsampling());
-    System.out.printf("There are %d available sizes\n", info.getAvailableSizes().size());
-    for (Dimension size : info.getAvailableSizes()) {
-      System.out.printf("%dx%d\n", size.width, size.height);
-    }
-    BufferedImage img = decode(jpegData, getInfo(jpegData), info.getAvailableSizes().get(2));
-    System.out.printf("Image size: %dx%d\n", img.getWidth(), img.getHeight());
-    ImageIO.write(img, "png", new File("/tmp/test.png"));
+    TurboJpegImageReader tjReader = Streams.stream(ImageIO.getImageReadersByFormatName("jpeg"))
+        .filter(TurboJpegImageReader.class::isInstance)
+        .map(TurboJpegImageReader.class::cast)
+        .findFirst().get();
+    ImageReader defaultReader = Streams.stream(ImageIO.getImageReadersByFormatName("jpeg"))
+        .filter(r -> !(r instanceof TurboJpegImageReader))
+        .findFirst().get();
 
-    BufferedImage in = ImageIO.read(new File("/tmp/test.png"));
-    ByteBuffer data = encode(in.getRaster(), 85);
-    try (FileOutputStream fos = new FileOutputStream(new File("/tmp/test.jpg"))) {
-      fos.getChannel().write(data);
-    };
+    TurboJpegImageWriter tjWriter = Streams.stream(ImageIO.getImageWritersByFormatName("jpeg"))
+        .filter(TurboJpegImageWriter.class::isInstance)
+        .map(TurboJpegImageWriter.class::cast)
+        .findFirst().get();
+    ImageWriter defaultWriter = Streams.stream(ImageIO.getImageWritersByFormatName("jpeg"))
+        .filter(w -> !(w instanceof TurboJpegImageWriter))
+        .findFirst().get();
 
-    ByteBuffer transformedData = transform(jpegData, info, new Rectangle(15, 16, 165, 165), 270);
-    Info transInfo = getInfo(transformedData.array());
-    System.out.printf("Transformed size: %dx%d\n", transInfo.getWidth(), transInfo.getHeight());
-    try (FileOutputStream fos = new FileOutputStream(new File("/tmp/test_transformed.jpg"))) {
-      fos.getChannel().write(transformedData);
-    }
-    BufferedImage transformedImg = decode(transformedData.array(), transInfo, transInfo.getAvailableSizes().get(1));
-    System.out.printf("Transformed and scaled size: %dx%d\n", transformedImg.getWidth(), transformedImg.getHeight());
-    ImageIO.write(img, "png", new File("/tmp/test_transformed_decoded.png"));
+    Duration tjDuration = benchmarkDecode(tjReader);
+    Duration defaultDuration = benchmarkDecode(defaultReader);
+    System.out.printf("Default decoding took %dms (%dms per iteration)\n", defaultDuration.toMillis(), defaultDuration.toMillis() / 100);
+    System.out.printf("TurboJPEG decoding took %dms (%dms per iteration)\n", tjDuration.toMillis(), tjDuration
+        .toMillis() / 100);
+
+
+    defaultDuration = benchmarkEncode(defaultWriter);
+    System.out.printf("Default encoding took %dms (%dms per iteration)\n", defaultDuration.toMillis(), defaultDuration.toMillis() / 100);
+
+    tjDuration = benchmarkEncode(tjWriter);
+    System.out.printf("TurboJPEG encoding took %dms (%dms per iteration)\n", tjDuration.toMillis(), tjDuration.toMillis
+        () / 100);
   }
 }

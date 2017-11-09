@@ -15,11 +15,14 @@ import javax.imageio.spi.ImageWriterSpi;
 import javax.imageio.stream.ImageOutputStream;
 
 public class OpenJp2ImageWriter extends ImageWriter {
+  private OpenJpeg lib;
+
   private ImageOutputStream stream = null;
   private ImageOutputStreamWrapper wrapper = null;
 
-  protected OpenJp2ImageWriter(ImageWriterSpi originatingProvider) {
+  protected OpenJp2ImageWriter(ImageWriterSpi originatingProvider, OpenJpeg lib) {
     super(originatingProvider);
+    this.lib = lib;
   }
 
   @Override
@@ -30,7 +33,7 @@ public class OpenJp2ImageWriter extends ImageWriter {
         throw new IllegalArgumentException("Output not an ImageOutputStream");
       }
       this.stream = (ImageOutputStream) output;
-      this.wrapper = new ImageOutputStreamWrapper(this.stream);
+      this.wrapper = new ImageOutputStreamWrapper(this.stream, lib);
     } else {
       this.stream = null;
       this.wrapper = null;
@@ -73,7 +76,7 @@ public class OpenJp2ImageWriter extends ImageWriter {
       sourceRegion = sourceRegion.intersection(param.getSourceRegion());
     }
     Raster raster = img.getData(sourceRegion);
-    opj_cparameters cparams = ((OpenJp2ImageWriteParam) param).toNativeParams();
-    OpenJpeg.encode(raster, this.wrapper, cparams);
+    opj_cparameters cparams = ((OpenJp2ImageWriteParam) param).toNativeParams(lib);
+    lib.encode(raster, this.wrapper, cparams);
   }
 }

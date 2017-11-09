@@ -77,4 +77,16 @@ class OpenJp2ImageReaderTest {
     assertThat(img.getWidth()).isEqualTo(1284);
     assertThat(img.getHeight()).isEqualTo(768);
   }
+
+  @Test
+  public void testCanReuseReader() throws IOException {
+    ImageReader reader = getReader("rgb.jp2");
+    BufferedImage rgbImg = reader.read(0, null);
+
+    reader.setInput(ImageIO.createImageInputStream(
+        new File(ClassLoader.getSystemResource("hires.jp2").getFile())));
+    BufferedImage bwImg = reader.read(0, null);
+
+    assertThat(rgbImg.getRGB(256, 256)).isNotEqualTo(bwImg.getRGB(256, 256));
+  }
 }

@@ -101,4 +101,16 @@ class TurboJpegImageReaderTest {
     g.drawImage(img, 0, 0, null);
     assertThat(((DataBufferByte) copy.getData().getDataBuffer()).getData()).doesNotContain(-1);
   }
+
+  @Test
+  public void testCanReuseReader() throws IOException {
+    ImageReader reader = getReader("rgb.jpg");
+    BufferedImage rgbImg = reader.read(1, null);
+
+    reader.setInput(ImageIO.createImageInputStream(
+        new File(ClassLoader.getSystemResource("crop_unaligned.jpg").getFile())));
+    BufferedImage bwImg = reader.read(1, null);
+
+    assertThat(rgbImg.getRGB(256, 256)).isNotEqualTo(bwImg.getRGB(256, 256));
+  }
 }

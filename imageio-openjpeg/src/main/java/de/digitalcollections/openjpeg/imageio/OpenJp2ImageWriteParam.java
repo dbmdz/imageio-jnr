@@ -41,9 +41,9 @@ public class OpenJp2ImageWriteParam extends ImageWriteParam {
 
   ProgressionOrder progOrder = ProgressionOrder.LRCP;
 
-  public opj_cparameters toNativeParams() {
-    opj_cparameters params = new opj_cparameters(OpenJpeg.RUNTIME);
-    OpenJpeg.LIB.opj_set_default_encoder_parameters(params);
+  public opj_cparameters toNativeParams(OpenJpeg lib) {
+    opj_cparameters params = new opj_cparameters(lib.runtime);
+    lib.lib.opj_set_default_encoder_parameters(params);
 
     // Tiling
     if (this.getTilingMode() == MODE_EXPLICIT) {

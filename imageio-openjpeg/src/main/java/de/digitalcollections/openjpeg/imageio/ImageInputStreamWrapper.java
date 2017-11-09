@@ -1,15 +1,16 @@
 package de.digitalcollections.openjpeg.imageio;
 
 import de.digitalcollections.openjpeg.InStreamWrapper;
+import de.digitalcollections.openjpeg.OpenJpeg;
 import java.io.IOException;
 import javax.imageio.stream.ImageInputStream;
 import jnr.ffi.Pointer;
 
-public class ImageInputStreamWrapper extends InStreamWrapper {
+class ImageInputStreamWrapper extends InStreamWrapper {
   private ImageInputStream is;
 
-  ImageInputStreamWrapper(ImageInputStream is) {
-    super();
+  ImageInputStreamWrapper(ImageInputStream is, OpenJpeg lib) {
+    super(lib.lib);
     this.is = is;
   }
 

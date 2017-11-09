@@ -19,12 +19,14 @@ import org.slf4j.LoggerFactory;
 public class OpenJp2ImageReader extends ImageReader {
   private static final Logger LOGGER = LoggerFactory.getLogger(OpenJp2ImageReader.class);
 
+  private OpenJpeg lib;
   private ImageInputStream stream = null;
   private ImageInputStreamWrapper streamWrapper = null;
   private Info info = null;
 
-  protected OpenJp2ImageReader(ImageReaderSpi originatingProvider) {
+  protected OpenJp2ImageReader(ImageReaderSpi originatingProvider, OpenJpeg lib) {
     super(originatingProvider);
+    this.lib = lib;
   }
 
   @Override
@@ -43,7 +45,7 @@ public class OpenJp2ImageReader extends ImageReader {
     } else {
       throw new IllegalArgumentException("Bad input.");
     }
-    this.streamWrapper = new ImageInputStreamWrapper(stream);
+    this.streamWrapper = new ImageInputStreamWrapper(stream, lib);
   }
 
   @Override
@@ -60,9 +62,9 @@ public class OpenJp2ImageReader extends ImageReader {
   private Info getInfo() {
     if (this.info == null) {
       try {
-        this.info = OpenJpeg.getInfo(this.streamWrapper);
+        this.info = lib.getInfo(this.streamWrapper);
         this.stream.seek(0);
-        this.streamWrapper = new ImageInputStreamWrapper(this.stream);
+        this.streamWrapper = new ImageInputStreamWrapper(this.stream, lib);
       } catch (IOException e) {
         LOGGER.error("Error obtaining info", e);
         this.info = null;
@@ -117,7 +119,7 @@ public class OpenJp2ImageReader extends ImageReader {
       if (param != null) {
         sourceRegion = adjustRegion(imageIndex, param.getSourceRegion());
       }
-      return OpenJpeg.decode(streamWrapper, sourceRegion, imageIndex);
+      return lib.decode(streamWrapper, sourceRegion, imageIndex);
     } finally {
       if (this.streamWrapper != null) this.streamWrapper.close();
     }

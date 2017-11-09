@@ -1,17 +1,22 @@
 package de.digitalcollections.turbojpeg.lib.structs;
 
-import de.digitalcollections.turbojpeg.TurboJpeg;
 import jnr.ffi.Runtime;
 import jnr.ffi.Struct;
 
 public class tjtransform extends Struct {
-  public tjregion r = inner(new tjregion(TurboJpeg.RUNTIME));
-  public Signed32 op = new Signed32();
-  public Signed32 options = new Signed32();
-  public Pointer data = new Pointer();
-  public Pointer customFilter = new Pointer();
+  public tjregion r;
+  public Signed32 op;
+  public Signed32 options;
+  public Pointer data;
+  public Pointer customFilter;
 
   public tjtransform(Runtime runtime) {
     super(runtime);
+    // NOTE: We run the initializers in the constructor since we need to access the runtime
+    r = inner(new tjregion(runtime));
+    op = new Signed32();
+    options = new Signed32();
+    data = new Pointer();
+    customFilter = new Pointer();
   }
 }
