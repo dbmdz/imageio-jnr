@@ -146,13 +146,11 @@ public class TurboJpegImageReader extends ImageReader {
       modified = true;
     }
     if (region.width % 8 != 0) {
-      extraCrop.width = region.width;
-      region.width = (int) (8*(Math.round(region.getWidth() / 8)));
+      region.width = (int) (8*(Math.ceil(region.getWidth() / 8)));
       modified = true;
     }
     if (region.height % 8 != 0) {
-      extraCrop.height = region.height;
-      region.height = (int) (8*(Math.round(region.getHeight() / 8)));
+      region.height = (int) (8*(Math.ceil(region.getHeight() / 8)));
       modified = true;
     }
     if (modified) {
@@ -171,8 +169,6 @@ public class TurboJpegImageReader extends ImageReader {
     if (factor < 1) {
       rectangle.x = (int) Math.ceil(factor * rectangle.x);
       rectangle.y = (int) Math.ceil(factor * rectangle.y);
-      rectangle.width = (int) Math.ceil(factor * rectangle.width);
-      rectangle.height = (int) Math.ceil(factor * rectangle.height);
     }
 
     if (rotation == 90 || rotation == 270) {
@@ -221,6 +217,8 @@ public class TurboJpegImageReader extends ImageReader {
           data.array(), transformedInfo, transformedInfo.getAvailableSizes().get(imageIndex));
       if (extraCrop != null) {
         adjustExtraCrop(imageIndex, transformedInfo, rotation, extraCrop);
+        extraCrop.width = param.getSourceRegion().width;
+        extraCrop.height = param.getSourceRegion().height;
         img = img.getSubimage(extraCrop.x, extraCrop.y, extraCrop.width, extraCrop.height);
       }
       return img;

@@ -80,10 +80,10 @@ class TurboJpegImageReaderTest {
   public void testReadUnalignedScaled() throws IOException {
     ImageReader reader = getReader("crop_unaligned.jpg");
     ImageReadParam param = reader.getDefaultReadParam();
-    param.setSourceRegion(new Rectangle(29, 37, 51, 43));
-    BufferedImage img = reader.read(2, param);
-    assertThat(img.getWidth()).isEqualTo(51);
-    assertThat(img.getHeight()).isEqualTo(43);
+    param.setSourceRegion(new Rectangle(87, 111, 152, 129));
+    BufferedImage img = reader.read(1, param);
+    assertThat(img.getWidth()).isEqualTo(152);
+    assertThat(img.getHeight()).isEqualTo(129);
     assertThat(((DataBufferByte) img.getData().getDataBuffer()).getData()).doesNotContain(-1);
   }
 
