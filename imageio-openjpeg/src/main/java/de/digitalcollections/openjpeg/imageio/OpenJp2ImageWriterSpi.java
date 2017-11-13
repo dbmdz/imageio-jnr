@@ -9,6 +9,7 @@ import javax.imageio.spi.ImageWriterSpi;
 import javax.imageio.stream.ImageOutputStream;
 
 import static java.awt.image.BufferedImage.TYPE_3BYTE_BGR;
+import static java.awt.image.BufferedImage.TYPE_BYTE_GRAY;
 
 public class OpenJp2ImageWriterSpi extends ImageWriterSpi {
   private static final String vendorName = "Münchener Digitalisierungszentrum/Digitale Bibliothek, Bayerische Staatsbibliothek";
@@ -42,8 +43,9 @@ public class OpenJp2ImageWriterSpi extends ImageWriterSpi {
 
   @Override
   public boolean canEncodeImage(ImageTypeSpecifier type) {
-    // TODO: Pretty restrictive right now, we should support all greyscale and (s)RGB(A) sample models
-    return (type.getNumBands() == 3 && type.getBufferedImageType() == TYPE_3BYTE_BGR);
+    // TODO: Implement alpha support
+    return ((type.getNumBands() == 3 && type.getBufferedImageType() == TYPE_3BYTE_BGR) ||
+            (type.getNumBands() == 1 && type.getBufferedImageType() == TYPE_BYTE_GRAY));
   }
 
   @Override

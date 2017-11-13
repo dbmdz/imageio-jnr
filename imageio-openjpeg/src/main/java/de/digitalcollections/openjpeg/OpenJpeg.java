@@ -15,8 +15,6 @@ import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferByte;
 import java.awt.image.PixelInterleavedSampleModel;
 import java.awt.image.Raster;
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import jnr.ffi.LibraryLoader;
 import jnr.ffi.Pointer;
@@ -147,20 +145,34 @@ public class OpenJpeg {
         throw new IOException("Could not decode image!");
       }
 
-      opj_image_comp[] comps = img.comps.get(img.numcomps.intValue());
+      BufferedImage bufImg;
+      int numcomps = img.numcomps.intValue();
+      opj_image_comp[] comps = img.comps.get(numcomps);
       targetWidth = comps[0].w.intValue();
       targetHeight = comps[0].h.intValue();
-      BufferedImage bufImg = new BufferedImage(targetWidth, targetHeight, BufferedImage.TYPE_3BYTE_BGR);
 
-      // NOTE: We don't use bufImg.getRaster().setPixel, since directly accessing the underlying buffer is ~400% faster
-      Pointer red = comps[0].data.get();
-      Pointer green = comps[1].data.get();
-      Pointer blue = comps[2].data.get();
-      byte[] rgbData = ((DataBufferByte) bufImg.getRaster().getDataBuffer()).getData();
-      for (int i = 0; i < targetWidth * targetHeight; i++) {
-        rgbData[i * 3] = (byte) blue.getInt(i * 4);
-        rgbData[i * 3 + 1] = (byte) green.getInt(i * 4);
-        rgbData[i * 3 + 2] = (byte) red.getInt(i * 4);
+      if (numcomps == 3) {
+        bufImg = new BufferedImage(targetWidth, targetHeight, BufferedImage.TYPE_3BYTE_BGR);
+
+        // NOTE: We don't use bufImg.getRaster().setPixel, since directly accessing the underlying buffer is ~400% faster
+        Pointer red = comps[0].data.get();
+        Pointer green = comps[1].data.get();
+        Pointer blue = comps[2].data.get();
+        byte[] rgbData = ((DataBufferByte) bufImg.getRaster().getDataBuffer()).getData();
+        for (int i = 0; i < targetWidth * targetHeight; i++) {
+          rgbData[i * 3] = (byte) blue.getInt(i * 4);
+          rgbData[i * 3 + 1] = (byte) green.getInt(i * 4);
+          rgbData[i * 3 + 2] = (byte) red.getInt(i * 4);
+        }
+      } else if (numcomps == 1) {
+        bufImg = new BufferedImage(targetWidth, targetHeight, BufferedImage.TYPE_BYTE_GRAY);
+        Pointer ptr = comps[0].data.get();
+        byte[] data = ((DataBufferByte) bufImg.getRaster().getDataBuffer()).getData();
+        for (int i = 0; i < targetWidth * targetHeight; i++) {
+          data[i] = (byte) ptr.getInt(i*4);
+        }
+      } else {
+        throw new IOException(String.format("Unsupported number of components: %d", numcomps));
       }
       return bufImg;
     } finally {
@@ -170,14 +182,15 @@ public class OpenJpeg {
   }
 
   private opj_image createImage(Raster img) {
-    if (img.getSampleModel().getNumBands() != 3) {
-      throw new IllegalArgumentException("Image must be RGB");
+    int numBands = img.getSampleModel().getNumBands();
+    if (numBands != 3 && numBands != 1) {
+      throw new IllegalArgumentException("Image must be RGB or Greyscale");
     }
     if (!(img.getSampleModel() instanceof PixelInterleavedSampleModel)) {
-      throw new IllegalArgumentException("Image must be of the 3BYTE_BGR");
+      throw new IllegalArgumentException("Image must be of the 3BYTE_BGR or BYTE_GRAY");
     }
-    opj_image_comptparm parms[] = Struct.arrayOf(runtime, opj_image_comptparm.class, 3);
-    for (int i=0; i < 3; i++) {
+    opj_image_comptparm parms[] = Struct.arrayOf(runtime, opj_image_comptparm.class, numBands);
+    for (int i=0; i < numBands; i++) {
       parms[i].prec.set(8);  // One byte per component
       parms[i].bpp.set(8);   // 8bit depth
       parms[i].sgnd.set(0);
@@ -187,8 +200,9 @@ public class OpenJpeg {
       parms[i].h.set(img.getHeight());
     }
 
+    COLOR_SPACE cspace = numBands == 3 ? COLOR_SPACE.OPJ_CLRSPC_SRGB : COLOR_SPACE.OPJ_CLRSPC_GRAY;
     opj_image outImg = new opj_image(runtime);
-    Pointer imgPtr = lib.opj_image_create(parms.length, Struct.getMemory(parms[0]), COLOR_SPACE.OPJ_CLRSPC_SRGB);
+    Pointer imgPtr = lib.opj_image_create(parms.length, Struct.getMemory(parms[0]), cspace);
     outImg.useMemory(imgPtr);
 
     outImg.x0.set(0);
@@ -196,26 +210,28 @@ public class OpenJpeg {
     outImg.x1.set(img.getWidth());
     outImg.y1.set(img.getHeight());
 
-    byte[] rgbData = ((DataBufferByte) img.getDataBuffer()).getData();
-    opj_image_comp[] comps = outImg.comps.get((int) outImg.numcomps.get());
-    Pointer red = comps[0].data.get();
-    Pointer green = comps[1].data.get();
-    Pointer blue = comps[2].data.get();
-    int offset = 0;
-    for (int y=0; y < img.getHeight(); y++) {
-      for (int x=0; x < img.getWidth(); x++) {
-        red.putByte(offset*4, rgbData[offset*3+2]);
-        green.putByte(offset*4, rgbData[offset*3+1]);
-        blue.putByte(offset*4, rgbData[offset*3]);
-        offset += 1;
+    byte[] imgData = ((DataBufferByte) img.getDataBuffer()).getData();
+    int numcomps = (int) outImg.numcomps.get();
+    opj_image_comp[] comps = outImg.comps.get(numcomps);
+
+    if (numcomps > 1) {
+      Pointer red = comps[0].data.get();
+      Pointer green = comps[1].data.get();
+      Pointer blue = comps[2].data.get();
+      int offset = 0;
+      for (int y = 0; y < img.getHeight(); y++) {
+        for (int x = 0; x < img.getWidth(); x++) {
+          red.putByte(offset * 4, imgData[offset * 3 + 2]);
+          green.putByte(offset * 4, imgData[offset * 3 + 1]);
+          blue.putByte(offset * 4, imgData[offset * 3]);
+          offset += 1;
+        }
       }
-    }
-    try (FileOutputStream fos = new FileOutputStream(new File("/tmp/red.bin"))) {
-      byte[] buf = new byte[img.getWidth()*img.getHeight()];
-      red.get(0, buf, 0, buf.length);
-      fos.write(buf);
-    } catch (IOException e) {
-      e.printStackTrace();
+    } else {
+      Pointer ptr = comps[0].data.get();
+      for (int i=0; i < img.getWidth() * img.getHeight(); i++) {
+        ptr.putByte(i*4, imgData[i]);
+      }
     }
     return outImg;
   }
@@ -225,6 +241,11 @@ public class OpenJpeg {
     Pointer codec = null;
     try {
       image = createImage(img);
+
+      // Disable MCT for grayscale images
+      if (image.numcomps.get() == 1) {
+        params.tcp_mct.set(0);
+      }
 
       codec = lib.opj_create_compress(CODEC_FORMAT.OPJ_CODEC_JP2);
       setupLogger(codec);

@@ -17,7 +17,7 @@ public class opj_image extends Struct {
   /** number of components in the image */
   public Unsigned32 numcomps = new Unsigned32();
   /** color space: sRGB, Greyscale or YUV */
-  Enum32<COLOR_SPACE> color_space = new Enum32<COLOR_SPACE>(COLOR_SPACE.class);
+  Enum32<COLOR_SPACE> color_space = new Enum32<>(COLOR_SPACE.class);
   /** image components */
   public StructRef<opj_image_comp> comps = new StructRef<>(opj_image_comp.class);
   /** 'restricted' ICC profile */

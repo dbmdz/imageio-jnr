@@ -77,6 +77,20 @@ class OpenJp2ImageWriterTest {
   }
 
   @Test
+  void writeGreyscale() throws Exception {
+    File expected = new File(ClassLoader.getSystemResource("expected/lenna_gray.jp2").getFile());
+    BufferedImage in = ImageIO.read(ClassLoader.getSystemResource("lenna_gray.png"));
+    ByteArrayOutputStream os = new ByteArrayOutputStream();
+    OpenJp2ImageWriteParam param = (OpenJp2ImageWriteParam) writer.getDefaultWriteParam();
+    try (ImageOutputStream ios = ImageIO.createImageOutputStream(os)) {
+      writer.setOutput(ios);
+      writer.write(null, new IIOImage(in, null, null), param);
+    }
+    os.flush();
+    assertThat(sha1digest(new ByteArrayInputStream(os.toByteArray()))).isEqualTo(sha1digest(expected));
+  }
+
+  @Test
   void writeLossyUntiledDefaultQuality() throws Exception {
     // = opj_compress -I
     OpenJp2ImageWriteParam param = (OpenJp2ImageWriteParam) writer.getDefaultWriteParam();

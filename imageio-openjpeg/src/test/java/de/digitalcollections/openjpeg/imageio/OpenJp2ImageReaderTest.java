@@ -30,6 +30,7 @@ class OpenJp2ImageReaderTest {
   public void testReadRGB() throws Exception {
     OpenJp2ImageReader reader = getReader("rgb.jp2");
     BufferedImage img = reader.read(0, null);
+    assertThat(img.getType()).isEqualTo(BufferedImage.TYPE_3BYTE_BGR);
     assertThat(img.getWidth()).isEqualTo(512);
     assertThat(img.getHeight()).isEqualTo(512);
   }
@@ -76,6 +77,15 @@ class OpenJp2ImageReaderTest {
     BufferedImage img = reader.read(0, param);
     assertThat(img.getWidth()).isEqualTo(1284);
     assertThat(img.getHeight()).isEqualTo(768);
+  }
+
+  @Test
+  public void testReadGrayScale() throws Exception {
+    OpenJp2ImageReader reader = getReader("gray.jp2");
+    BufferedImage img = reader.read(0, null);
+    assertThat(img.getType()).isEqualTo(BufferedImage.TYPE_BYTE_GRAY);
+    assertThat(img.getWidth()).isEqualTo(512);
+    assertThat(img.getHeight()).isEqualTo(512);
   }
 
   @Test
