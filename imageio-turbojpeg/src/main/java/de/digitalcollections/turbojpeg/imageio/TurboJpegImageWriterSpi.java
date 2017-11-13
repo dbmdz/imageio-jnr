@@ -7,6 +7,7 @@ import java.util.Locale;
 import javax.imageio.ImageTypeSpecifier;
 import javax.imageio.ImageWriter;
 import javax.imageio.spi.ImageWriterSpi;
+import javax.imageio.spi.ServiceRegistry;
 import javax.imageio.stream.ImageOutputStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,10 +48,22 @@ public class TurboJpegImageWriterSpi extends ImageWriterSpi {
     }
   }
 
+  /** Instruct registry to prioritize this WriterSpi over the default JPEG one. **/
+  @SuppressWarnings("unchecked")
+  @Override
+  public void onRegistration(final ServiceRegistry registry, final Class<?> category) {
+    try {
+      ImageWriterSpi defaultProvider = (ImageWriterSpi) registry.getServiceProviderByClass(Class.forName(
+          "com.sun.imageio.plugins.jpeg.JPEGImageReaderSpi"));
+      registry.setOrdering((Class<ImageWriterSpi>) category, this, defaultProvider);
+    } catch (ClassNotFoundException e) {
+      // NOP
+    }
+  }
 
   @Override
   public boolean canEncodeImage(ImageTypeSpecifier type) {
-      // TODO: Pretty restrictive right now, we should support all greyscale and (s)RGB(A) sample models
+    // TODO: Support all image types, if neccessary convert before encoding
     return ((type.getNumBands() == 3 || type.getNumBands() ==1) &&
              ImmutableSet.of(TYPE_3BYTE_BGR, TYPE_4BYTE_ABGR, TYPE_BYTE_GRAY).contains(type.getBufferedImageType()));
   }

@@ -7,6 +7,7 @@ import java.util.Locale;
 import javax.imageio.ImageIO;
 import javax.imageio.ImageReader;
 import javax.imageio.spi.ImageReaderSpi;
+import javax.imageio.spi.ServiceRegistry;
 import javax.imageio.stream.ImageInputStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,6 +42,19 @@ public class TurboJpegImageReaderSpi extends ImageReaderSpi {
         LOGGER.error("Could not load libturbojpeg", e);
         throw new IOException(e);
       }
+    }
+  }
+
+  /** Instruct registry to prioritize this ReaderSpi over the default JPEG one. **/
+  @SuppressWarnings("unchecked")
+  @Override
+  public void onRegistration(final ServiceRegistry registry, final Class<?> category) {
+    try {
+      ImageReaderSpi defaultProvider = (ImageReaderSpi) registry.getServiceProviderByClass(Class.forName(
+          "com.sun.imageio.plugins.jpeg.JPEGImageReaderSpi"));
+      registry.setOrdering((Class<ImageReaderSpi>) category, this, defaultProvider);
+    } catch (ClassNotFoundException e) {
+      // NOP
     }
   }
 
