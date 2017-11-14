@@ -4,6 +4,7 @@ import de.digitalcollections.turbojpeg.TurboJpeg;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Locale;
+import java.util.stream.Stream;
 import javax.imageio.ImageIO;
 import javax.imageio.ImageReader;
 import javax.imageio.spi.ImageReaderSpi;
@@ -45,17 +46,20 @@ public class TurboJpegImageReaderSpi extends ImageReaderSpi {
     }
   }
 
-  /** Instruct registry to prioritize this ReaderSpi over the default JPEG one. **/
+  /** Instruct registry to prioritize this ReaderSpi over other JPEG readers. **/
   @SuppressWarnings("unchecked")
   @Override
   public void onRegistration(final ServiceRegistry registry, final Class<?> category) {
-    try {
-      ImageReaderSpi defaultProvider = (ImageReaderSpi) registry.getServiceProviderByClass(Class.forName(
-          "com.sun.imageio.plugins.jpeg.JPEGImageReaderSpi"));
-      registry.setOrdering((Class<ImageReaderSpi>) category, this, defaultProvider);
-    } catch (ClassNotFoundException e) {
-      // NOP
-    }
+    Stream.of(
+        "com.twelvemonkeys.imageio.plugins.jpeg.JPEGImageReaderSpi",
+        "com.sun.imageio.plugins.jpeg.JPEGImageReaderSpi").forEach((clsName) -> {
+      try {
+        ImageReaderSpi defaultProvider = (ImageReaderSpi) registry.getServiceProviderByClass(Class.forName(clsName));
+        registry.setOrdering((Class<ImageReaderSpi>) category, this, defaultProvider);
+      } catch (ClassNotFoundException e) {
+        // NOP
+      }
+    });
   }
 
 

@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableSet;
 import de.digitalcollections.turbojpeg.TurboJpeg;
 import java.io.IOException;
 import java.util.Locale;
+import java.util.stream.Stream;
 import javax.imageio.ImageTypeSpecifier;
 import javax.imageio.ImageWriter;
 import javax.imageio.spi.ImageWriterSpi;
@@ -48,17 +49,20 @@ public class TurboJpegImageWriterSpi extends ImageWriterSpi {
     }
   }
 
-  /** Instruct registry to prioritize this WriterSpi over the default JPEG one. **/
+  /** Instruct registry to prioritize this WriterSpi over other JPEG writers. **/
   @SuppressWarnings("unchecked")
   @Override
   public void onRegistration(final ServiceRegistry registry, final Class<?> category) {
-    try {
-      ImageWriterSpi defaultProvider = (ImageWriterSpi) registry.getServiceProviderByClass(Class.forName(
-          "com.sun.imageio.plugins.jpeg.JPEGImageReaderSpi"));
-      registry.setOrdering((Class<ImageWriterSpi>) category, this, defaultProvider);
-    } catch (ClassNotFoundException e) {
-      // NOP
-    }
+    Stream.of(
+        "com.twelvemonkeys.imageio.plugins.jpeg.JPEGImageWriterSpi",
+        "com.sun.imageio.plugins.jpeg.JPEGImageWriterSpi").forEach((clsName) -> {
+      try {
+        ImageWriterSpi defaultProvider = (ImageWriterSpi) registry.getServiceProviderByClass(Class.forName(clsName));
+        registry.setOrdering((Class<ImageWriterSpi>) category, this, defaultProvider);
+      } catch (ClassNotFoundException e) {
+        // NOP
+      }
+    });
   }
 
   @Override
