@@ -6,8 +6,8 @@
 
   <parent>
     <groupId>de.digitalcollections.imageio</groupId>
-    <artifactId>imageio</artifactId>
-    <version>0.1.0</version>
+    <artifactId>imageio-jnr</artifactId>
+    <version>0.1.1-SNAPSHOT</version>
   </parent>
   <artifactId>imageio-openjpeg</artifactId>
   <name>MDZ/Bayerische Staatsbibliothek :: ImageIO :: OpenJPEG/JPEG2000 plugin</name>

@@ -6,8 +6,8 @@
 
   <parent>
     <groupId>de.digitalcollections.imageio</groupId>
-    <artifactId>imageio</artifactId>
-    <version>0.1.0</version>
+    <artifactId>imageio-jnr</artifactId>
+    <version>0.1.1-SNAPSHOT</version>
   </parent>
   <artifactId>imageio-turbojpeg</artifactId>
   <name>MDZ/Bayerische Staatsbibliothek :: ImageIO :: TurboJPEG plugin</name>
