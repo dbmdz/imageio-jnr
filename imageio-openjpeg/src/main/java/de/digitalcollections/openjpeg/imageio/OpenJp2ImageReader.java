@@ -170,6 +170,26 @@ public class OpenJp2ImageReader extends ImageReader {
   }
 
   @Override
+  public BufferedImage readTile(int imageIndex, int tileX, int tileY) throws IOException {
+    checkIndex(imageIndex);
+    int xOffset = getTileGridXOffset(imageIndex);
+    int yOffset = getTileGridYOffset(imageIndex);
+    int tileWidth = getTileWidth(imageIndex);
+    int tileHeight = getTileHeight(imageIndex);
+    Rectangle region = new Rectangle(
+        xOffset + tileX * tileWidth,
+        yOffset + tileY * tileHeight,
+        tileWidth,
+        tileHeight);
+    if (region.x + region.width > getWidth(imageIndex) || region.y + region.height > getHeight(imageIndex)) {
+      throw new IllegalArgumentException("Tile indices out of bounds.");
+    }
+    ImageReadParam param = getDefaultReadParam();
+    param.setSourceRegion(region);
+    return this.read(imageIndex, param);
+  }
+
+  @Override
   public IIOMetadata getStreamMetadata() throws IOException {
     return null;
   }
