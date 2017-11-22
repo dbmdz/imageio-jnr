@@ -153,23 +153,35 @@ public class TurboJpeg {
 
       int width = info.getWidth();
       int height = info.getHeight();
+      boolean flipCoords = rotation == 90 || rotation == 270;
       if (region != null) {
-        if (width % 8 != 0 || height % 8 != 0) {
-          throw new IllegalArgumentException(
-              "Invalid cropping region, dimensions must be divisible by 8");
+        Dimension mcuSize = info.getMCUSize();
+        if (region.width % mcuSize.width != 0 || region.height % mcuSize.height != 0) {
+          throw new IllegalArgumentException(String.format(
+              "Invalid cropping region, width must be divisible by %d, height by %d", mcuSize.width, mcuSize.height));
         }
         width = region.width;
         height = region.height;
-        transform.options.set(TJXOPT.TJXOPT_CROP | TJXOPT.TJXOPT_PERFECT);
+        transform.options.set(TJXOPT.TJXOPT_CROP | TJXOPT.TJXOPT_TRIM);
         transform.r.x.set(region.x);
         transform.r.y.set(region.y);
-        transform.r.w.set(region.width);
-        transform.r.h.set(region.height);
+        if ((region.x + region.width) >= (flipCoords ? info.getHeight() : info.getWidth())) {
+          transform.r.w.set(0);
+        } else {
+          transform.r.w.set(region.width);
+        }
+        if ((region.y + region.height) >= (flipCoords ? info.getWidth() : info.getHeight())) {
+          transform.r.h.set(0);
+        } else {
+          transform.r.h.set(region.height);
+        }
       }
       if (rotation != 0) {
-        if (rotation == 90 || rotation == 270) {
-          height = width;
-          width = height;
+        if (flipCoords) {
+          int w = width;
+          int h = height;
+          height = w;
+          width = h;
         }
         TJXOP op;
         switch (rotation) {
@@ -185,9 +197,17 @@ public class TurboJpeg {
           default:
             throw new IllegalArgumentException("Invalid rotation, must be 90, 180 or 270");
         }
-        transform.op.set(transform.op.get() | op.intValue());
+        transform.op.set(op.intValue());
       }
-      int bufSize = (int) lib.tjBufSize(width, height, TJSAMP.TJSAMP_444);
+      int bufWidth = width;
+      if (width == 0 && region != null) {
+        bufWidth = info.getWidth() - region.x;
+      }
+      int bufHeight = height;
+      if (height == 0 && region != null) {
+        bufHeight = info.getHeight() - region.y;
+      }
+      int bufSize = (int) lib.tjBufSize(bufWidth, bufHeight, TJSAMP.TJSAMP_444);
       bufPtr = lib.tjAlloc(bufSize);
       NativeLongByReference lenRef = new NativeLongByReference(bufSize);
       Buffer inBuf = ByteBuffer.wrap(jpegData).order(runtime.byteOrder());

@@ -110,6 +110,10 @@ public class OpenJp2ImageReader extends ImageReader {
     if (sourceRegion == null) {
       return null;
     }
+    if (sourceRegion.x == 0 && sourceRegion.y == 0 &&
+        sourceRegion.width == getWidth(imageIndex) && sourceRegion.height == getHeight(imageIndex)) {
+      return null;
+    }
     double scaleFactor = (double) getWidth(0) / (double) getWidth(imageIndex);
     return new Rectangle(
         (int) Math.ceil(scaleFactor * sourceRegion.x),

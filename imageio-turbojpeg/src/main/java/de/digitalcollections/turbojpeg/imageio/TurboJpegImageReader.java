@@ -3,6 +3,7 @@ package de.digitalcollections.turbojpeg.imageio;
 import de.digitalcollections.turbojpeg.Info;
 import de.digitalcollections.turbojpeg.TurboJpeg;
 import de.digitalcollections.turbojpeg.TurboJpegException;
+import java.awt.Dimension;
 import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
@@ -16,6 +17,8 @@ import javax.imageio.ImageTypeSpecifier;
 import javax.imageio.metadata.IIOMetadata;
 import javax.imageio.spi.ImageReaderSpi;
 import javax.imageio.stream.ImageInputStream;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import static java.awt.image.BufferedImage.TYPE_3BYTE_BGR;
 import static java.awt.image.BufferedImage.TYPE_4BYTE_ABGR;
@@ -23,6 +26,7 @@ import static java.awt.image.BufferedImage.TYPE_4BYTE_ABGR_PRE;
 import static java.awt.image.BufferedImage.TYPE_BYTE_GRAY;
 
 public class TurboJpegImageReader extends ImageReader {
+  private final static Logger LOGGER = LoggerFactory.getLogger(TurboJpegImageReader.class);
 
   private final TurboJpeg lib;
   private ByteBuffer jpegData;
@@ -69,21 +73,6 @@ public class TurboJpegImageReader extends ImageReader {
     return ByteBuffer.wrap(bos.toByteArray());
   }
 
-  private void readData() throws IOException {
-    jpegData = bufferFromStream((ImageInputStream) input);
-  }
-
-  private void parseInfo() throws IOException {
-    if (jpegData == null) {
-      readData();
-    }
-    try {
-      info = lib.getInfo(jpegData.array());
-    } catch (TurboJpegException e) {
-      throw new IOException(e);
-    }
-  }
-
   @Override
   public ImageReadParam getDefaultReadParam() {
     return new TurboJpegImageReadParam();
@@ -91,26 +80,17 @@ public class TurboJpegImageReader extends ImageReader {
 
   @Override
   public int getNumImages(boolean allowSearch) throws IOException {
-    if (info == null) {
-      parseInfo();
-    }
     return info.getAvailableSizes().size();
   }
 
   @Override
   public int getWidth(int imageIndex) throws IOException {
     checkIndex(imageIndex);
-    if (info == null) {
-      parseInfo();
-    }
     return info.getAvailableSizes().get(imageIndex).width;
   }
 
   @Override
   public int getHeight(int imageIndex) throws IOException {
-    if (info == null) {
-      parseInfo();
-    }
     return info.getAvailableSizes().get(imageIndex).height;
   }
 
@@ -121,37 +101,66 @@ public class TurboJpegImageReader extends ImageReader {
         .iterator();
   }
 
-  /** Since TurboJPEG can only crop to values divisible by 8, we may need to
+  /** Since TurboJPEG can only crop to values divisible by the MCU size, we may need to
    *  expand the cropping area to get a suitable rectangle.
    *
+   * @param mcuSize The size of the MCUs
    * @param region The source region to be cropped
    * @return The region that needs to be cropped from the image cropped to the expanded rectangle
    */
-  private Rectangle adjustRegion(Rectangle region) {
+  private Rectangle adjustRegion(Dimension mcuSize, Rectangle region, int rotation) throws IOException {
     if (region == null) {
       return null;
     }
     boolean modified = false;
     Rectangle extraCrop = new Rectangle(0, 0, region.width, region.height);
-    if (region.x % 8 != 0) {
-      extraCrop.x = region.x % 8;
+    if (region.width == 0) {
+      extraCrop.width = getWidth(0) - region.x;
+    }
+    if (region.height == 0) {
+      extraCrop.height = getHeight(0) - region.y;
+    }
+    if (region.x % mcuSize.width != 0) {
+      extraCrop.x = region.x % mcuSize.width;
       region.x -= extraCrop.x;
-      region.width += extraCrop.x;
+      if (region.width > 0) {
+        region.width += extraCrop.x;
+      }
       modified = true;
     }
-    if (region.y % 8 != 0) {
-      extraCrop.y = region.y % 8;
+    if (region.y % mcuSize.height != 0) {
+      extraCrop.y = region.y % mcuSize.height;
       region.y -= extraCrop.y;
-      region.height += extraCrop.y;
+      if (region.height > 0) {
+        region.height += extraCrop.y;
+      }
       modified = true;
     }
-    if (region.width % 8 != 0) {
-      region.width = (int) (8*(Math.ceil(region.getWidth() / 8)));
+    if (region.width % mcuSize.width != 0) {
+      region.width = (int) (mcuSize.width*(Math.ceil(region.getWidth() / mcuSize.width)));
       modified = true;
     }
-    if (region.height % 8 != 0) {
-      region.height = (int) (8*(Math.ceil(region.getHeight() / 8)));
+    if (region.height % mcuSize.height != 0) {
+      region.height = (int) (mcuSize.height*(Math.ceil(region.getHeight() / mcuSize.height)));
       modified = true;
+    }
+    if (rotation == 90 || rotation == 270) {
+      int w = region.width;
+      int h = region.height;
+      int x = region.x;
+      int y = region.y;
+      region.width = h;
+      region.height = w;
+      region.x = y;
+      region.y = x;
+      int ew = extraCrop.width;
+      int eh = extraCrop.height;
+      int ex = extraCrop.x;
+      int ey = extraCrop.y;
+      extraCrop.width = eh;
+      extraCrop.height = ew;
+      extraCrop.x = ey;
+      extraCrop.y = ex;
     }
     if (modified) {
       return extraCrop;
@@ -160,43 +169,33 @@ public class TurboJpegImageReader extends ImageReader {
     }
   }
 
-  public void adjustExtraCrop(int imageIndex, Info croppedInfo, int rotation, Rectangle rectangle) {
-    if (rectangle == null) {
-      return;
-    }
-
+  public void adjustExtraCrop(int imageIndex, Info croppedInfo, Rectangle rectangle) {
     double factor = croppedInfo.getAvailableSizes().get(imageIndex).getWidth() / croppedInfo.getAvailableSizes().get(0).getWidth();
     if (factor < 1) {
-      rectangle.x = (int) Math.ceil(factor * rectangle.x);
-      rectangle.y = (int) Math.ceil(factor * rectangle.y);
-    }
-
-    if (rotation == 90 || rotation == 270) {
-      int x = rectangle.x;
-      int y = rectangle.y;
-      rectangle.x = y;
-      rectangle.y = x;
+      rectangle.x = (int) Math.round(factor * rectangle.x);
+      rectangle.y = (int) Math.round(factor * rectangle.y);
+      rectangle.width = (int) Math.round(factor * rectangle.width);
+      rectangle.height = (int) Math.round(factor * rectangle.height);
     }
   }
 
   private void scaleRegion(int targetIndex, Rectangle sourceRegion) throws IOException {
-    double scaleFactor = (double) getWidth(0) / (double) getWidth(targetIndex);
+    if (targetIndex == 0) {
+      return;
+    }
+    int nativeWidth = getWidth(0);
+    int nativeHeight = getHeight(0);
+    double scaleFactor = (double) nativeWidth / (double) getWidth(targetIndex);
     sourceRegion.x = (int) Math.ceil(scaleFactor * sourceRegion.x);
     sourceRegion.y = (int) Math.ceil(scaleFactor * sourceRegion.y);
-    sourceRegion.width = (int) Math.ceil(scaleFactor * sourceRegion.width);
-    sourceRegion.height = (int) Math.ceil(scaleFactor * sourceRegion.height);
+    sourceRegion.width = Math.min((int) Math.ceil(scaleFactor * sourceRegion.width), nativeWidth - sourceRegion.x);
+    sourceRegion.height = Math.min((int) Math.ceil(scaleFactor * sourceRegion.height), nativeHeight - sourceRegion.y);
   }
 
   @Override
   public BufferedImage read(int imageIndex, ImageReadParam param) throws IOException {
     checkIndex(imageIndex);
-    if (jpegData == null) {
-      readData();
-    }
     ByteBuffer data = jpegData;
-    if (info == null) {
-      parseInfo();
-    }
     try {
       int rotation = 0;
       Rectangle region = null;
@@ -207,7 +206,17 @@ public class TurboJpegImageReader extends ImageReader {
       if (param != null && param.getSourceRegion() != null) {
         region = param.getSourceRegion();
         scaleRegion(imageIndex, region);
-        extraCrop = adjustRegion(region);
+        if (region.x + region.width == getWidth(0)) {
+          region.width = 0;
+        }
+        if (region.y + region.height == getHeight(0)) {
+          region.height = 0;
+        }
+        if (!isRegionFullImage(imageIndex, region)) {
+          extraCrop = adjustRegion(info.getMCUSize(), region, rotation);
+        } else {
+          region = null;
+        }
       }
       if (region != null || rotation != 0) {
         data = lib.transform(data.array(), info, region, rotation);
@@ -216,15 +225,17 @@ public class TurboJpegImageReader extends ImageReader {
       BufferedImage img = lib.decode(
           data.array(), transformedInfo, transformedInfo.getAvailableSizes().get(imageIndex));
       if (extraCrop != null) {
-        adjustExtraCrop(imageIndex, transformedInfo, rotation, extraCrop);
-        extraCrop.width = param.getSourceRegion().width;
-        extraCrop.height = param.getSourceRegion().height;
+        adjustExtraCrop(imageIndex, transformedInfo, extraCrop);
         img = img.getSubimage(extraCrop.x, extraCrop.y, extraCrop.width, extraCrop.height);
       }
       return img;
     } catch (TurboJpegException e) {
       throw new IOException(e);
     }
+  }
+
+  private boolean isRegionFullImage(int imageIndex, Rectangle region) throws IOException {
+    return (region.x == 0 && region.y == 0 && region.width == 0 && region.height == 0);
   }
 
   @Override

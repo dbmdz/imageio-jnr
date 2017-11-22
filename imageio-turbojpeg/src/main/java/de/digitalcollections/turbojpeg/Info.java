@@ -30,7 +30,7 @@ public class Info {
   }
 
   private static int getScaled(int dim, int num, int denom) {
-    return (dim * num + denom -1) / denom;
+    return (dim * num + denom - 1) / denom;
   }
 
   public Info(int width, int height, int subsampling, tjscalingfactor[] factors) {
@@ -41,8 +41,21 @@ public class Info {
         .sorted(Comparator.comparing(f -> -getScaled(width, f.num.get(), f.denom.get())))
         .map(f -> new Dimension(getScaled(width, f.num.get(), f.denom.get()),
                                 getScaled(height, f.num.get(), f.denom.get())))
-        .filter(d -> d.width <= width && d.height <= height && d.width > 1 && d.height > 1)
+        .filter(d -> d.width <= width && d.height <= height && d.width >= 8 && d.height >= 8)
         .distinct()
         .collect(Collectors.toList());
+  }
+
+  public Dimension getMCUSize() {
+    switch (subsampling) {
+      case 1:  // 4:2:2
+        return new Dimension(16, 8);
+      case 2:
+        return new Dimension(16, 16);
+      case 4:
+        return new Dimension(8, 16);
+      default:
+        return new Dimension(8, 8);
+    }
   }
 }
