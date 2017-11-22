@@ -89,12 +89,19 @@ public class TurboJpeg {
           height = size.height;
         }
       }
-      BufferedImage img = new BufferedImage(width, height, BufferedImage.TYPE_3BYTE_BGR);
+      boolean isGray = info.getSubsampling() == TJSAMP.TJSAMP_GRAY.intValue();
+      int imgType;
+      if (isGray) {
+        imgType = BufferedImage.TYPE_BYTE_GRAY;
+      } else {
+        imgType = BufferedImage.TYPE_3BYTE_BGR;
+      }
+      BufferedImage img = new BufferedImage(width, height, imgType);
       ByteBuffer outBuf = ByteBuffer.wrap(((DataBufferByte) img.getRaster().getDataBuffer()).getData())
                                     .order(runtime.byteOrder());
       int rv = lib.tjDecompress2(
           codec, ByteBuffer.wrap(jpegData), jpegData.length, outBuf,
-          width, width * 3, height, TJPF.TJPF_BGR, 0);
+          width, isGray ? width : width * 3, height, isGray ? TJPF.TJPF_GRAY : TJPF.TJPF_BGR, 0);
       if (rv != 0) {
         throw new TurboJpegException(lib.tjGetErrorStr());
       }
@@ -108,12 +115,6 @@ public class TurboJpeg {
     Pointer codec = null;
     Pointer bufPtr = null;
     try {
-      codec = lib.tjInitCompress();
-      int bufSize = (int) lib.tjBufSize(img.getWidth(), img.getHeight(), TJSAMP.TJSAMP_444);
-      bufPtr = lib.tjAlloc(bufSize);
-      NativeLongByReference lenPtr = new NativeLongByReference(bufSize);
-      ByteBuffer inBuf = ByteBuffer.wrap(((DataBufferByte) img.getDataBuffer()).getData())
-                                   .order(runtime.byteOrder());
       TJPF pixelFmt;
       switch (img.getNumBands()) {
         case 4:
@@ -128,9 +129,16 @@ public class TurboJpeg {
         default:
           throw new IllegalArgumentException("Illegal sample format");
       }
+      TJSAMP sampling = pixelFmt == TJPF.TJPF_GRAY ? TJSAMP.TJSAMP_GRAY : TJSAMP.TJSAMP_444;
+      codec = lib.tjInitCompress();
+      int bufSize = (int) lib.tjBufSize(img.getWidth(), img.getHeight(), sampling);
+      bufPtr = lib.tjAlloc(bufSize);
+      NativeLongByReference lenPtr = new NativeLongByReference(bufSize);
+      ByteBuffer inBuf = ByteBuffer.wrap(((DataBufferByte) img.getDataBuffer()).getData())
+          .order(runtime.byteOrder());
       int rv = lib.tjCompress2(
           codec, inBuf, img.getWidth(), 0, img.getHeight(),  pixelFmt,
-          new PointerByReference(bufPtr), lenPtr, TJSAMP.TJSAMP_444, quality, 0);
+          new PointerByReference(bufPtr), lenPtr, sampling, quality, 0);
       if (rv != 0) {
         throw new TurboJpegException(lib.tjGetErrorStr());
       }
