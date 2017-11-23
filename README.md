@@ -1,9 +1,8 @@
 # imageio-jnr
 
-[![Javadocs](http://javadoc.io/badge/de.digitalcollections/imageio-jnr.svg)](http://javadoc.io/doc/de.digitalcollections/imageio-jnr)
 [![Build Status](https://travis-ci.org/dbmdz/imageio-jnr.svg?branch=master)](https://travis-ci.org/dbmdz/imageio-jnr)
 [![codecov](https://codecov.io/gh/dbmdz/imageio-jnr/branch/master/graph/badge.svg)](https://codecov.io/gh/dbmdz/imageio-jnr)
-[![MIT License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![Apache 2.0 License](https://img.shields.io/badge/license-Apache_2.0-blue.svg)](LICENSE)
 [![GitHub release](https://img.shields.io/github/release/dbmdz/imageio-jnr.svg?maxAge=2592000)](https://github.com/dbmdz/imageio-jnr/releases)
 [![Maven Central](https://img.shields.io/maven-central/v/de.digitalcollections/imageio-jnr.svg?maxAge=2592000)](http://search.maven.org/#search%7Cga%7C1%7Ca%3A%22imageio-jnr%22)
 
@@ -20,10 +19,10 @@ Please note that the plugins need at least Java 8.
 
 ## Currently available plugins
 
-|       Module      |   Format  |      Backing native library         |             Required version               |
-| ----------------- | --------- | ----------------------------------- | ------------------------------------------ |
-| imageio-openjpeg  | JPEG2000  | [OpenJPEG](http://www.openjpeg.org) | \>= 2.0 (>=2.3 recommended for performance) |
-| imageio-turbojpeg |    JPEG   | [TurboJPEG](https://libjpeg-turbo.org/About/TurboJPEG) | \>= 1.0               |
+|       Module      |   Format  |      Backing native library         |             Required version               | JavaDoc
+| ----------------- | --------- | ----------------------------------- | ------------------------------------------ | ---
+| imageio-openjpeg  | JPEG2000  | [OpenJPEG](http://www.openjpeg.org) | \>= 2.0 (>=2.3 recommended for performance) | [![Javadocs](http://javadoc.io/badge/de.digitalcollections.imageio/imageio-openjpeg.svg)](http://javadoc.io/doc/de.digitalcollections.imageio/imageio-openjpeg)
+| imageio-turbojpeg |    JPEG   | [TurboJPEG](https://libjpeg-turbo.org/About/TurboJPEG) | \>= 1.0               | [![Javadocs](http://javadoc.io/badge/de.digitalcollections.imageio/imageio-turbojpeg.svg)](http://javadoc.io/doc/de.digitalcollections.imageio/imageio-turbojpeg)
 
 
 ## Supported features
