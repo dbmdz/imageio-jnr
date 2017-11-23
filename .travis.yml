@@ -14,3 +14,6 @@ before_script:
   - wget https://github.com/uclouvain/openjpeg/releases/download/v2.3.0/openjpeg-v2.3.0-linux-x86_64.tar.gz -O /tmp/openjpeg.tar.gz
   - tar -xvf /tmp/openjpeg.tar.gz
   - export LD_LIBRARY_PATH=$PWD/openjpeg-v2.3.0-linux-x86_64/lib:$LD_LIBRARY_PATH
+
+after_success:
+  - bash <(curl -s https://codecov.io/bash) -t ea2cc58d-57f1-4653-89eb-8ab0b7c3ab7f
