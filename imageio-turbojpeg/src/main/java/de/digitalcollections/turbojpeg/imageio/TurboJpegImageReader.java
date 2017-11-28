@@ -169,13 +169,21 @@ public class TurboJpegImageReader extends ImageReader {
     }
   }
 
-  public void adjustExtraCrop(int imageIndex, Info croppedInfo, Rectangle rectangle) {
+  private void adjustExtraCrop(int imageIndex, Info croppedInfo, Rectangle rectangle) {
     double factor = croppedInfo.getAvailableSizes().get(imageIndex).getWidth() / croppedInfo.getAvailableSizes().get(0).getWidth();
     if (factor < 1) {
       rectangle.x = (int) Math.round(factor * rectangle.x);
       rectangle.y = (int) Math.round(factor * rectangle.y);
       rectangle.width = (int) Math.round(factor * rectangle.width);
       rectangle.height = (int) Math.round(factor * rectangle.height);
+    }
+    int maxWidth = croppedInfo.getAvailableSizes().get(imageIndex).width;
+    int maxHeight = croppedInfo.getAvailableSizes().get(imageIndex).height;
+    if (rectangle.x + rectangle.width > maxWidth) {
+      rectangle.width = maxWidth - rectangle.x;
+    }
+    if (rectangle.y + rectangle.height > maxHeight) {
+      rectangle.height = maxHeight - rectangle.y;
     }
   }
 
