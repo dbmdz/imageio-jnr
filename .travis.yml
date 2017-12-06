@@ -17,3 +17,13 @@ before_script:
 
 after_success:
   - bash <(curl -s https://codecov.io/bash) -t ea2cc58d-57f1-4653-89eb-8ab0b7c3ab7f
+
+deploy:
+  provider: releases
+  api_key:
+    secure: O6V2M4M/yHl6rXU9pAXOmQR0R4bJ3O0Vjh3mHR+ZSvMrqSk0CYyN4D+t6xm8+9aS+eAU6Le/mujvcIMUFcccmtmCNm7VNcHTVjRojyWZk0a9ZPqaRkUG4UGo6H/9uqwuHl9Ew+WiVFOGGWqTKSR0ZrFuRkjQjwVRu2T/oAluUGmqO0pPpfPOv3sYBqCoaPtNDrqG1sPAgvoLiaqsQ28PnTY3LeUFi9Y/ZXGHP7557cDu3sBOX0QD0gXeShb1ygh0j3pOe1ynjtyJjw/BqQIL/VSo6CVE+3UxxxLCZ15t6sfFIbKkgwYjtXayFutu1me9VDwuwYE/7zJFnwAgjh/Wz7gQlwZya6xrGvxHVLT71WDyEWtQKf8EwACnHe1DjiLBzIydw7EmoHK5hIgj320khbBfa8e8hqPPtW/tHFjF7+MT4xZzXcw8B54XrZoaDMdAOJF2EVyzHryxqJ3bzJNcu7eg3HkusT/tukNbBF1Hmf82gIT3IZ1HYPqRmd7+FaXdsc4VEoi2ZMBAc4CrdTwrtnhe8IBhZkUsbNLRS25fkhxOyd2ip2PYgZqXK4qD1cmRdivdqNdL/1HfHKFkuoR/GXTgXhzSPd+xcLW98TX8jvbN1qRbs2pRurGK8S7b6NzG84fxnLRUhGBgDraM1H32ZE1Hpq1UMkpkRPd4yUSs4iY=
+  file_glob: true
+  file: "target/*.jar"
+  skip_cleanup: true
+  on:
+    tags: true
