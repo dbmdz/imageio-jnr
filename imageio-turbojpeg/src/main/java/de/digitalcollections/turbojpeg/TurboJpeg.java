@@ -10,8 +10,16 @@ import de.digitalcollections.turbojpeg.lib.enums.TJXOPT;
 import de.digitalcollections.turbojpeg.lib.libturbojpeg;
 import de.digitalcollections.turbojpeg.lib.structs.tjscalingfactor;
 import de.digitalcollections.turbojpeg.lib.structs.tjtransform;
-import java.awt.Dimension;
-import java.awt.Rectangle;
+import jnr.ffi.LibraryLoader;
+import jnr.ffi.Pointer;
+import jnr.ffi.Runtime;
+import jnr.ffi.Struct;
+import jnr.ffi.byref.IntByReference;
+import jnr.ffi.byref.NativeLongByReference;
+import jnr.ffi.byref.PointerByReference;
+
+import javax.imageio.*;
+import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferByte;
 import java.awt.image.Raster;
@@ -23,18 +31,6 @@ import java.nio.Buffer;
 import java.nio.ByteBuffer;
 import java.time.Duration;
 import java.time.Instant;
-import javax.imageio.IIOImage;
-import javax.imageio.ImageIO;
-import javax.imageio.ImageReader;
-import javax.imageio.ImageWriteParam;
-import javax.imageio.ImageWriter;
-import jnr.ffi.LibraryLoader;
-import jnr.ffi.Pointer;
-import jnr.ffi.Runtime;
-import jnr.ffi.Struct;
-import jnr.ffi.byref.IntByReference;
-import jnr.ffi.byref.NativeLongByReference;
-import jnr.ffi.byref.PointerByReference;
 
 public class TurboJpeg {
   public libturbojpeg lib;

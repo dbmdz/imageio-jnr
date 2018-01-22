@@ -3,27 +3,24 @@ package de.digitalcollections.turbojpeg.imageio;
 import de.digitalcollections.turbojpeg.Info;
 import de.digitalcollections.turbojpeg.TurboJpeg;
 import de.digitalcollections.turbojpeg.TurboJpegException;
-import java.awt.Dimension;
-import java.awt.Rectangle;
-import java.awt.image.BufferedImage;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.util.Iterator;
-import java.util.stream.Stream;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import javax.imageio.ImageReadParam;
 import javax.imageio.ImageReader;
 import javax.imageio.ImageTypeSpecifier;
 import javax.imageio.metadata.IIOMetadata;
 import javax.imageio.spi.ImageReaderSpi;
 import javax.imageio.stream.ImageInputStream;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.awt.*;
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.util.Iterator;
+import java.util.stream.Stream;
 
-import static java.awt.image.BufferedImage.TYPE_3BYTE_BGR;
-import static java.awt.image.BufferedImage.TYPE_4BYTE_ABGR;
-import static java.awt.image.BufferedImage.TYPE_4BYTE_ABGR_PRE;
-import static java.awt.image.BufferedImage.TYPE_BYTE_GRAY;
+import static java.awt.image.BufferedImage.*;
 
 public class TurboJpegImageReader extends ImageReader {
   private final static Logger LOGGER = LoggerFactory.getLogger(TurboJpegImageReader.class);
@@ -103,12 +100,16 @@ public class TurboJpegImageReader extends ImageReader {
 
   /** Since TurboJPEG can only crop to values divisible by the MCU size, we may need to
    *  expand the cropping area to get a suitable rectangle.
+   *  Thus, cropping becomes a two-stage process:
+   *    - Crop to to nearest MCU boundaries (TurboJPEG)
+   *    - Crop to the actual region (Java)
    *
+   * @param imageSize The size of the uncropped image
    * @param mcuSize The size of the MCUs
    * @param region The source region to be cropped
    * @return The region that needs to be cropped from the image cropped to the expanded rectangle
    */
-  private Rectangle adjustRegion(Dimension mcuSize, Rectangle region, int rotation) throws IOException {
+  private Rectangle adjustRegion(Dimension imageSize, Dimension mcuSize, Rectangle region, int rotation) throws IOException {
     if (region == null) {
       return null;
     }
@@ -146,20 +147,26 @@ public class TurboJpegImageReader extends ImageReader {
     }
     if (rotation == 90 || rotation == 270) {
       int w = region.width;
-      int h = region.height;
-      int x = region.x;
-      int y = region.y;
-      region.width = h;
+      region.width = region.height;
       region.height = w;
-      region.x = y;
-      region.y = x;
       int ew = extraCrop.width;
-      int eh = extraCrop.height;
-      int ex = extraCrop.x;
-      int ey = extraCrop.y;
-      extraCrop.width = eh;
+      extraCrop.width = extraCrop.height;
       extraCrop.height = ew;
-      extraCrop.x = ey;
+    }
+    if (rotation == 270) {
+      int x = region.x;
+      region.x = region.y;
+      region.y = x;
+      int ex = extraCrop.x;
+      extraCrop.x = extraCrop.y;
+      extraCrop.y = ex;
+    }
+    if (rotation == 90) {
+      int x = region.x;
+      region.x = imageSize.height - region.y - region.width;
+      region.y = x;
+      int ex = extraCrop.x;
+      extraCrop.x = region.width - extraCrop.y - extraCrop.width;
       extraCrop.y = ex;
     }
     if (modified) {
@@ -187,6 +194,14 @@ public class TurboJpegImageReader extends ImageReader {
     }
   }
 
+  /** The incoming cropping request always targets a specific resolution (i.e. downscaled if targetIndex > 0).
+   * However, TurobJPEG requires the cropping region to target the source resolution. Thus, we need to upscale
+   * the region passed by the user if the index != 0
+   *
+   * @param targetIndex Index of the targeted image resolution
+   * @param sourceRegion Region relative to the targeted image resolution, will be modified
+   * @throws IOException
+   */
   private void scaleRegion(int targetIndex, Rectangle sourceRegion) throws IOException {
     if (targetIndex == 0) {
       return;
@@ -221,7 +236,8 @@ public class TurboJpegImageReader extends ImageReader {
           region.height = 0;
         }
         if (!isRegionFullImage(imageIndex, region)) {
-          extraCrop = adjustRegion(info.getMCUSize(), region, rotation);
+          extraCrop = adjustRegion(new Dimension(getWidth(0), getHeight(0)),
+                                   info.getMCUSize(), region, rotation);
         } else {
           region = null;
         }

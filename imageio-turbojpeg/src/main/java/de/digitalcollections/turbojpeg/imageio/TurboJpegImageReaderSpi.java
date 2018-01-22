@@ -1,17 +1,18 @@
 package de.digitalcollections.turbojpeg.imageio;
 
 import de.digitalcollections.turbojpeg.TurboJpeg;
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.Locale;
-import java.util.stream.Stream;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import javax.imageio.ImageIO;
 import javax.imageio.ImageReader;
 import javax.imageio.spi.ImageReaderSpi;
 import javax.imageio.spi.ServiceRegistry;
 import javax.imageio.stream.ImageInputStream;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.Locale;
+import java.util.stream.Stream;
 
 public class TurboJpegImageReaderSpi extends ImageReaderSpi {
   private static final Logger LOGGER = LoggerFactory.getLogger(TurboJpegImageReaderSpi.class);
@@ -65,6 +66,7 @@ public class TurboJpegImageReaderSpi extends ImageReaderSpi {
 
   @Override
   public boolean canDecodeInput(Object input) throws IOException {
+    loadLibrary();
     if (!(input instanceof ImageInputStream)) {
       input = ImageIO.createImageInputStream(input);
     }
