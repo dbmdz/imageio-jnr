@@ -41,7 +41,7 @@ public class Info {
         .sorted(Comparator.comparing(f -> -getScaled(width, f.num.get(), f.denom.get())))
         .map(f -> new Dimension(getScaled(width, f.num.get(), f.denom.get()),
                                 getScaled(height, f.num.get(), f.denom.get())))
-        .filter(d -> d.width <= width && d.height <= height && d.width >= 8 && d.height >= 8)
+        .filter(d -> d.width <= width && d.height <= height)
         .distinct()
         .collect(Collectors.toList());
   }
