@@ -83,6 +83,18 @@ class TurboJpegImageReaderTest {
   }
 
   @Test
+  public void testReadUnalignedRotated() throws IOException {
+    ImageReader reader = getReader("crop_unaligned_rot90.jpg");
+    TurboJpegImageReadParam param = (TurboJpegImageReadParam) reader.getDefaultReadParam();
+    param.setSourceRegion(new Rectangle(16, 16, 339, 319));
+    param.setRotationDegree(90);
+    BufferedImage img = reader.read(0, param);
+    assertThat(img)
+        .hasDimensions(319, 339)
+        .hasNoPixelsOfColor(-1 /* white */);
+  }
+
+  @Test
   public void testReadRotated() throws IOException {
     ImageReader reader = getReader("crop_unaligned.jpg");
     TurboJpegImageReadParam param = (TurboJpegImageReadParam) reader.getDefaultReadParam();

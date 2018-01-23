@@ -37,6 +37,7 @@ public class Info {
     this.width = width;
     this.height = height;
     this.subsampling = subsampling;
+    // The available sizes are determined from the list of scaling factors.
     this.availableSizes = Arrays.stream(factors)
         .sorted(Comparator.comparing(f -> -getScaled(width, f.num.get(), f.denom.get())))
         .map(f -> new Dimension(getScaled(width, f.num.get(), f.denom.get()),

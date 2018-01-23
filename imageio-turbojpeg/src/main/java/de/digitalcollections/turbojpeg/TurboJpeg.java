@@ -1,8 +1,5 @@
 package de.digitalcollections.turbojpeg;
 
-import com.google.common.collect.Streams;
-import de.digitalcollections.turbojpeg.imageio.TurboJpegImageReader;
-import de.digitalcollections.turbojpeg.imageio.TurboJpegImageWriter;
 import de.digitalcollections.turbojpeg.lib.enums.TJPF;
 import de.digitalcollections.turbojpeg.lib.enums.TJSAMP;
 import de.digitalcollections.turbojpeg.lib.enums.TJXOP;
@@ -18,20 +15,14 @@ import jnr.ffi.byref.IntByReference;
 import jnr.ffi.byref.NativeLongByReference;
 import jnr.ffi.byref.PointerByReference;
 
-import javax.imageio.*;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferByte;
 import java.awt.image.Raster;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
 import java.nio.Buffer;
 import java.nio.ByteBuffer;
-import java.time.Duration;
-import java.time.Instant;
 
+/** Java bindings for libturbojpeg via JFFI **/
 public class TurboJpeg {
   public libturbojpeg lib;
   public Runtime runtime;
@@ -41,6 +32,7 @@ public class TurboJpeg {
     runtime = Runtime.getRuntime(lib);
   }
 
+  /** Return information about the JPEG image in the input buffer **/
   public Info getInfo(byte[] jpegData) throws TurboJpegException {
     Pointer codec = null;
     try {
@@ -70,6 +62,14 @@ public class TurboJpeg {
     }
   }
 
+  /** Decode the JPEG image in the input buffer into a BufferedImage.
+   *
+   * @param jpegData  JPEG data input buffer
+   * @param info Information about the JPEG image in the buffer
+   * @param size Target decompressed dimensions, must be among the available sizes (see {@link Info#getAvailableSizes()})
+   * @return The decoded image
+   * @throws TurboJpegException
+   */
   public BufferedImage decode(byte[] jpegData, Info info, Dimension size) throws TurboJpegException {
     Pointer codec = null;
     try {
@@ -93,6 +93,7 @@ public class TurboJpeg {
         imgType = BufferedImage.TYPE_3BYTE_BGR;
       }
       BufferedImage img = new BufferedImage(width, height, imgType);
+      // Wrap the underlying data buffer of the image with a ByteBuffer so we can pass it over the ABI
       ByteBuffer outBuf = ByteBuffer.wrap(((DataBufferByte) img.getRaster().getDataBuffer()).getData())
                                     .order(runtime.byteOrder());
       int rv = lib.tjDecompress2(
@@ -107,6 +108,7 @@ public class TurboJpeg {
     }
   }
 
+  /** Encode an image to JPEG **/
   public ByteBuffer encode(Raster img, int quality) throws TurboJpegException {
     Pointer codec = null;
     Pointer bufPtr = null;
@@ -127,9 +129,13 @@ public class TurboJpeg {
       }
       TJSAMP sampling = pixelFmt == TJPF.TJPF_GRAY ? TJSAMP.TJSAMP_GRAY : TJSAMP.TJSAMP_444;
       codec = lib.tjInitCompress();
+
+      // Allocate JPEG target buffer
       int bufSize = (int) lib.tjBufSize(img.getWidth(), img.getHeight(), sampling);
       bufPtr = lib.tjAlloc(bufSize);
       NativeLongByReference lenPtr = new NativeLongByReference(bufSize);
+
+      // Wrap source image data buffer with ByteBuffer to pass it over the ABI
       ByteBuffer inBuf = ByteBuffer.wrap(((DataBufferByte) img.getDataBuffer()).getData())
           .order(runtime.byteOrder());
       int rv = lib.tjCompress2(
@@ -148,6 +154,15 @@ public class TurboJpeg {
     }
   }
 
+  /** Transform a JPEG image without decoding it fully
+   *
+   * @param jpegData JPEG input buffer
+   * @param info Information about the JPEG (from {@link #getInfo(byte[])}
+   * @param region Source region to crop out of JPEG
+   * @param rotation Degrees to rotate the JPEG, must be 90, 180 or 270
+   * @return The transformed JPEG data
+   * @throws TurboJpegException
+   */
   public ByteBuffer transform(byte[] jpegData, Info info, Rectangle region, int rotation) throws TurboJpegException {
     Pointer codec = null;
     Pointer bufPtr = null;
@@ -169,6 +184,7 @@ public class TurboJpeg {
         transform.options.set(TJXOPT.TJXOPT_CROP | TJXOPT.TJXOPT_TRIM);
         transform.r.x.set(region.x);
         transform.r.y.set(region.y);
+        // If any cropping dimension equals the original dimension, libturbojpeg requires it to be set to 0
         if ((region.x + region.width) >= (flipCoords ? info.getHeight() : info.getWidth())) {
           transform.r.w.set(0);
         } else {
@@ -229,60 +245,5 @@ public class TurboJpeg {
       if (codec != null && codec.address() != 0) lib.tjDestroy(codec);
       if (bufPtr != null && bufPtr.address() != 0) lib.tjFree(bufPtr);
     }
-  }
-
-  private static Duration benchmarkDecode(ImageReader reader) throws IOException {
-    Instant start = Instant.now();
-    for (int i=0; i < 100; i++) {
-      reader.setInput(ImageIO.createImageInputStream(new FileInputStream(new File("/tmp/bench/artificial.jpg"))));
-      BufferedImage img = reader.read(0, null);
-    }
-    return Duration.between(start, Instant.now());
-  }
-
-  private static Duration benchmarkEncode(ImageWriter writer) throws IOException {
-    IIOImage img = new IIOImage(ImageIO.read(new File("/tmp/bench/big_building.png")), null, null);
-    ImageWriteParam param = writer.getDefaultWriteParam();
-    param.setCompressionMode(ImageWriteParam.MODE_EXPLICIT);
-    param.setCompressionQuality(0.85f);
-    Instant start = Instant.now();
-    for (int i=0; i < 100; i++) {
-      ByteArrayOutputStream bos = new ByteArrayOutputStream();
-      writer.setOutput(ImageIO.createImageOutputStream(bos));
-      writer.write(null, img, null);
-    }
-    return Duration.between(start, Instant.now());
-  }
-
-  public static void main(String[] args) throws Exception {
-    TurboJpegImageReader tjReader = Streams.stream(ImageIO.getImageReadersByFormatName("jpeg"))
-        .filter(TurboJpegImageReader.class::isInstance)
-        .map(TurboJpegImageReader.class::cast)
-        .findFirst().get();
-    ImageReader defaultReader = Streams.stream(ImageIO.getImageReadersByFormatName("jpeg"))
-        .filter(r -> !(r instanceof TurboJpegImageReader))
-        .findFirst().get();
-
-    TurboJpegImageWriter tjWriter = Streams.stream(ImageIO.getImageWritersByFormatName("jpeg"))
-        .filter(TurboJpegImageWriter.class::isInstance)
-        .map(TurboJpegImageWriter.class::cast)
-        .findFirst().get();
-    ImageWriter defaultWriter = Streams.stream(ImageIO.getImageWritersByFormatName("jpeg"))
-        .filter(w -> !(w instanceof TurboJpegImageWriter))
-        .findFirst().get();
-
-    Duration tjDuration = benchmarkDecode(tjReader);
-    Duration defaultDuration = benchmarkDecode(defaultReader);
-    System.out.printf("Default decoding took %dms (%dms per iteration)\n", defaultDuration.toMillis(), defaultDuration.toMillis() / 100);
-    System.out.printf("TurboJPEG decoding took %dms (%dms per iteration)\n", tjDuration.toMillis(), tjDuration
-        .toMillis() / 100);
-
-
-    defaultDuration = benchmarkEncode(defaultWriter);
-    System.out.printf("Default encoding took %dms (%dms per iteration)\n", defaultDuration.toMillis(), defaultDuration.toMillis() / 100);
-
-    tjDuration = benchmarkEncode(tjWriter);
-    System.out.printf("TurboJPEG encoding took %dms (%dms per iteration)\n", tjDuration.toMillis(), tjDuration.toMillis
-        () / 100);
   }
 }

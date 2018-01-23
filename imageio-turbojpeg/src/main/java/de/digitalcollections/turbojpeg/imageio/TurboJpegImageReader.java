@@ -75,6 +75,7 @@ public class TurboJpegImageReader extends ImageReader {
     return new TurboJpegImageReadParam();
   }
 
+  /** The number of images corresponds to the number of different resolutions that can be directly decoded. */
   @Override
   public int getNumImages(boolean allowSearch) throws IOException {
     return info.getAvailableSizes().size();
@@ -104,23 +105,39 @@ public class TurboJpegImageReader extends ImageReader {
    *    - Crop to to nearest MCU boundaries (TurboJPEG)
    *    - Crop to the actual region (Java)
    *
-   * @param imageSize The size of the uncropped image
    * @param mcuSize The size of the MCUs
    * @param region The source region to be cropped
    * @return The region that needs to be cropped from the image cropped to the expanded rectangle
    */
-  private Rectangle adjustRegion(Dimension imageSize, Dimension mcuSize, Rectangle region, int rotation) throws IOException {
+  private Rectangle adjustRegion(Dimension mcuSize, Rectangle region, int rotation) throws IOException {
     if (region == null) {
       return null;
     }
     boolean modified = false;
-    Rectangle extraCrop = new Rectangle(0, 0, region.width, region.height);
-    if (region.width == 0) {
-      extraCrop.width = getWidth(0) - region.x;
+    int originalWidth = getWidth(0);
+    int originalHeight = getHeight(0);
+    if (rotation == 90 || rotation == 270) {
+      int w = region.width;
+      region.width = region.height;
+      region.height = w;
+      int ow = originalWidth;
+      originalWidth = originalHeight;
+      originalHeight = ow;
     }
-    if (region.height == 0) {
-      extraCrop.height = getHeight(0) - region.y;
+    if (rotation == 270) {
+      int x = region.x;
+      region.x = region.y;
+      region.y = x;
     }
+    if (rotation == 90) {
+      int x = region.x;
+      region.x = originalWidth - region.y - region.width;
+      region.y = x;
+    }
+    Rectangle extraCrop = new Rectangle(
+        0, 0,
+        region.width == 0 ? originalWidth - region.x : region.width,
+        region.height == 0 ? originalHeight - region.y : region.height);
     if (region.x % mcuSize.width != 0) {
       extraCrop.x = region.x % mcuSize.width;
       region.x -= extraCrop.x;
@@ -145,30 +162,6 @@ public class TurboJpegImageReader extends ImageReader {
       region.height = (int) (mcuSize.height*(Math.ceil(region.getHeight() / mcuSize.height)));
       modified = true;
     }
-    if (rotation == 90 || rotation == 270) {
-      int w = region.width;
-      region.width = region.height;
-      region.height = w;
-      int ew = extraCrop.width;
-      extraCrop.width = extraCrop.height;
-      extraCrop.height = ew;
-    }
-    if (rotation == 270) {
-      int x = region.x;
-      region.x = region.y;
-      region.y = x;
-      int ex = extraCrop.x;
-      extraCrop.x = extraCrop.y;
-      extraCrop.y = ex;
-    }
-    if (rotation == 90) {
-      int x = region.x;
-      region.x = imageSize.height - region.y - region.width;
-      region.y = x;
-      int ex = extraCrop.x;
-      extraCrop.x = region.width - extraCrop.y - extraCrop.width;
-      extraCrop.y = ex;
-    }
     if (modified) {
       return extraCrop;
     } else {
@@ -176,6 +169,9 @@ public class TurboJpegImageReader extends ImageReader {
     }
   }
 
+  /** While the regular cropping parameters are applied to the unscaled source image, the additional extra cropping
+   * on the Java side of things is applied to the decoded and possibly scaled image. Thus, we need to scale down the
+   * extra cropping rectangle. */
   private void adjustExtraCrop(int imageIndex, Info croppedInfo, Rectangle rectangle) {
     double factor = croppedInfo.getAvailableSizes().get(imageIndex).getWidth() / croppedInfo.getAvailableSizes().get(0).getWidth();
     if (factor < 1) {
@@ -236,8 +232,7 @@ public class TurboJpegImageReader extends ImageReader {
           region.height = 0;
         }
         if (!isRegionFullImage(imageIndex, region)) {
-          extraCrop = adjustRegion(new Dimension(getWidth(0), getHeight(0)),
-                                   info.getMCUSize(), region, rotation);
+          extraCrop = adjustRegion(info.getMCUSize(), region, rotation);
         } else {
           region = null;
         }
