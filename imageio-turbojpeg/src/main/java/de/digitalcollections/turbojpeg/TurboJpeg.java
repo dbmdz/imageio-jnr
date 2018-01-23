@@ -14,6 +14,8 @@ import jnr.ffi.Struct;
 import jnr.ffi.byref.IntByReference;
 import jnr.ffi.byref.NativeLongByReference;
 import jnr.ffi.byref.PointerByReference;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
@@ -24,6 +26,7 @@ import java.nio.ByteBuffer;
 
 /** Java bindings for libturbojpeg via JFFI **/
 public class TurboJpeg {
+  private static final Logger LOG = LoggerFactory.getLogger(Info.class);
   public libturbojpeg lib;
   public Runtime runtime;
 
@@ -100,6 +103,7 @@ public class TurboJpeg {
           codec, ByteBuffer.wrap(jpegData), jpegData.length, outBuf,
           width, isGray ? width : width * 3, height, isGray ? TJPF.TJPF_GRAY : TJPF.TJPF_BGR, 0);
       if (rv != 0) {
+        LOG.error("Could not decompress JPEG (dimensions: {}x{}, gray: {})", width, height, isGray);
         throw new TurboJpegException(lib.tjGetErrorStr());
       }
       return img;
@@ -142,6 +146,8 @@ public class TurboJpeg {
           codec, inBuf, img.getWidth(), 0, img.getHeight(),  pixelFmt,
           new PointerByReference(bufPtr), lenPtr, sampling, quality, 0);
       if (rv != 0) {
+        LOG.error("Could not compress image (dimensions: {}x{}, format: {}, sampling: {}, quality: {}",
+                  img.getWidth(), img.getHeight(), pixelFmt, sampling, quality);
         throw new TurboJpegException(lib.tjGetErrorStr());
       }
       ByteBuffer outBuf = ByteBuffer.allocate(lenPtr.getValue().intValue()).order(runtime.byteOrder());
@@ -235,6 +241,8 @@ public class TurboJpeg {
           codec, inBuf, jpegData.length, 1, new PointerByReference(bufPtr),
           lenRef, transform, 0);
       if (rv != 0) {
+        LOG.error("Could not compress image (crop: {},{},{},{}, rotate: {}",
+                  transform.r.x, transform.r.y, transform.r.w, transform.r.h, rotation);
         throw new TurboJpegException(lib.tjGetErrorStr());
       }
       ByteBuffer outBuf = ByteBuffer.allocate(lenRef.getValue().intValue()).order(runtime.byteOrder());

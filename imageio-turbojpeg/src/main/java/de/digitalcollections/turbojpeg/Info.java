@@ -1,7 +1,8 @@
 package de.digitalcollections.turbojpeg;
 
 import de.digitalcollections.turbojpeg.lib.structs.tjscalingfactor;
-import java.awt.Dimension;
+
+import java.awt.*;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
