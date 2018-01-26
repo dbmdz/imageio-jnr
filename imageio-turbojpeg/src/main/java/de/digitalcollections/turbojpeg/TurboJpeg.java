@@ -26,7 +26,7 @@ import java.nio.ByteBuffer;
 
 /** Java bindings for libturbojpeg via JFFI **/
 public class TurboJpeg {
-  private static final Logger LOG = LoggerFactory.getLogger(Info.class);
+  private static final Logger LOG = LoggerFactory.getLogger(TurboJpeg.class);
   public libturbojpeg lib;
   public Runtime runtime;
 
