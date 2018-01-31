@@ -92,6 +92,16 @@ class TurboJpegImageReaderTest {
     assertThat(img)
         .hasDimensions(319, 339)
         .hasNoPixelsOfColor(-1 /* white */);
+    param.setRotationDegree(180);
+    img = reader.read(0, param);
+    assertThat(img)
+        .hasDimensions(339, 319)
+        .hasNoPixelsOfColor(-1 /* white */);
+    param.setRotationDegree(270);
+    img = reader.read(0, param);
+    assertThat(img)
+        .hasDimensions(319, 339)
+        .hasNoPixelsOfColor(-1 /* white */);
   }
 
   @Test
@@ -119,6 +129,16 @@ class TurboJpegImageReaderTest {
     assertThat(img)
         .hasDimensions(172, 204)
         .hasNoPixelsOfColor(-1 /* white */);
+    param.setRotationDegree(180);
+    img = reader.read(0, param);
+    assertThat(img)
+            .hasDimensions(204, 172)
+            .hasNoPixelsOfColor(-1 /* white */);
+    param.setRotationDegree(270);
+    img = reader.read(0, param);
+    assertThat(img)
+            .hasDimensions(172, 204)
+            .hasNoPixelsOfColor(-1 /* white */);
   }
 
   @Test
@@ -131,6 +151,16 @@ class TurboJpegImageReaderTest {
     assertThat(img)
         .hasDimensions(368, 384)
         .hasNoPixelsOfColor(-1 /* white */);
+    param.setRotationDegree(180);
+    img = reader.read(1, param);
+    assertThat(img)
+            .hasDimensions(384, 368)
+            .hasNoPixelsOfColor(-1 /* white */);
+    param.setRotationDegree(270);
+    img = reader.read(1, param);
+    assertThat(img)
+            .hasDimensions(368, 384)
+            .hasNoPixelsOfColor(-1 /* white */);
   }
 
   @Test

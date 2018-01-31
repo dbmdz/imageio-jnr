@@ -241,7 +241,7 @@ public class TurboJpeg {
           codec, inBuf, jpegData.length, 1, new PointerByReference(bufPtr),
           lenRef, transform, 0);
       if (rv != 0) {
-        LOG.error("Could not compress image (crop: {},{},{},{}, rotate: {}",
+        LOG.error("Could not compress image (crop: {},{},{},{}, rotate: {})",
                   transform.r.x, transform.r.y, transform.r.w, transform.r.h, rotation);
         throw new TurboJpegException(lib.tjGetErrorStr());
       }

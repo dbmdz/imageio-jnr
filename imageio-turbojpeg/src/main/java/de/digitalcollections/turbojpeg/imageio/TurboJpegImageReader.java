@@ -116,23 +116,26 @@ public class TurboJpegImageReader extends ImageReader {
     boolean modified = false;
     int originalWidth = getWidth(0);
     int originalHeight = getHeight(0);
-    if (rotation == 90 || rotation == 270) {
-      int w = region.width;
-      region.width = region.height;
-      region.height = w;
-      int ow = originalWidth;
-      originalWidth = originalHeight;
-      originalHeight = ow;
+    int regionWidth = region.width > 0 ? region.width : originalWidth - region.x;
+    int regionHeight = region.height > 0 ? region.height : originalHeight - region.y;
+    if (rotation == 90) {
+      int x = region.x;
+      region.x = originalHeight - regionHeight - region.y;
+      region.y = x;
+    }
+    if (rotation == 180) {
+      region.x = originalWidth - regionWidth - region.x;
+      region.y = originalHeight - regionHeight - region.y;
     }
     if (rotation == 270) {
       int x = region.x;
       region.x = region.y;
-      region.y = x;
+      region.y = originalWidth - regionWidth - x;
     }
-    if (rotation == 90) {
-      int x = region.x;
-      region.x = originalWidth - region.y - region.width;
-      region.y = x;
+    if (rotation == 90 || rotation == 270) {
+      int w = region.width;
+      region.width = region.height;
+      region.height = w;
     }
     Rectangle extraCrop = new Rectangle(
         0, 0,
