@@ -105,6 +105,9 @@ public class TurboJpegImageReader extends ImageReader {
    *    - Crop to to nearest MCU boundaries (TurboJPEG)
    *    - Crop to the actual region (Java)
    *
+   * Additionally, since TurboJPEG applies rotation **before** cropping, but the ImageIO API is based on the
+   * assumption that rotation occurs **after** cropping, we have to transform the cropping region accordingly.
+   *
    * @param mcuSize The size of the MCUs
    * @param region The source region to be cropped
    * @return The region that needs to be cropped from the image cropped to the expanded rectangle
@@ -116,21 +119,19 @@ public class TurboJpegImageReader extends ImageReader {
     boolean modified = false;
     int originalWidth = getWidth(0);
     int originalHeight = getHeight(0);
-    int regionWidth = region.width > 0 ? region.width : originalWidth - region.x;
-    int regionHeight = region.height > 0 ? region.height : originalHeight - region.y;
     if (rotation == 90) {
       int x = region.x;
-      region.x = originalHeight - regionHeight - region.y;
+      region.x = originalHeight - region.height - region.y;
       region.y = x;
     }
     if (rotation == 180) {
-      region.x = originalWidth - regionWidth - region.x;
-      region.y = originalHeight - regionHeight - region.y;
+      region.x = originalWidth - region.width - region.x;
+      region.y = originalHeight - region.height - region.y;
     }
     if (rotation == 270) {
       int x = region.x;
       region.x = region.y;
-      region.y = originalWidth - regionWidth - x;
+      region.y = originalWidth - region.width - x;
     }
     if (rotation == 90 || rotation == 270) {
       int w = region.width;
@@ -228,12 +229,6 @@ public class TurboJpegImageReader extends ImageReader {
       if (param != null && param.getSourceRegion() != null) {
         region = param.getSourceRegion();
         scaleRegion(imageIndex, region);
-        if (region.x + region.width == getWidth(0)) {
-          region.width = 0;
-        }
-        if (region.y + region.height == getHeight(0)) {
-          region.height = 0;
-        }
         if (!isRegionFullImage(imageIndex, region)) {
           extraCrop = adjustRegion(info.getMCUSize(), region, rotation);
         } else {
