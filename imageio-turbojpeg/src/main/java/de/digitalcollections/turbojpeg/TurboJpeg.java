@@ -131,7 +131,8 @@ public class TurboJpeg {
         default:
           throw new IllegalArgumentException("Illegal sample format");
       }
-      TJSAMP sampling = pixelFmt == TJPF.TJPF_GRAY ? TJSAMP.TJSAMP_GRAY : TJSAMP.TJSAMP_444;
+      // TODO: Make sampling format configurable
+      TJSAMP sampling = pixelFmt == TJPF.TJPF_GRAY ? TJSAMP.TJSAMP_GRAY : TJSAMP.TJSAMP_420;
       codec = lib.tjInitCompress();
 
       // Allocate JPEG target buffer
