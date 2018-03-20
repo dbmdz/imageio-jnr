@@ -229,4 +229,15 @@ class TurboJpegImageReaderTest {
     BufferedImage img = reader.read(2, param);
     assertThat(img).hasDimensions(reader.getWidth(2), reader.getHeight(2));
   }
+
+  @Test
+  public void testReadTinyImage() throws IOException {
+    ImageReader reader = getReader("tiny.jpg");
+    TurboJpegImageReadParam param = (TurboJpegImageReadParam) reader.getDefaultReadParam();
+    param.setSourceRegion(new Rectangle(0, 0, reader.getWidth(0), reader.getHeight(0)));
+    BufferedImage img = reader.read(0, param);
+    assertThat(img.getWidth()).isEqualTo(1);
+    assertThat(img.getHeight()).isEqualTo(1);
+
+  }
 }

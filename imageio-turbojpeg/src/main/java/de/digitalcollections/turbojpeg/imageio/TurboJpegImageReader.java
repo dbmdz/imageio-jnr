@@ -252,7 +252,11 @@ public class TurboJpegImageReader extends ImageReader {
   }
 
   private boolean isRegionFullImage(int imageIndex, Rectangle region) throws IOException {
-    return (region.x == 0 && region.y == 0 && region.width == 0 && region.height == 0);
+    int nativeWidth = getWidth(imageIndex);
+    int nativeHeight = getHeight(imageIndex);
+    return region.x == 0 && region.y == 0
+            && (region.width == 0 || region.width == nativeWidth)
+            && (region.height == 0 || region.height == nativeHeight);
   }
 
   @Override
