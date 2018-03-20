@@ -4,7 +4,7 @@
 [![codecov](https://codecov.io/gh/dbmdz/imageio-jnr/branch/master/graph/badge.svg)](https://codecov.io/gh/dbmdz/imageio-jnr)
 [![Apache 2.0 License](https://img.shields.io/badge/license-Apache_2.0-blue.svg)](LICENSE)
 [![GitHub release](https://img.shields.io/github/release/dbmdz/imageio-jnr.svg?maxAge=2592000)](https://github.com/dbmdz/imageio-jnr/releases)
-[![Maven Central](https://img.shields.io/maven-central/v/de.digitalcollections/imageio-jnr.svg?maxAge=2592000)](http://search.maven.org/#search%7Cga%7C1%7Ca%3A%22imageio-jnr%22)
+[![Maven Central](https://img.shields.io/maven-central/v/de.digitalcollections.imageio/imageio-jnr.svg)](http://search.maven.org/#search%7Cga%7C1%7Cg%3A%22de.digitalcollections.imageio%22)
 
 
 This repository contains ImageIO plugins that wrap the most common native
@@ -23,6 +23,31 @@ Please note that the plugins need at least Java 8.
 | ----------------- | --------- | ----------------------------------- | ------------------------------------------ | ---
 | imageio-openjpeg  | JPEG2000  | [OpenJPEG](http://www.openjpeg.org) | \>= 2.0 (>=2.3 recommended for performance) | [![Javadocs](http://javadoc.io/badge/de.digitalcollections.imageio/imageio-openjpeg.svg)](http://javadoc.io/doc/de.digitalcollections.imageio/imageio-openjpeg)
 | imageio-turbojpeg |    JPEG   | [TurboJPEG](https://libjpeg-turbo.org/About/TurboJPEG) | \>= 1.0               | [![Javadocs](http://javadoc.io/badge/de.digitalcollections.imageio/imageio-turbojpeg.svg)](http://javadoc.io/doc/de.digitalcollections.imageio/imageio-turbojpeg)
+
+
+## Installation
+To use the ImageIO plugins, include them in your dependencies:
+
+```xml
+<dependency>
+  <groupId>de.digitalcollections.imageio</groupId>
+  <artifactId>imageio-turbojpeg</artifactId>
+  <version>0.2.5</version>
+</depdendency>
+
+<dependency>
+  <groupId>de.digitalcollections.imageio</groupId>
+  <artifactId>imageio-openjpeg</artifactId>
+  <version>0.2.5</version>
+</depdendency>
+```
+
+Before using them, make sure that you have all the required native libraries
+installed, e.g. on Debian-based systems:
+
+```
+$ sudo apt install libturbojpeg1 libopenjp2-7
+```
 
 
 ## Supported features
