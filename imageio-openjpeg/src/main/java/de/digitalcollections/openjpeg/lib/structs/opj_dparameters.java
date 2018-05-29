@@ -5,6 +5,7 @@ import jnr.ffi.Runtime;
 import jnr.ffi.Struct;
 
 public class opj_dparameters extends Struct {
+
   public final Unsigned32 cp_reduce = new Unsigned32();
   public final Unsigned32 cp_layer = new Unsigned32();
   public final AsciiString infile = new AsciiString(libopenjp2.STR_LEN);
@@ -25,18 +26,18 @@ public class opj_dparameters extends Struct {
   public final Signed32 cod_format = new Signed32();
 
   /* NOT YET USED IN THE V2 VERSION OF OPENJPEG */
-  /* JPWL encoding parameters */
+ /* JPWL encoding parameters */
   /** enables writing of EPC in MH, thus activating JPWL */
   public final Boolean jpwl_epc_on = new Boolean();
   /** error protection method for MH (0,1,16,32,37-128) */
   public final Signed32 jpwl_hprot_MH = new Signed32();
-  /** tile number of header protection specification (>=0) */
+  /** tile number of header protection specification (&ge;0) */
   public final Signed32[] jpwl_hprot_TPH_tileno = array(new Signed32[libopenjp2.JPWL_MAX_NO_TILESPECS]);
   /** error protection methods for TPHs (0,1,16,32,37-128) */
   public final Signed32[] jpwl_hprot_TPH = array(new Signed32[libopenjp2.JPWL_MAX_NO_TILESPECS]);
-  /** tile number of packet protection specification (>=0) */
+  /** tile number of packet protection specification (&ge;0) */
   public final Signed32[] jpwl_pprot_tileno = array(new Signed32[libopenjp2.JPWL_MAX_NO_PACKSPECS]);
-  /** packet number of packet protection specification (>=0) */
+  /** packet number of packet protection specification (&ge;0) */
   public final Signed32[] jpwl_pprot_packn = array(new Signed32[libopenjp2.JPWL_MAX_NO_PACKSPECS]);
   /** error protection methods for packets (0,1,16,32,37-128) */
   public final Signed32[] jpwl_pprot = array(new Signed32[libopenjp2.JPWL_MAX_NO_PACKSPECS]);
@@ -48,25 +49,25 @@ public class opj_dparameters extends Struct {
   public final Signed32 jpwl_sens_range = new Signed32();
   /** sensitivity method for MH (-1=no,0-7) */
   public final Signed32 jpwl_sens_MH = new Signed32();
-  /** tile number of sensitivity specification (>=0) */
+  /** tile number of sensitivity specification (&ge;0) */
   public final Signed32[] jpwl_sens_TPH_tileno = array(new Signed32[libopenjp2.JPWL_MAX_NO_TILESPECS]);
   /** sensitivity methods for TPHs (-1=no,0-7) */
   public final Signed32[] jpwl_sens_TPH = array(new Signed32[libopenjp2.JPWL_MAX_NO_TILESPECS]);
 
   /**
-    * DEPRECATED: use RSIZ, OPJ_PROFILE_* and MAX_COMP_SIZE instead
-    * Digital Cinema compliance 0-not compliant, 1-compliant
-    * */
+   * DEPRECATED: use RSIZ, OPJ_PROFILE_* and MAX_COMP_SIZE instead
+   * Digital Cinema compliance 0-not compliant, 1-compliant
+   * */
   public final Signed32 cp_cinema = new Signed32();
   /**
-    * Maximum size (in bytes) for each component.
-    * If == 0, component size limitation is not considered
-    * */
+   * Maximum size (in bytes) for each component.
+   * If == 0, component size limitation is not considered
+   * */
   public final Signed32 max_comp_size = new Signed32();
   /**
-    * DEPRECATED: use RSIZ, OPJ_PROFILE_* and OPJ_EXTENSION_* instead
-    * Profile name
-    * */
+   * DEPRECATED: use RSIZ, OPJ_PROFILE_* and OPJ_EXTENSION_* instead
+   * Profile name
+   * */
   public final Signed32 cp_rsiz = new Signed32();
   /** Tile part generation*/
   public final Signed32 tp_on = new Signed32();
@@ -80,10 +81,10 @@ public class opj_dparameters extends Struct {
        encoding without offset concerning all the components. */
   public final Pointer mct_data = new Pointer();
   /**
-    * Maximum size (in bytes) for the whole codestream.
-    * If == 0, codestream size limitation is not considered
-    * If it does not comply with tcp_rates, max_cs_size prevails
-    * and a warning is issued.
+   * Maximum size (in bytes) for the whole codestream.
+   * If == 0, codestream size limitation is not considered
+   * If it does not comply with tcp_rates, max_cs_size prevails
+   * and a warning is issued.
    * */
   public final Signed32 max_cs_size = new Signed32();
   /** RSIZ value

@@ -11,6 +11,7 @@ import javax.imageio.ImageWriteParam;
  * Parameters for encoding JPEG2000 images
  */
 public class OpenJp2ImageWriteParam extends ImageWriteParam {
+
   public enum ProgressionOrder {
     LRCP(0), RLCP(1), RPCL(2), PCRL(3), CPRL(4);
 
@@ -22,8 +23,8 @@ public class OpenJp2ImageWriteParam extends ImageWriteParam {
 
     PROG_ORDER toNative() {
       return Arrays.stream(PROG_ORDER.values())
-          .filter(v -> v.value == this.val)
-          .findFirst().get();
+              .filter(v -> v.value == this.val)
+              .findFirst().get();
     }
   }
 
@@ -75,7 +76,7 @@ public class OpenJp2ImageWriteParam extends ImageWriteParam {
     }
 
     if (getCompressionMode() == MODE_EXPLICIT) {
-      params.tcp_rates[0].set(Math.max(100f - getCompressionQuality()*100f, 0f));
+      params.tcp_rates[0].set(Math.max(100f - getCompressionQuality() * 100f, 0f));
     } else {
       params.tcp_rates[0].set(0);
     }
@@ -111,6 +112,7 @@ public class OpenJp2ImageWriteParam extends ImageWriteParam {
   /**
    * Set the compression type. Must be 'lossless' (default) or 'lossy'.
    */
+  @Override
   public void setCompressionType(String compressionType) {
     if (Stream.of(COMPRESS_TYPE_LOSSLESS, COMPRESS_TYPE_LOSSY).noneMatch(compressionType::equals)) {
       throw new IllegalArgumentException("Unknown compression type");
@@ -120,8 +122,11 @@ public class OpenJp2ImageWriteParam extends ImageWriteParam {
 
   @Override
   public String getCompressionType() {
-    if (compressLossy) return COMPRESS_TYPE_LOSSY;
-    else return COMPRESS_TYPE_LOSSLESS;
+    if (compressLossy) {
+      return COMPRESS_TYPE_LOSSY;
+    } else {
+      return COMPRESS_TYPE_LOSSLESS;
+    }
   }
 
   @Override
@@ -142,6 +147,7 @@ public class OpenJp2ImageWriteParam extends ImageWriteParam {
 
   /**
    * Write SOP markers after each packet.
+   * @param writeSOPMarkers flag if sop markers should be written
    */
   public void setWriteSOPMarkers(boolean writeSOPMarkers) {
     this.writeSOPMarkers = writeSOPMarkers;
@@ -153,6 +159,7 @@ public class OpenJp2ImageWriteParam extends ImageWriteParam {
 
   /**
    * Write EPH marker after each header packet.
+   * @param writeEPHMarkers flag if eph markers should be written
    */
   public void setWriteEPHMarkers(boolean writeEPHMarkers) {
     this.writeEPHMarkers = writeEPHMarkers;
@@ -160,7 +167,7 @@ public class OpenJp2ImageWriteParam extends ImageWriteParam {
 
   /**
    * Set the compression quality. Automatically switches compression type to lossy.
-   * {@link ImageWriteParam::setCompressionType} must have been set to {@link ImageWriteParam::MODE_EXPLICIT}.
+   * {@link ImageWriteParam#setCompressionType} must have been set to {@link ImageWriteParam#MODE_EXPLICIT}.
    *
    * Quality must be between 0.0 (worst) and 1.0 (best).
    */
@@ -178,6 +185,7 @@ public class OpenJp2ImageWriteParam extends ImageWriteParam {
    * Set the number of resolutions to encode in the output image.
    *
    * Each resolution will be 2^num times smaller than the native resolution.
+   * @param numResolutions the num resolutions
    */
   public void setNumResolutions(int numResolutions) {
     this.numResolutions = numResolutions;
@@ -189,6 +197,7 @@ public class OpenJp2ImageWriteParam extends ImageWriteParam {
 
   /**
    * Set the progression order of the encoded image.
+   * @param progOrder the progression order
    */
   public void setProgressionOrder(ProgressionOrder progOrder) {
     this.progOrder = progOrder;
