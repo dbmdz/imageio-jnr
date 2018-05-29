@@ -12,26 +12,27 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class OpenJp2ImageReaderSpi extends ImageReaderSpi {
-  private static Logger LOGGER = LoggerFactory.getLogger(OpenJp2ImageReaderSpi.class);
+
+  private static final Logger LOGGER = LoggerFactory.getLogger(OpenJp2ImageReaderSpi.class);
   private static byte[] HEADER_MAGIC = new byte[]{0x00, 0x00, 0x00, 0x0c, 0x6a, 0x50,
                                                   0x20, 0x20, 0x0d, 0x0a, (byte) 0x87, 0x0a};
   private static final String vendorName = "Münchener Digitalisierungszentrum/Digitale Bibliothek, Bayerische Staatsbibliothek";
   private static final String version = "0.1.0";
   private static final String readerClassName = "de.digitalcollections.openjpeg.imageio.OpenJp2ImageReader";
-  private static final String[] names = { "jpeg2000" };
-  private static final String[] suffixes = { "jp2" };
-  private static final String[] MIMETypes = { "image/jp2" };
-  private static final String[] writerSpiNames = { "de.digitalcollections.openjpeg.imageio.OpenJp2ImageWriterSpi" };
-  private static final Class[] inputTypes = { ImageInputStream.class };
+  private static final String[] names = {"jpeg2000"};
+  private static final String[] suffixes = {"jp2"};
+  private static final String[] MIMETypes = {"image/jp2"};
+  private static final String[] writerSpiNames = {"de.digitalcollections.openjpeg.imageio.OpenJp2ImageWriterSpi"};
+  private static final Class[] inputTypes = {ImageInputStream.class};
 
   private OpenJpeg lib;
 
   public OpenJp2ImageReaderSpi() {
     super(vendorName, version, names, suffixes, MIMETypes, readerClassName, inputTypes, writerSpiNames,
-        false, null, null,
-        null, null, false,
-        null, null, null,
-        null);
+            false, null, null,
+            null, null, false,
+            null, null, null,
+            null);
   }
 
   private void loadLibrary() throws IOException {
@@ -39,7 +40,7 @@ public class OpenJp2ImageReaderSpi extends ImageReaderSpi {
       try {
         this.lib = new OpenJpeg();
       } catch (UnsatisfiedLinkError e) {
-        LOGGER.error("Could not load libopenjp2", e);
+        LOGGER.warn("Could not load libopenjp2, plugin will be disabled");
         throw new IOException(e);
       }
     }
@@ -53,7 +54,7 @@ public class OpenJp2ImageReaderSpi extends ImageReaderSpi {
     if (input == null) {
       return false;
     }
-    ImageInputStream stream = (ImageInputStream)input;
+    ImageInputStream stream = (ImageInputStream) input;
     byte[] b = new byte[12];
     try {
       stream.mark();

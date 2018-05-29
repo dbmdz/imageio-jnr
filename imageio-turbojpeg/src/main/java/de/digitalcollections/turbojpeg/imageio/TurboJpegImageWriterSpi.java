@@ -18,24 +18,24 @@ import static java.awt.image.BufferedImage.TYPE_4BYTE_ABGR;
 import static java.awt.image.BufferedImage.TYPE_BYTE_GRAY;
 
 public class TurboJpegImageWriterSpi extends ImageWriterSpi {
+
   private static final Logger LOGGER = LoggerFactory.getLogger(TurboJpegImageWriterSpi.class);
   private static final String vendorName = "Münchener Digitalisierungszentrum/Digitale Bibliothek, Bayerische Staatsbibliothek";
   private static final String version = "0.1.0";
   private static final String writerClassName = "de.digitalcollections.openjpeg.turbojpeg.TurboJpegImageWriter";
-  private static final String[] names = { "JPEG", "jpeg", "JPG", "jpg" };
-  private static final String[] suffixes = { "jpg", "jpeg" };
-  private static final String[] MIMETypes = { "image/jpeg" };
-  private static final String[] readerSpiNames = { "de.digitalcollections.turbojpeg.imageio.TurboJpegImageReaderSpi" };
-  private static final Class[] outputTypes = { ImageOutputStream.class };
+  private static final String[] names = {"JPEG", "jpeg", "JPG", "jpg"};
+  private static final String[] suffixes = {"jpg", "jpeg"};
+  private static final String[] MIMETypes = {"image/jpeg"};
+  private static final String[] readerSpiNames = {"de.digitalcollections.turbojpeg.imageio.TurboJpegImageReaderSpi"};
+  private static final Class[] outputTypes = {ImageOutputStream.class};
 
   private TurboJpeg lib;
 
-
   public TurboJpegImageWriterSpi() {
     super(vendorName, version, names, suffixes, MIMETypes, writerClassName, outputTypes, readerSpiNames,
-        false, null, null,
-        null, null, false,
-        null, null, null, null);
+            false, null, null,
+            null, null, false,
+            null, null, null, null);
   }
 
   private void loadLibrary() throws IOException {
@@ -43,7 +43,7 @@ public class TurboJpegImageWriterSpi extends ImageWriterSpi {
       try {
         this.lib = new TurboJpeg();
       } catch (UnsatisfiedLinkError e) {
-        LOGGER.error("Could not load libturbojpeg", e);
+        LOGGER.warn("Could not load libturbojpeg, plugin will be disabled");
         throw new IOException(e);
       }
     }
@@ -54,22 +54,22 @@ public class TurboJpegImageWriterSpi extends ImageWriterSpi {
   @Override
   public void onRegistration(final ServiceRegistry registry, final Class<?> category) {
     Stream.of(
-        "com.twelvemonkeys.imageio.plugins.jpeg.JPEGImageWriterSpi",
-        "com.sun.imageio.plugins.jpeg.JPEGImageWriterSpi").forEach((clsName) -> {
-      try {
-        ImageWriterSpi defaultProvider = (ImageWriterSpi) registry.getServiceProviderByClass(Class.forName(clsName));
-        registry.setOrdering((Class<ImageWriterSpi>) category, this, defaultProvider);
-      } catch (ClassNotFoundException e) {
-        // NOP
-      }
-    });
+            "com.twelvemonkeys.imageio.plugins.jpeg.JPEGImageWriterSpi",
+            "com.sun.imageio.plugins.jpeg.JPEGImageWriterSpi").forEach((clsName) -> {
+              try {
+                ImageWriterSpi defaultProvider = (ImageWriterSpi) registry.getServiceProviderByClass(Class.forName(clsName));
+                registry.setOrdering((Class<ImageWriterSpi>) category, this, defaultProvider);
+              } catch (ClassNotFoundException e) {
+                // NOP
+              }
+            });
   }
 
   @Override
   public boolean canEncodeImage(ImageTypeSpecifier type) {
     // TODO: Support all image types, if neccessary convert before encoding
-    return ((type.getNumBands() == 3 || type.getNumBands() ==1) &&
-             ImmutableSet.of(TYPE_3BYTE_BGR, TYPE_4BYTE_ABGR, TYPE_BYTE_GRAY).contains(type.getBufferedImageType()));
+    return ((type.getNumBands() == 3 || type.getNumBands() == 1)
+            && ImmutableSet.of(TYPE_3BYTE_BGR, TYPE_4BYTE_ABGR, TYPE_BYTE_GRAY).contains(type.getBufferedImageType()));
   }
 
   @Override
