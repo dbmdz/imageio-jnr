@@ -17,7 +17,7 @@ public class OpenJp2ImageWriterSpi extends ImageWriterSpi {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(OpenJp2ImageWriterSpi.class);
   private static final String vendorName = "Münchener Digitalisierungszentrum/Digitale Bibliothek, Bayerische Staatsbibliothek";
-  private static final String version = "0.1.0";
+  private static final String version = "0.2.6";
   private static final String writerClassName = "de.digitalcollections.openjpeg.imageio.OpenJp2ImageWriter";
   private static final String[] names = {"jpeg2000"};
   private static final String[] suffixes = {"jp2"};

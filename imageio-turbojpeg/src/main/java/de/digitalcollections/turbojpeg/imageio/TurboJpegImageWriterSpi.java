@@ -21,7 +21,7 @@ public class TurboJpegImageWriterSpi extends ImageWriterSpi {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(TurboJpegImageWriterSpi.class);
   private static final String vendorName = "Münchener Digitalisierungszentrum/Digitale Bibliothek, Bayerische Staatsbibliothek";
-  private static final String version = "0.1.0";
+  private static final String version = "0.2.6";
   private static final String writerClassName = "de.digitalcollections.openjpeg.turbojpeg.TurboJpegImageWriter";
   private static final String[] names = {"JPEG", "jpeg", "JPG", "jpg"};
   private static final String[] suffixes = {"jpg", "jpeg"};
