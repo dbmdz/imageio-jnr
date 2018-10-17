@@ -52,10 +52,14 @@ public class TurboJpeg {
 
       IntByReference numRef = new IntByReference();
       Pointer factorPtr = lib.tjGetScalingFactors(numRef);
-      tjscalingfactor[] factors = new tjscalingfactor[numRef.getValue()];
-      for (int i=0; i < numRef.getValue(); i++) {
+      if (factorPtr == null || factorPtr.address() == 0) {
+        throw new TurboJpegException(lib.tjGetErrorStr());
+      }
+      final Integer numOfFactors = numRef.getValue();
+      tjscalingfactor[] factors = new tjscalingfactor[numOfFactors];
+      for (int i = 0; i < numOfFactors; i++) {
         tjscalingfactor f = new tjscalingfactor(runtime);
-        factorPtr = factorPtr.slice(i * Struct.size(f));
+        factorPtr = factorPtr.slice(Struct.size(f));
         f.useMemory(factorPtr);
         factors[i] = f;
       }
