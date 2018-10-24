@@ -45,7 +45,7 @@ class TurboJpegImageReaderTest {
 
   @Test
   public void testReadScaled() throws IOException {
-    BufferedImage img = getReader("rgb.jpg").read(1, null);
+    BufferedImage img = getReader("rgb.jpg").read(2, null);
     assertThat(img).hasDimensions(384, 384);
   }
 
@@ -76,7 +76,7 @@ class TurboJpegImageReaderTest {
     ImageReader reader = getReader("crop_unaligned.jpg");
     ImageReadParam param = reader.getDefaultReadParam();
     param.setSourceRegion(new Rectangle(87, 111, 152, 129));
-    BufferedImage img = reader.read(1, param);
+    BufferedImage img = reader.read(2, param);
     assertThat(img)
         .hasDimensions(152, 129)
         .hasNoPixelsOfColor(-1 /* white */);
