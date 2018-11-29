@@ -3,3 +3,4 @@ target
 *.iml
 core
 hs_err_*.log
+/nb-configuration.xml
