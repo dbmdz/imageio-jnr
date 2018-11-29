@@ -83,5 +83,5 @@ are available for the majority of commonly used platforms.
 
 ## FAQ
 
-- Q: I get a "Failed to read JPEG info." IllegalArgumentException when using TwelveMonkeys libraries version 3.4.1 for reading a TIFF with JPEG compressed data.
-  A: Stick to Twelvemonkeys version 3.3.2 until now. We will investigate on it.
+- Q: I get a `Failed to read JPEG info.` `IllegalArgumentException` when using the TwelveMonkeys ImageIO libraries in version 3.4.1 when reading a TIFF with JPEG compressed data.
+  A: Stick to Twelvemonkeys version 3.3.2 for now. We're currently investigating the issue.
