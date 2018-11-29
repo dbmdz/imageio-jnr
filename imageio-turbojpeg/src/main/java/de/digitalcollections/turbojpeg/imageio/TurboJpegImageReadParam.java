@@ -1,9 +1,10 @@
 package de.digitalcollections.turbojpeg.imageio;
 
 import com.google.common.collect.ImmutableSet;
-import javax.imageio.ImageReadParam;
+import javax.imageio.plugins.jpeg.JPEGImageReadParam;
 
-public class TurboJpegImageReadParam extends ImageReadParam {
+public class TurboJpegImageReadParam extends JPEGImageReadParam {
+
   private int rotationDegree;
 
   public int getRotationDegree() {

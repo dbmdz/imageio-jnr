@@ -81,3 +81,7 @@ so you merely need to make sure that the backing native libraries are compatible
 Both [OpenJPEG](https://packages.debian.org/stretch/libopenjp2-7) and [TurboJPEG](https://packages.debian.org/stretch/libturbojpeg0)
 are available for the majority of commonly used platforms.
 
+## FAQ
+
+- Q: I get a `Failed to read JPEG info.` `IllegalArgumentException` when using the TwelveMonkeys ImageIO libraries in version 3.4.1 when reading a TIFF with JPEG compressed data.
+  A: Stick to Twelvemonkeys version 3.3.2 for now. We're currently investigating the issue.

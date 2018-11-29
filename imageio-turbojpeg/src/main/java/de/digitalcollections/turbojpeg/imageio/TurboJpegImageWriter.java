@@ -15,6 +15,7 @@ import javax.imageio.spi.ImageWriterSpi;
 import javax.imageio.stream.ImageOutputStream;
 
 public class TurboJpegImageWriter extends ImageWriter {
+
   private ImageOutputStream stream;
   private final TurboJpeg lib;
 
@@ -38,7 +39,7 @@ public class TurboJpegImageWriter extends ImageWriter {
 
   @Override
   public ImageWriteParam getDefaultWriteParam() {
-    return new TurboJpegImageWriteParam();
+    return new TurboJpegImageWriteParam(null);
   }
 
   @Override

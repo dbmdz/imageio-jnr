@@ -3,15 +3,6 @@ package de.digitalcollections.turbojpeg.imageio;
 import de.digitalcollections.turbojpeg.Info;
 import de.digitalcollections.turbojpeg.TurboJpeg;
 import de.digitalcollections.turbojpeg.TurboJpegException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import javax.imageio.ImageReadParam;
-import javax.imageio.ImageReader;
-import javax.imageio.ImageTypeSpecifier;
-import javax.imageio.metadata.IIOMetadata;
-import javax.imageio.spi.ImageReaderSpi;
-import javax.imageio.stream.ImageInputStream;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
@@ -19,10 +10,19 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.Iterator;
 import java.util.stream.Stream;
+import javax.imageio.ImageReadParam;
+import javax.imageio.ImageReader;
+import javax.imageio.ImageTypeSpecifier;
+import javax.imageio.metadata.IIOMetadata;
+import javax.imageio.spi.ImageReaderSpi;
+import javax.imageio.stream.ImageInputStream;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import static java.awt.image.BufferedImage.*;
 
 public class TurboJpegImageReader extends ImageReader {
+
   private final static Logger LOGGER = LoggerFactory.getLogger(TurboJpegImageReader.class);
 
   private final TurboJpeg lib;
@@ -45,8 +45,10 @@ public class TurboJpegImageReader extends ImageReader {
         jpegData = bufferFromStream((ImageInputStream) input);
         info = lib.getInfo(jpegData.array());
       } catch (IOException e) {
+        LOGGER.error(e.getMessage());
         throw new IllegalArgumentException("Failed to read input.");
       } catch (TurboJpegException e) {
+        LOGGER.error(e.getMessage());
         throw new IllegalArgumentException("Failed to read JPEG info.");
       }
     } else {
@@ -95,8 +97,8 @@ public class TurboJpegImageReader extends ImageReader {
   @Override
   public Iterator<ImageTypeSpecifier> getImageTypes(int imageIndex) throws IOException {
     return Stream.of(TYPE_3BYTE_BGR, TYPE_4BYTE_ABGR, TYPE_4BYTE_ABGR_PRE, TYPE_BYTE_GRAY)
-        .map(ImageTypeSpecifier::createFromBufferedImageType)
-        .iterator();
+            .map(ImageTypeSpecifier::createFromBufferedImageType)
+            .iterator();
   }
 
   /** Since TurboJPEG can only crop to values divisible by the MCU size, we may need to
@@ -139,9 +141,9 @@ public class TurboJpegImageReader extends ImageReader {
       region.height = w;
     }
     Rectangle extraCrop = new Rectangle(
-        0, 0,
-        region.width == 0 ? originalWidth - region.x : region.width,
-        region.height == 0 ? originalHeight - region.y : region.height);
+            0, 0,
+            region.width == 0 ? originalWidth - region.x : region.width,
+            region.height == 0 ? originalHeight - region.y : region.height);
     if (region.x % mcuSize.width != 0) {
       extraCrop.x = region.x % mcuSize.width;
       region.x -= extraCrop.x;
@@ -159,11 +161,11 @@ public class TurboJpegImageReader extends ImageReader {
       modified = true;
     }
     if (region.width % mcuSize.width != 0) {
-      region.width = (int) (mcuSize.width*(Math.ceil(region.getWidth() / mcuSize.width)));
+      region.width = (int) (mcuSize.width * (Math.ceil(region.getWidth() / mcuSize.width)));
       modified = true;
     }
     if (region.height % mcuSize.height != 0) {
-      region.height = (int) (mcuSize.height*(Math.ceil(region.getHeight() / mcuSize.height)));
+      region.height = (int) (mcuSize.height * (Math.ceil(region.getHeight() / mcuSize.height)));
       modified = true;
     }
     if (modified) {
@@ -240,7 +242,7 @@ public class TurboJpegImageReader extends ImageReader {
       }
       Info transformedInfo = lib.getInfo(data.array());
       BufferedImage img = lib.decode(
-          data.array(), transformedInfo, transformedInfo.getAvailableSizes().get(imageIndex));
+              data.array(), transformedInfo, transformedInfo.getAvailableSizes().get(imageIndex));
       if (extraCrop != null) {
         adjustExtraCrop(imageIndex, transformedInfo, extraCrop);
         img = img.getSubimage(extraCrop.x, extraCrop.y, extraCrop.width, extraCrop.height);
