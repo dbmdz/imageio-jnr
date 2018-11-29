@@ -55,12 +55,13 @@
     <version.assertj>3.8.0</version.assertj>
     <version.jnr-ffi>2.1.7</version.jnr-ffi>
     <version.slf4j>1.8.0-beta0</version.slf4j>
-    <version.junit-jupiter>5.0.1</version.junit-jupiter>
+    <version.junit-jupiter>5.3.2</version.junit-jupiter>
     <version.jacoco-maven-plugin>0.8.2</version.jacoco-maven-plugin>
     <version.maven-compiler-plugin>3.1</version.maven-compiler-plugin>
     <version.maven-gpg-plugin>1.6</version.maven-gpg-plugin>
     <version.maven-javadoc-plugin>3.0.0-M1</version.maven-javadoc-plugin>
     <version.maven-source-plugin>3.0.1</version.maven-source-plugin>
+    <version.maven-surefire-plugin>2.22.1</version.maven-surefire-plugin>
     <version.nexus-staging-maven-plugin>1.6.7</version.nexus-staging-maven-plugin>
     <version.versions-maven-plugin>2.3</version.versions-maven-plugin>
   </properties>
@@ -193,7 +194,7 @@
       </plugin>
       <plugin>
         <artifactId>maven-surefire-plugin</artifactId>
-        <version>2.22.1</version>
+        <version>${version.maven-surefire-plugin}</version>
         <configuration>
           <includes>
             <include>**/Test*.java</include>
@@ -214,7 +215,7 @@
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-gpg-plugin</artifactId>
-            <version>1.6</version>
+            <version>${version.maven-gpg-plugin}</version>
             <executions>
               <execution>
                 <id>sign-artifacts</id>
