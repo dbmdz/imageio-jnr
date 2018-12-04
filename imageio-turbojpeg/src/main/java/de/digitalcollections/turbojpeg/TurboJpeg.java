@@ -171,7 +171,7 @@ public class TurboJpeg {
       }
       ByteBuffer outBuf = ByteBuffer.allocate(lenPtr.getValue().intValue()).order(runtime.byteOrder());
       bufPtr.get(0, outBuf.array(), 0, lenPtr.getValue().intValue());
-      outBuf.rewind();
+      ((Buffer) outBuf).rewind();
       return outBuf;
     } finally {
       if (codec != null && codec.address() != 0) {
@@ -270,7 +270,7 @@ public class TurboJpeg {
       }
       ByteBuffer outBuf = ByteBuffer.allocate(lenRef.getValue().intValue()).order(runtime.byteOrder());
       bufPtr.get(0, outBuf.array(), 0, lenRef.getValue().intValue());
-      outBuf.rewind();
+      ((Buffer) outBuf).rewind();
       return outBuf;
     } finally {
       if (codec != null && codec.address() != 0) {
