@@ -1,11 +1,11 @@
 # imageio-jnr
 
-[![Build Status](https://travis-ci.org/dbmdz/imageio-jnr.svg?branch=master)](https://travis-ci.org/dbmdz/imageio-jnr)
-[![codecov](https://codecov.io/gh/dbmdz/imageio-jnr/branch/master/graph/badge.svg)](https://codecov.io/gh/dbmdz/imageio-jnr)
-[![Apache 2.0 License](https://img.shields.io/badge/license-Apache_2.0-blue.svg)](LICENSE)
-[![GitHub release](https://img.shields.io/github/release/dbmdz/imageio-jnr.svg?maxAge=2592000)](https://github.com/dbmdz/imageio-jnr/releases)
-[![Maven Central](https://img.shields.io/maven-central/v/de.digitalcollections.imageio/imageio-jnr.svg)](http://search.maven.org/#search%7Cga%7C1%7Cg%3A%22de.digitalcollections.imageio%22)
-
+[![Javadocs](https://javadoc.io/badge/de.digitalcollections.imageio/imageio-jnr.svg)](https://javadoc.io/doc/de.digitalcollections.imageio/imageio-jnr)
+[![Build Status](https://img.shields.io/travis/dbmdz/imageio-jnr/master.svg)](https://travis-ci.org/dbmdz/imageio-jnr)
+[![Codecov](https://img.shields.io/codecov/c/github/dbmdz/imageio-jnr/master.svg)](https://codecov.io/gh/dbmdz/imageio-jnr)
+[![License](https://img.shields.io/github/license/dbmdz/imageio-jnr.svg)](LICENSE)
+[![GitHub release](https://img.shields.io/github/release/dbmdz/imageio-jnr.svg)](https://github.com/dbmdz/imageio-jnr/releases)
+[![Maven Central](https://img.shields.io/maven-central/v/de.digitalcollections.imageio/imageio-jnr.svg)](https://search.maven.org/search?q=a:imageio-jnr)
 
 This repository contains ImageIO plugins that wrap the most common native
 libraries for various image formats with [JNR-FFI](https://github.com/jnr/jnr-ffi).
