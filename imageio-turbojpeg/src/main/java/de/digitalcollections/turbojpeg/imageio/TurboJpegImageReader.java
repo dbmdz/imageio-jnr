@@ -3,7 +3,8 @@ package de.digitalcollections.turbojpeg.imageio;
 import de.digitalcollections.turbojpeg.Info;
 import de.digitalcollections.turbojpeg.TurboJpeg;
 import de.digitalcollections.turbojpeg.TurboJpegException;
-import java.awt.*;
+import java.awt.Dimension;
+import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -19,11 +20,14 @@ import javax.imageio.stream.ImageInputStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static java.awt.image.BufferedImage.*;
+import static java.awt.image.BufferedImage.TYPE_3BYTE_BGR;
+import static java.awt.image.BufferedImage.TYPE_4BYTE_ABGR;
+import static java.awt.image.BufferedImage.TYPE_4BYTE_ABGR_PRE;
+import static java.awt.image.BufferedImage.TYPE_BYTE_GRAY;
 
 public class TurboJpegImageReader extends ImageReader {
 
-  private final static Logger LOGGER = LoggerFactory.getLogger(TurboJpegImageReader.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(TurboJpegImageReader.class);
 
   private final TurboJpeg lib;
   private ByteBuffer jpegData;
@@ -202,7 +206,7 @@ public class TurboJpegImageReader extends ImageReader {
    *
    * @param targetIndex Index of the targeted image resolution
    * @param sourceRegion Region relative to the targeted image resolution, will be modified
-   * @throws IOException
+   * @throws IOException if there's an error getting the image dimensions
    */
   private void scaleRegion(int targetIndex, Rectangle sourceRegion) throws IOException {
     if (targetIndex == 0) {

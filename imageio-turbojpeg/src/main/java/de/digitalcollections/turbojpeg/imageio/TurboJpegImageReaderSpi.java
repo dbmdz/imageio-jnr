@@ -13,6 +13,7 @@ import javax.imageio.stream.ImageInputStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@SuppressWarnings("checkstyle:constantname")
 public class TurboJpegImageReaderSpi extends ImageReaderSpi {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(TurboJpegImageReaderSpi.class);
@@ -27,6 +28,9 @@ public class TurboJpegImageReaderSpi extends ImageReaderSpi {
 
   private TurboJpeg lib;
 
+  /**
+   * Construct the SPI. Boilerplate.
+   */
   public TurboJpegImageReaderSpi() {
     super(vendorName, version, names, suffixes, MIMETypes, readerClassName,
             new Class[]{ImageInputStream.class}, writerSpiNames,

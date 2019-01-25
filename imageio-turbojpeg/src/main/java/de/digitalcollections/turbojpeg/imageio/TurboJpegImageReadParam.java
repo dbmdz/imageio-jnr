@@ -3,6 +3,11 @@ package de.digitalcollections.turbojpeg.imageio;
 import com.google.common.collect.ImmutableSet;
 import javax.imageio.plugins.jpeg.JPEGImageReadParam;
 
+/**
+ * Parameters for reading JPEG images.
+ *
+ * Currently the only extra setting apart from the default ImageIO ones is setting the rotation degree.
+ */
 public class TurboJpegImageReadParam extends JPEGImageReadParam {
 
   private int rotationDegree;
