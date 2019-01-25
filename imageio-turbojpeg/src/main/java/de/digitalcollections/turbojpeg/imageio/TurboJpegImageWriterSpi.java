@@ -17,6 +17,7 @@ import static java.awt.image.BufferedImage.TYPE_3BYTE_BGR;
 import static java.awt.image.BufferedImage.TYPE_4BYTE_ABGR;
 import static java.awt.image.BufferedImage.TYPE_BYTE_GRAY;
 
+@SuppressWarnings("checkstyle:constantname")
 public class TurboJpegImageWriterSpi extends ImageWriterSpi {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(TurboJpegImageWriterSpi.class);
@@ -31,6 +32,9 @@ public class TurboJpegImageWriterSpi extends ImageWriterSpi {
 
   private TurboJpeg lib;
 
+  /**
+   * Construct the SPI. Boilerplate.
+   */
   public TurboJpegImageWriterSpi() {
     super(vendorName, version, names, suffixes, MIMETypes, writerClassName, outputTypes, readerSpiNames,
             false, null, null,

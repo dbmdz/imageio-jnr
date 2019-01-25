@@ -110,8 +110,9 @@ public class OpenJp2ImageReader extends ImageReader {
     if (sourceRegion == null) {
       return null;
     }
-    if (sourceRegion.x == 0 && sourceRegion.y == 0 &&
-        sourceRegion.width == getWidth(imageIndex) && sourceRegion.height == getHeight(imageIndex)) {
+    if (sourceRegion.x == 0 && sourceRegion.y == 0
+        && sourceRegion.width == getWidth(imageIndex)
+        && sourceRegion.height == getHeight(imageIndex)) {
       return null;
     }
     double scaleFactor = (double) getWidth(0) / (double) getWidth(imageIndex);
@@ -135,7 +136,9 @@ public class OpenJp2ImageReader extends ImageReader {
       }
       return lib.decode(streamWrapper, sourceRegion, imageIndex);
     } finally {
-      if (this.streamWrapper != null) this.streamWrapper.close();
+      if (this.streamWrapper != null) {
+        this.streamWrapper.close();
+      }
     }
   }
 

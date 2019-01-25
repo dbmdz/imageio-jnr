@@ -25,12 +25,24 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class OpenJpeg {
-  private final static Logger LOGGER = LoggerFactory.getLogger(OpenJpeg.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(OpenJpeg.class);
+
+  @SuppressWarnings("checkstyle:constantname")
+  private static final opj_msg_callback infoLogFn = (msg, data) -> LOGGER.debug(msg.trim());
+  @SuppressWarnings("checkstyle:constantname")
+  private static final opj_msg_callback warnLogFn = (msg, data) -> LOGGER.warn(msg.trim());
+  @SuppressWarnings("checkstyle:constantname")
+  private static final opj_msg_callback errorLogFn = (msg, data) -> LOGGER.error(msg.trim());
+
   public libopenjp2 lib;
   public Runtime runtime;
+
   static {
   }
 
+  /**
+   * Load the library.
+   */
   public OpenJpeg() {
     this.lib = LibraryLoader.create(libopenjp2.class).load("openjp2");
     if (!lib.opj_version().startsWith("2.")) {
@@ -39,10 +51,6 @@ public class OpenJpeg {
     }
     this.runtime =  Runtime.getRuntime(lib);
   }
-
-  private static final opj_msg_callback infoLogFn = (msg, data) -> LOGGER.debug(msg.trim());
-  private static final opj_msg_callback warnLogFn = (msg, data) -> LOGGER.warn(msg.trim());
-  private static final opj_msg_callback errorLogFn = (msg, data) -> LOGGER.error(msg.trim());
 
   private void setupLogger(Pointer codec) {
     if (LOGGER.isInfoEnabled()) {
@@ -62,6 +70,9 @@ public class OpenJpeg {
     }
   }
 
+  /**
+   * Obtain information about the JPEG200 image in the input stream.
+   */
   public Info getInfo(InStreamWrapper wrapper) throws IOException {
     Pointer codec = null;
     opj_image img = null;
@@ -70,32 +81,14 @@ public class OpenJpeg {
       img = getImage(wrapper, codec);
       return getInfo(codec, img);
     } finally {
-      if (codec != null) lib.opj_destroy_codec(codec);
-      if (img != null) img.free(lib);
+      if (codec != null) {
+        lib.opj_destroy_codec(codec);
+      }
+      if (img != null) {
+        img.free(lib);
+      }
       wrapper.close();
     }
-  }
-
-  private Pointer getCodec(int reduceFactor) throws IOException {
-    Pointer codec = lib.opj_create_decompress(CODEC_FORMAT.OPJ_CODEC_JP2);
-    setupLogger(codec);
-    opj_dparameters params = new opj_dparameters(Runtime.getRuntime(lib));
-    lib.opj_set_default_decoder_parameters(params);
-    params.cp_reduce.set(reduceFactor);
-    if (!lib.opj_setup_decoder(codec, params)) {
-      throw new IOException("Error setting up decoder!");
-    }
-    return codec;
-  };
-
-  private opj_image getImage(InStreamWrapper wrapper, Pointer codec) throws IOException {
-    opj_image img = new opj_image(Runtime.getRuntime(lib));
-    PointerByReference imgPtr = new PointerByReference();
-    if (!lib.opj_read_header(wrapper.getNativeStream(), codec, imgPtr)) {
-      throw new IOException("Error while reading header.");
-    }
-    img.useMemory(imgPtr.getValue());
-    return img;
   }
 
   private Info getInfo(Pointer codecPointer, opj_image img) {
@@ -115,10 +108,43 @@ public class OpenJpeg {
       info.setNumResolutions(csInfo.m_default_tile_info.tccp_info.get().numresolutions.intValue());
       return info;
     } finally {
-      if (csInfo != null) csInfo.free(lib);
+      if (csInfo != null) {
+        csInfo.free(lib);
+      }
     }
   }
 
+
+  private Pointer getCodec(int reduceFactor) throws IOException {
+    Pointer codec = lib.opj_create_decompress(CODEC_FORMAT.OPJ_CODEC_JP2);
+    setupLogger(codec);
+    opj_dparameters params = new opj_dparameters(Runtime.getRuntime(lib));
+    lib.opj_set_default_decoder_parameters(params);
+    params.cp_reduce.set(reduceFactor);
+    if (!lib.opj_setup_decoder(codec, params)) {
+      throw new IOException("Error setting up decoder!");
+    }
+    return codec;
+  }
+
+  private opj_image getImage(InStreamWrapper wrapper, Pointer codec) throws IOException {
+    opj_image img = new opj_image(Runtime.getRuntime(lib));
+    PointerByReference imgPtr = new PointerByReference();
+    if (!lib.opj_read_header(wrapper.getNativeStream(), codec, imgPtr)) {
+      throw new IOException("Error while reading header.");
+    }
+    img.useMemory(imgPtr.getValue());
+    return img;
+  }
+
+  /**
+   * Decode the JPEG2000 image in the input stream to a BufferedImage.
+   * @param wrapper Wrapper around the input stream pointing to the image
+   * @param area Region of the image to decode
+   * @param reduceFactor Scale down the image by a factor of 2^reduceFactor
+   * @return the decoded image
+   * @throws IOException if there's a problem decoding the image
+   */
   public BufferedImage decode(InStreamWrapper wrapper, Rectangle area, int reduceFactor)
       throws IOException {
     Pointer codec = null;
@@ -169,15 +195,19 @@ public class OpenJpeg {
         Pointer ptr = comps[0].data.get();
         byte[] data = ((DataBufferByte) bufImg.getRaster().getDataBuffer()).getData();
         for (int i = 0; i < targetWidth * targetHeight; i++) {
-          data[i] = (byte) ptr.getInt(i*4);
+          data[i] = (byte) ptr.getInt(i * 4);
         }
       } else {
         throw new IOException(String.format("Unsupported number of components: %d", numcomps));
       }
       return bufImg;
     } finally {
-      if (img != null) img.free(lib);
-      if (codec != null) lib.opj_destroy_codec(codec);
+      if (img != null) {
+        img.free(lib);
+      }
+      if (codec != null) {
+        lib.opj_destroy_codec(codec);
+      }
     }
   }
 
@@ -189,20 +219,20 @@ public class OpenJpeg {
     if (!(img.getSampleModel() instanceof PixelInterleavedSampleModel)) {
       throw new IllegalArgumentException("Image must be of the 3BYTE_BGR or BYTE_GRAY");
     }
-    opj_image_comptparm parms[] = Struct.arrayOf(runtime, opj_image_comptparm.class, numBands);
-    for (int i=0; i < numBands; i++) {
-      parms[i].prec.set(8);  // One byte per component
-      parms[i].bpp.set(8);   // 8bit depth
-      parms[i].sgnd.set(0);
-      parms[i].dx.set(1);
-      parms[i].dy.set(1);
-      parms[i].w.set(img.getWidth());
-      parms[i].h.set(img.getHeight());
+    opj_image_comptparm []params = Struct.arrayOf(runtime, opj_image_comptparm.class, numBands);
+    for (int i = 0; i < numBands; i++) {
+      params[i].prec.set(8);  // One byte per component
+      params[i].bpp.set(8);   // 8bit depth
+      params[i].sgnd.set(0);
+      params[i].dx.set(1);
+      params[i].dy.set(1);
+      params[i].w.set(img.getWidth());
+      params[i].h.set(img.getHeight());
     }
 
     COLOR_SPACE cspace = numBands == 3 ? COLOR_SPACE.OPJ_CLRSPC_SRGB : COLOR_SPACE.OPJ_CLRSPC_GRAY;
     opj_image outImg = new opj_image(runtime);
-    Pointer imgPtr = lib.opj_image_create(parms.length, Struct.getMemory(parms[0]), cspace);
+    Pointer imgPtr = lib.opj_image_create(params.length, Struct.getMemory(params[0]), cspace);
     outImg.useMemory(imgPtr);
 
     outImg.x0.set(0);
@@ -229,13 +259,20 @@ public class OpenJpeg {
       }
     } else {
       Pointer ptr = comps[0].data.get();
-      for (int i=0; i < img.getWidth() * img.getHeight(); i++) {
-        ptr.putByte(i*4, imgData[i]);
+      for (int i = 0; i < img.getWidth() * img.getHeight(); i++) {
+        ptr.putByte(i * 4, imgData[i]);
       }
     }
     return outImg;
   }
 
+  /**
+   * Encode a raster image to a JPEG2000 image.
+   * @param img image to encode
+   * @param output wrapped OutputStream the image should be written to
+   * @param params encoding parameters
+   * @throws IOException if encoding fails
+   */
   public void encode(Raster img, OutStreamWrapper output, opj_cparameters params) throws IOException {
     opj_image image = null;
     Pointer codec = null;
@@ -269,9 +306,15 @@ public class OpenJpeg {
         throw new IOException("Could not finish encoding.");
       }
     } finally {
-      if (image != null) image.free(lib);
-      if (codec != null) lib.opj_destroy_codec(codec);
-      if (output != null) output.close();
+      if (image != null) {
+        image.free(lib);
+      }
+      if (codec != null) {
+        lib.opj_destroy_codec(codec);
+      }
+      if (output != null) {
+        output.close();
+      }
     }
   }
 }

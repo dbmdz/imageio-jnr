@@ -11,6 +11,7 @@ import javax.imageio.stream.ImageInputStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@SuppressWarnings("checkstyle:constantname")
 public class OpenJp2ImageReaderSpi extends ImageReaderSpi {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(OpenJp2ImageReaderSpi.class);
@@ -27,6 +28,9 @@ public class OpenJp2ImageReaderSpi extends ImageReaderSpi {
 
   private OpenJpeg lib;
 
+  /**
+   * Construct the SPI, boilerplate.
+   */
   public OpenJp2ImageReaderSpi() {
     super(vendorName, version, names, suffixes, MIMETypes, readerClassName, inputTypes, writerSpiNames,
             false, null, null,

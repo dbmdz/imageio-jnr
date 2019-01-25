@@ -1,8 +1,7 @@
 package de.digitalcollections.turbojpeg;
 
 import de.digitalcollections.turbojpeg.lib.structs.tjscalingfactor;
-
-import java.awt.*;
+import java.awt.Dimension;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
@@ -34,6 +33,9 @@ public class Info {
     return (dim * num + denom - 1) / denom;
   }
 
+  /**
+   * Create a new instance with the information parsed from the JPEG image.
+   */
   public Info(int width, int height, int subsampling, tjscalingfactor[] factors) {
     this.width = width;
     this.height = height;
@@ -49,6 +51,11 @@ public class Info {
         .collect(Collectors.toList());
   }
 
+  /**
+   * Get the size of the Minimum Coding Units.
+   *
+   * Neccessary to calculate the right cropping alignments.
+   */
   public Dimension getMCUSize() {
     switch (subsampling) {
       case 1:  // 4:2:2
