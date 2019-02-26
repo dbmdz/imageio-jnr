@@ -7,6 +7,7 @@ import java.io.IOException;
 import javax.imageio.ImageIO;
 import javax.imageio.ImageReadParam;
 import javax.imageio.ImageReader;
+import org.assertj.core.util.Lists;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -14,7 +15,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class OpenJp2ImageReaderTest {
   @Test
   public void testReaderIsRegistered() {
-    assertThat(ImageIO.getImageReadersBySuffix("jp2")).isNotEmpty();
+    assertThat(Lists.newArrayList(ImageIO.getImageReadersBySuffix("jp2"))).isNotEmpty();
   }
 
   private OpenJp2ImageReader getReader(String fixtureFile) throws IOException {

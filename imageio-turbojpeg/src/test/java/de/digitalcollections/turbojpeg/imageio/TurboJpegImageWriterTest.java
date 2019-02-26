@@ -1,5 +1,6 @@
 package de.digitalcollections.turbojpeg.imageio;
 
+import com.google.common.collect.Lists;
 import com.google.common.collect.Streams;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
@@ -19,8 +20,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 class TurboJpegImageWriterTest {
   @Test
   void writerIsDiscoverable() {
-    assertThat(ImageIO.getImageWritersByFormatName("jpeg")).hasAtLeastOneElementOfType(TurboJpegImageWriter.class);
-    assertThat(ImageIO.getImageWritersByMIMEType("image/jpeg")).hasAtLeastOneElementOfType(TurboJpegImageWriter.class);
+    assertThat(Lists.newArrayList(ImageIO.getImageWritersByFormatName("jpeg")))
+        .hasAtLeastOneElementOfType(TurboJpegImageWriter.class);
+    assertThat(Lists.newArrayList(ImageIO.getImageWritersByMIMEType("image/jpeg")))
+        .hasAtLeastOneElementOfType(TurboJpegImageWriter.class);
   }
 
   @Test
