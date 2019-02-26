@@ -215,14 +215,6 @@ public class OpenJp2ImageReader extends ImageReader {
         throw new RuntimeException(e);
       }
     }
-    if (this.stream != null) {
-      try {
-        this.stream.close();
-        this.stream = null;
-      } catch (IOException e) {
-        throw new RuntimeException(e);
-      }
-    }
     this.info = null;
   }
 }
