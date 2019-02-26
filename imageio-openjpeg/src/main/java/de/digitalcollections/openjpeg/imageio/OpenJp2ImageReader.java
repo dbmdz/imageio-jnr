@@ -35,6 +35,9 @@ public class OpenJp2ImageReader extends ImageReader {
   @Override
   public void setInput(Object input, boolean seekForwardOnly, boolean ignoreMetadata) {
     super.setInput(input, seekForwardOnly, ignoreMetadata);
+    // Clean up old input
+    this.dispose();
+
     if (input == null) {
       return;
     }
@@ -200,5 +203,26 @@ public class OpenJp2ImageReader extends ImageReader {
   @Override
   public IIOMetadata getImageMetadata(int imageIndex) throws IOException {
     return null;
+  }
+
+  @Override
+  public void dispose() {
+    if (this.streamWrapper != null) {
+      try {
+        this.streamWrapper.close();
+        this.streamWrapper = null;
+      } catch (IOException e) {
+        throw new RuntimeException(e);
+      }
+    }
+    if (this.stream != null) {
+      try {
+        this.stream.close();
+        this.stream = null;
+      } catch (IOException e) {
+        throw new RuntimeException(e);
+      }
+    }
+    this.info = null;
   }
 }

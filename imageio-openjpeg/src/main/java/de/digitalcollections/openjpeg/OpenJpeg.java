@@ -208,6 +208,7 @@ public class OpenJpeg {
       if (codec != null) {
         lib.opj_destroy_codec(codec);
       }
+      wrapper.close();
     }
   }
 
