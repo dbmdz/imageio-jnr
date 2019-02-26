@@ -1,29 +1,30 @@
 package de.digitalcollections.turbojpeg.imageio;
 
-import org.junit.jupiter.api.Test;
-
-import javax.imageio.ImageIO;
-import javax.imageio.ImageReadParam;
-import javax.imageio.ImageReader;
-import java.awt.*;
+import java.awt.Graphics;
+import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
-import java.util.Iterator;
+import java.util.List;
 import java.util.function.Supplier;
+import javax.imageio.ImageIO;
+import javax.imageio.ImageReadParam;
+import javax.imageio.ImageReader;
+import org.assertj.core.util.Lists;
+import org.junit.jupiter.api.Test;
 
 import static de.digitalcollections.turbojpeg.imageio.CustomAssertions.assertThat;
 
 class TurboJpegImageReaderTest {
   @Test
   public void testReaderIsRegistered() {
-    Supplier<Iterator<ImageReader>> getReaderIter = () -> ImageIO.getImageReadersBySuffix("jpg");
+    Supplier<List<ImageReader>> getReaderIter = () -> Lists.newArrayList(ImageIO.getImageReadersBySuffix("jpg"));
     assertThat(getReaderIter.get()).isNotEmpty();
     assertThat(getReaderIter.get()).hasAtLeastOneElementOfType(TurboJpegImageReader.class);
-    getReaderIter = () -> ImageIO.getImageReadersByMIMEType("image/jpeg");
+    getReaderIter = () -> Lists.newArrayList(ImageIO.getImageReadersByMIMEType("image/jpeg"));
     assertThat(getReaderIter.get()).isNotEmpty();
     assertThat(getReaderIter.get()).hasAtLeastOneElementOfType(TurboJpegImageReader.class);
-    getReaderIter = () -> ImageIO.getImageReadersByFormatName("jpeg");
+    getReaderIter = () -> Lists.newArrayList(ImageIO.getImageReadersByFormatName("jpeg"));
     assertThat(getReaderIter.get()).isNotEmpty();
     assertThat(getReaderIter.get()).hasAtLeastOneElementOfType(TurboJpegImageReader.class);
   }

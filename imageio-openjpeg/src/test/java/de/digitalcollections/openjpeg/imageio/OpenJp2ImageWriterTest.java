@@ -13,10 +13,12 @@ import javax.imageio.IIOImage;
 import javax.imageio.ImageIO;
 import javax.imageio.ImageWriteParam;
 import javax.imageio.stream.ImageOutputStream;
+import org.assertj.core.util.Lists;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
+
 
 class OpenJp2ImageWriterTest {
   private OpenJp2ImageWriter writer;
@@ -64,9 +66,9 @@ class OpenJp2ImageWriterTest {
 
   @Test
   void writerIsDiscoverable() {
-    assertThat(ImageIO.getImageWritersByFormatName("jpeg2000")).hasAtLeastOneElementOfType(OpenJp2ImageWriter.class);
-    assertThat(ImageIO.getImageWritersByMIMEType("image/jp2")).hasAtLeastOneElementOfType(OpenJp2ImageWriter.class);
-    assertThat(ImageIO.getImageWritersBySuffix("jp2")).hasAtLeastOneElementOfType(OpenJp2ImageWriter.class);
+    assertThat(Lists.newArrayList(ImageIO.getImageWritersByFormatName("jpeg2000"))).hasAtLeastOneElementOfType(OpenJp2ImageWriter.class);
+    assertThat(Lists.newArrayList(ImageIO.getImageWritersByMIMEType("image/jp2"))).hasAtLeastOneElementOfType(OpenJp2ImageWriter.class);
+    assertThat(Lists.newArrayList(ImageIO.getImageWritersBySuffix("jp2"))).hasAtLeastOneElementOfType(OpenJp2ImageWriter.class);
   }
 
   @Test
