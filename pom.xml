@@ -6,7 +6,7 @@
 
   <groupId>de.digitalcollections.imageio</groupId>
   <artifactId>imageio-jnr</artifactId>
-  <version>0.2.9-SNAPSHOT</version>
+  <version>0.3.0</version>
   <packaging>pom</packaging>
   <name>MDZ/Bayerische Staatsbibliothek :: ImageIO</name>
   <description>Parent for ImageIO-JNR components.</description>
