@@ -10,6 +10,7 @@ import java.util.function.Supplier;
 import javax.imageio.ImageIO;
 import javax.imageio.ImageReadParam;
 import javax.imageio.ImageReader;
+import javax.imageio.stream.ImageInputStream;
 import org.assertj.core.util.Lists;
 import org.junit.jupiter.api.Test;
 
@@ -31,9 +32,10 @@ class TurboJpegImageReaderTest {
 
   private TurboJpegImageReader getReader(String fixtureFile) throws IOException {
     File inFile = new File(ClassLoader.getSystemResource(fixtureFile).getFile());
-    ImageReader reader = ImageIO.getImageReaders(inFile).next();
+    ImageInputStream is = ImageIO.createImageInputStream(inFile);
+    ImageReader reader = ImageIO.getImageReaders(is).next();
     assertThat(reader).isInstanceOf(TurboJpegImageReader.class);
-    reader.setInput(ImageIO.createImageInputStream(inFile));
+    reader.setInput(is);
     return (TurboJpegImageReader) reader;
   }
 

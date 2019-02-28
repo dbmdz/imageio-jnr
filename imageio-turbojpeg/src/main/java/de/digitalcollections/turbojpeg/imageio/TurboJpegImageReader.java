@@ -52,8 +52,9 @@ public class TurboJpegImageReader extends ImageReader {
         LOGGER.error(e.getMessage());
         throw new IllegalArgumentException("Failed to read input.");
       } catch (TurboJpegException e) {
-        LOGGER.error(e.getMessage());
-        throw new IllegalArgumentException("Failed to read JPEG info.");
+        // NOTE: We do not cancel here, since this does not neccesarily have to be a problem, e.g. if setInput is
+        // called from the TIFFImageReader.
+        // Users should have checked with the TurboJpegImageReaderSpi#canDecode method beforehand, anyways.
       }
     } else {
       throw new IllegalArgumentException("Bad input.");
