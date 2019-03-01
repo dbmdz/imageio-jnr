@@ -15,14 +15,14 @@ libraries are installed on the target system. However, thanks to JNR-FFI, no
 compiler is neccessary, the plugins will directly use the installed native
 libraries and you can install them directly from Maven Central.
 
-Please note that the plugins need at least Java 8.
+Please note that the plugins need at least Java 8 and Ubuntu 16.04.
 
 ## Currently available plugins
 
 |       Module      |   Format  |      Backing native library         |             Required version               | JavaDoc
 | ----------------- | --------- | ----------------------------------- | ------------------------------------------ | ---
 | imageio-openjpeg  | JPEG2000  | [OpenJPEG](http://www.openjpeg.org) | \>= 2.0 (>=2.3 recommended for performance) | [![Javadocs](http://javadoc.io/badge/de.digitalcollections.imageio/imageio-openjpeg.svg)](http://javadoc.io/doc/de.digitalcollections.imageio/imageio-openjpeg)
-| imageio-turbojpeg |    JPEG   | [TurboJPEG](https://libjpeg-turbo.org/About/TurboJPEG) | \>= 1.0               | [![Javadocs](http://javadoc.io/badge/de.digitalcollections.imageio/imageio-turbojpeg.svg)](http://javadoc.io/doc/de.digitalcollections.imageio/imageio-turbojpeg)
+| imageio-turbojpeg |    JPEG   | [TurboJPEG](https://libjpeg-turbo.org/About/TurboJPEG) | \>= 1.4               | [![Javadocs](http://javadoc.io/badge/de.digitalcollections.imageio/imageio-turbojpeg.svg)](http://javadoc.io/doc/de.digitalcollections.imageio/imageio-turbojpeg)
 
 
 ## Installation
