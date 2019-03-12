@@ -166,7 +166,7 @@ public class TurboJpeg {
         int[] buf = new int[img.getWidth() * img.getHeight()];
         img.getPixels(0, 0, img.getWidth(), img.getHeight(), buf);
         byte[] byteBuf = new byte[buf.length];
-        for (int i=0; i < buf.length; i++) {
+        for (int i = 0; i < buf.length; i++) {
           byteBuf[i] = (byte) (buf[i] == 0 ? 0x00 : 0xFF);
         }
         inBuf = ByteBuffer.wrap(byteBuf).order(runtime.byteOrder());;
