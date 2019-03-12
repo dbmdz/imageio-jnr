@@ -160,8 +160,20 @@ public class TurboJpeg {
       NativeLongByReference lenPtr = new NativeLongByReference(bufSize);
 
       // Wrap source image data buffer with ByteBuffer to pass it over the ABI
-      ByteBuffer inBuf = ByteBuffer.wrap(((DataBufferByte) img.getDataBuffer()).getData())
-              .order(runtime.byteOrder());
+      ByteBuffer inBuf;
+      if (img.getNumBands() == 1) {
+        // For binary images, we need to convert our (0, 1) binary values into (0, 255) greyscale values
+        int[] buf = new int[img.getWidth() * img.getHeight()];
+        img.getPixels(0, 0, img.getWidth(), img.getHeight(), buf);
+        byte[] byteBuf = new byte[buf.length];
+        for (int i=0; i < buf.length; i++) {
+          byteBuf[i] = (byte) (buf[i] == 0 ? 0x00 : 0xFF);
+        }
+        inBuf = ByteBuffer.wrap(byteBuf);
+      } else {
+        inBuf = ByteBuffer.wrap(((DataBufferByte) img.getDataBuffer()).getData())
+            .order(runtime.byteOrder());
+      }
       int rv = lib.tjCompress2(
               codec, inBuf, img.getWidth(), 0, img.getHeight(), pixelFmt,
               new PointerByReference(bufPtr), lenPtr, sampling, quality, 0);

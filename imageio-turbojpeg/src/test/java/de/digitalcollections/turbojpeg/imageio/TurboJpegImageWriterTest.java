@@ -3,6 +3,7 @@ package de.digitalcollections.turbojpeg.imageio;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Streams;
 import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import javax.imageio.IIOImage;
@@ -42,6 +43,31 @@ class TurboJpegImageWriterTest {
     }
     os.flush();
     assertThat(os.toByteArray()).isNotEmpty();
+  }
+
+  @Test
+  public void testEncodeBinary() throws Exception {
+    ImageWriter writer = Streams.stream(ImageIO.getImageWritersByFormatName("jpeg"))
+        .filter(TurboJpegImageWriter.class::isInstance)
+        .findFirst().get();
+    ImageWriteParam param = writer.getDefaultWriteParam();
+    param.setCompressionMode(ImageWriteParam.MODE_EXPLICIT);
+    param.setCompressionQuality(0.85f);
+    BufferedImage in = ImageIO.read(ClassLoader.getSystemResource("binary.tif"));
+    ByteArrayOutputStream os = new ByteArrayOutputStream();
+    try (ImageOutputStream ios = ImageIO.createImageOutputStream(os)) {
+      writer.setOutput(ios);
+      writer.write(null, new IIOImage(in, null, null), param);
+    }
+    os.flush();
+    assertThat(os.toByteArray()).isNotEmpty();
+    ByteArrayInputStream bis = new ByteArrayInputStream(os.toByteArray());
+    BufferedImage jpegImg = ImageIO.read(bis);
+    assertThat(jpegImg.getWidth()).isEqualTo(in.getWidth());
+    assertThat(jpegImg.getHeight()).isEqualTo(in.getHeight());
+    int[] pixBuf = new int[jpegImg.getWidth() * jpegImg.getHeight()];
+    jpegImg.getData().getPixels(0, 0, jpegImg.getWidth(), jpegImg.getHeight(), pixBuf);
+    assertThat(pixBuf).contains(0, 255);
   }
 
   @Test
