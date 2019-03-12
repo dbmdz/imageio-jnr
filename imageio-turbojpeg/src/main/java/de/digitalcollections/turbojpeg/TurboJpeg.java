@@ -169,7 +169,7 @@ public class TurboJpeg {
         for (int i=0; i < buf.length; i++) {
           byteBuf[i] = (byte) (buf[i] == 0 ? 0x00 : 0xFF);
         }
-        inBuf = ByteBuffer.wrap(byteBuf);
+        inBuf = ByteBuffer.wrap(byteBuf).order(runtime.byteOrder());;
       } else {
         inBuf = ByteBuffer.wrap(((DataBufferByte) img.getDataBuffer()).getData())
             .order(runtime.byteOrder());
