@@ -241,6 +241,5 @@ class TurboJpegImageReaderTest {
     BufferedImage img = reader.read(0, param);
     assertThat(img.getWidth()).isEqualTo(1);
     assertThat(img.getHeight()).isEqualTo(1);
-
   }
 }

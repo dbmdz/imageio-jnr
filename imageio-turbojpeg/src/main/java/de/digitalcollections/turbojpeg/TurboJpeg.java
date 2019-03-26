@@ -161,7 +161,7 @@ public class TurboJpeg {
 
       // Wrap source image data buffer with ByteBuffer to pass it over the ABI
       ByteBuffer inBuf;
-      if (img.getNumBands() == 1) {
+      if (img.getNumBands() == 1 && img.getSampleModel().getSampleSize(0) == 1) {
         // For binary images, we need to convert our (0, 1) binary values into (0, 255) greyscale values
         int[] buf = new int[img.getWidth() * img.getHeight()];
         img.getPixels(0, 0, img.getWidth(), img.getHeight(), buf);
