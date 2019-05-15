@@ -25,6 +25,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class OpenJpeg {
+
   private static final Logger LOGGER = LoggerFactory.getLogger(OpenJpeg.class);
 
   @SuppressWarnings("checkstyle:constantname")
@@ -49,7 +50,7 @@ public class OpenJpeg {
       throw new UnsatisfiedLinkError(String.format(
           "OpenJPEG version must be at least 2.0.0 (found: %s)", lib.opj_version()));
     }
-    this.runtime =  Runtime.getRuntime(lib);
+    this.runtime = Runtime.getRuntime(lib);
   }
 
   private void setupLogger(Pointer codec) {
@@ -106,6 +107,7 @@ public class OpenJpeg {
       info.setTileOriginX(csInfo.tx0.intValue());
       info.setTileOriginY(csInfo.ty0.intValue());
       info.setNumResolutions(csInfo.m_default_tile_info.tccp_info.get().numresolutions.intValue());
+
       return info;
     } finally {
       if (csInfo != null) {
@@ -139,6 +141,7 @@ public class OpenJpeg {
 
   /**
    * Decode the JPEG2000 image in the input stream to a BufferedImage.
+   *
    * @param wrapper Wrapper around the input stream pointing to the image
    * @param area Region of the image to decode
    * @param reduceFactor Scale down the image by a factor of 2^reduceFactor
@@ -177,6 +180,14 @@ public class OpenJpeg {
       targetWidth = comps[0].w.intValue();
       targetHeight = comps[0].h.intValue();
 
+      // 8bit color depth is assumed as default color depth here -> 2 ^ 8 = 256 colors are available
+      // For 16bit color depth -> 2 ^ 16 = 65536 color are available.
+      // To "scale down" images with 16bit color depth to 8 bit, just a color depth factor needs to be
+      // calculated (65536 / 256 = 256) to correctly assign pixel in the underlying image buffer.
+      // Note: prec and bpp seems to be interchanged in opj_image_comp struc.
+      int colorDepthFactor = ((int) Math.pow(2, comps[0].prec.intValue())) / 256;
+      colorDepthFactor = colorDepthFactor > 0 ? colorDepthFactor : 1;
+
       if (numcomps == 3) {
         bufImg = new BufferedImage(targetWidth, targetHeight, BufferedImage.TYPE_3BYTE_BGR);
 
@@ -184,18 +195,18 @@ public class OpenJpeg {
         Pointer red = comps[0].data.get();
         Pointer green = comps[1].data.get();
         Pointer blue = comps[2].data.get();
-        byte[] rgbData = ((DataBufferByte) bufImg.getRaster().getDataBuffer()).getData();
+        byte[] bgrData = ((DataBufferByte) bufImg.getRaster().getDataBuffer()).getData();
         for (int i = 0; i < targetWidth * targetHeight; i++) {
-          rgbData[i * 3] = (byte) blue.getInt(i * 4);
-          rgbData[i * 3 + 1] = (byte) green.getInt(i * 4);
-          rgbData[i * 3 + 2] = (byte) red.getInt(i * 4);
+          bgrData[i * 3] = (byte) (blue.getInt(i * 4) / colorDepthFactor);
+          bgrData[i * 3 + 1] = (byte) (green.getInt(i * 4) / colorDepthFactor);
+          bgrData[i * 3 + 2] = (byte) (red.getInt(i * 4) / colorDepthFactor);
         }
       } else if (numcomps == 1) {
         bufImg = new BufferedImage(targetWidth, targetHeight, BufferedImage.TYPE_BYTE_GRAY);
         Pointer ptr = comps[0].data.get();
         byte[] data = ((DataBufferByte) bufImg.getRaster().getDataBuffer()).getData();
         for (int i = 0; i < targetWidth * targetHeight; i++) {
-          data[i] = (byte) ptr.getInt(i * 4);
+          data[i] = (byte) (ptr.getInt(i * 4) / colorDepthFactor);
         }
       } else {
         throw new IOException(String.format("Unsupported number of components: %d", numcomps));
@@ -220,7 +231,7 @@ public class OpenJpeg {
     if (!(img.getSampleModel() instanceof PixelInterleavedSampleModel)) {
       throw new IllegalArgumentException("Image must be of the 3BYTE_BGR or BYTE_GRAY");
     }
-    opj_image_comptparm []params = Struct.arrayOf(runtime, opj_image_comptparm.class, numBands);
+    opj_image_comptparm[] params = Struct.arrayOf(runtime, opj_image_comptparm.class, numBands);
     for (int i = 0; i < numBands; i++) {
       params[i].prec.set(8);  // One byte per component
       params[i].bpp.set(8);   // 8bit depth
@@ -269,6 +280,7 @@ public class OpenJpeg {
 
   /**
    * Encode a raster image to a JPEG2000 image.
+   *
    * @param img image to encode
    * @param output wrapped OutputStream the image should be written to
    * @param params encoding parameters
