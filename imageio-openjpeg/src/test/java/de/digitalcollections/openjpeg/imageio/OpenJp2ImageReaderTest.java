@@ -100,4 +100,19 @@ class OpenJp2ImageReaderTest {
 
     assertThat(rgbImg.getRGB(256, 256)).isNotEqualTo(bwImg.getRGB(256, 256));
   }
+
+  @Test
+  public void testCanRead16BitImage() throws IOException {
+    // Image is licensed under CC BY-NC-SA 4.0
+    OpenJp2ImageReader reader = getReader("bpp_16.jp2");
+    BufferedImage img = reader.read(0, null);
+
+    assertThat(img.getType()).isEqualTo(BufferedImage.TYPE_3BYTE_BGR);
+
+    // Pixel at 2,0 should have following color information: 49 (R), 47 (G), 50 (B)
+    // Underlying image has color information encoded as BGR
+    assertThat(img.getRaster().getDataBuffer().getElem(6)).isEqualTo(50); // B
+    assertThat(img.getRaster().getDataBuffer().getElem(7)).isEqualTo(47); // G
+    assertThat(img.getRaster().getDataBuffer().getElem(8)).isEqualTo(49); // R
+  }
 }
