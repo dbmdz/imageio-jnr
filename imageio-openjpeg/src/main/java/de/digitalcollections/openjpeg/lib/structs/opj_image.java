@@ -21,9 +21,9 @@ public class opj_image extends Struct {
   /** image components */
   public StructRef<opj_image_comp> comps = new StructRef<>(opj_image_comp.class);
   /** 'restricted' ICC profile */
-  Pointer icc_profile_buf = new Pointer();
+  public Pointer icc_profile_buf = new Pointer();
   /** size of ICC profile */
-  Unsigned32 icc_profile_len = new Unsigned32();
+  public Unsigned32 icc_profile_len = new Unsigned32();
 
   public opj_image(Runtime runtime) {
     super(runtime);
