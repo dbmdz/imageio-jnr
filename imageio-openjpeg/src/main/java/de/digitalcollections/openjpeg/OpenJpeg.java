@@ -11,10 +11,15 @@ import de.digitalcollections.openjpeg.lib.structs.opj_image;
 import de.digitalcollections.openjpeg.lib.structs.opj_image_comp;
 import de.digitalcollections.openjpeg.lib.structs.opj_image_comptparm;
 import java.awt.Rectangle;
+import java.awt.color.ICC_ColorSpace;
+import java.awt.color.ICC_Profile;
 import java.awt.image.BufferedImage;
+import java.awt.image.ColorConvertOp;
 import java.awt.image.DataBufferByte;
 import java.awt.image.PixelInterleavedSampleModel;
 import java.awt.image.Raster;
+import java.awt.image.RasterOp;
+import java.awt.image.WritableRaster;
 import java.io.IOException;
 import jnr.ffi.LibraryLoader;
 import jnr.ffi.Pointer;
@@ -211,6 +216,19 @@ public class OpenJpeg {
       } else {
         throw new IOException(String.format("Unsupported number of components: %d", numcomps));
       }
+
+      // Convert color space, if present
+      if (img.icc_profile_len.intValue() > 0) {
+        byte[] iccData = new byte[img.icc_profile_len.intValue()];
+        img.icc_profile_buf.get().get(0, iccData, 0, iccData.length);
+        ICC_Profile iccProfile = ICC_Profile.getInstance(iccData);
+        ICC_ColorSpace intendedCS = new ICC_ColorSpace(iccProfile);
+        RasterOp convert = new ColorConvertOp(intendedCS, bufImg.getColorModel().getColorSpace(), null);
+        WritableRaster dest = bufImg.getRaster()
+            .createWritableChild(0, 0, bufImg.getWidth(), bufImg.getHeight(), 0, 0, null);
+        convert.filter(bufImg.getRaster(), dest);
+      }
+
       return bufImg;
     } finally {
       if (img != null) {
