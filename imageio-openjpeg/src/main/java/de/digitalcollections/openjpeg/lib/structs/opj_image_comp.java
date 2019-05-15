@@ -17,7 +17,7 @@ public class opj_image_comp extends Struct {
   /** y component offset compared to the whole image */
   Unsigned32 y0 = new Unsigned32();
   /** precision */
-  Unsigned32 prec = new Unsigned32();
+  public Unsigned32 prec = new Unsigned32();
   /** image depth in bits */
   Unsigned32 bpp = new Unsigned32();
   /** signed (1) / unsigned (0) */
