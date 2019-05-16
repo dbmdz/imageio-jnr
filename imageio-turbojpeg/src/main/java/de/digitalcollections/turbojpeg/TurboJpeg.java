@@ -51,8 +51,9 @@ public class TurboJpeg {
       IntByReference width = new IntByReference();
       IntByReference height = new IntByReference();
       IntByReference jpegSubsamp = new IntByReference();
-      int rv = lib.tjDecompressHeader2(
-              codec, ByteBuffer.wrap(jpegData), jpegData.length, width, height, jpegSubsamp);
+      IntByReference jpegColorspace = new IntByReference();
+      int rv = lib.tjDecompressHeader3(
+              codec, ByteBuffer.wrap(jpegData), jpegData.length, width, height, jpegSubsamp, jpegColorspace);
       if (rv != 0) {
         throw new TurboJpegException(lib.tjGetErrorStr());
       }
@@ -67,7 +68,7 @@ public class TurboJpeg {
         f.useMemory(factorPtr);
         factors[i] = f;
       }
-      return new Info(width.getValue(), height.getValue(), jpegSubsamp.getValue(), factors);
+      return new Info(width.getValue(), height.getValue(), jpegSubsamp.getValue(), jpegColorspace.getValue(), factors);
     } finally {
       if (codec != null && codec.address() != 0) {
         lib.tjDestroy(codec);
@@ -98,7 +99,7 @@ public class TurboJpeg {
           height = size.height;
         }
       }
-      boolean isGray = info.getSubsampling() == TJSAMP.TJSAMP_GRAY.intValue();
+      boolean isGray = info.getSubsampling() == TJSAMP.TJSAMP_GRAY;
       int imgType;
       if (isGray) {
         imgType = BufferedImage.TYPE_BYTE_GRAY;
