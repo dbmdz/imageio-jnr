@@ -99,6 +99,7 @@ public class TurboJpegImageReaderSpi extends ImageReaderSpi {
         return false;
       }
     } catch (TurboJpegException e) {
+      LOGGER.error("Could not read JPEG info", e);
       return false;
     }
     return true;
