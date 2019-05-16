@@ -1,5 +1,7 @@
 package de.digitalcollections.turbojpeg;
 
+import de.digitalcollections.turbojpeg.lib.enums.TJCS;
+import de.digitalcollections.turbojpeg.lib.enums.TJSAMP;
 import de.digitalcollections.turbojpeg.lib.structs.tjscalingfactor;
 import java.awt.Dimension;
 import java.util.Arrays;
@@ -10,7 +12,8 @@ import java.util.stream.Collectors;
 public class Info {
   private int width;
   private int height;
-  private int subsampling;
+  private TJSAMP subsampling;
+  private TJCS colorspace;
   List<Dimension> availableSizes;
 
   public int getWidth() {
@@ -21,8 +24,12 @@ public class Info {
     return height;
   }
 
-  public int getSubsampling() {
+  public TJSAMP getSubsampling() {
     return subsampling;
+  }
+
+  public TJCS getColorspace() {
+    return colorspace;
   }
 
   public List<Dimension> getAvailableSizes() {
@@ -36,10 +43,11 @@ public class Info {
   /**
    * Create a new instance with the information parsed from the JPEG image.
    */
-  public Info(int width, int height, int subsampling, tjscalingfactor[] factors) {
+  public Info(int width, int height, int subsampling, int colorspace, tjscalingfactor[] factors) {
     this.width = width;
     this.height = height;
-    this.subsampling = subsampling;
+    this.subsampling = TJSAMP.fromInt(subsampling);
+    this.colorspace = TJCS.fromInt(colorspace);
     // The available sizes are determined from the list of scaling factors.
     this.availableSizes = Arrays.stream(factors)
         .filter(f -> f.denom.get() > 0)
@@ -58,11 +66,11 @@ public class Info {
    */
   public Dimension getMCUSize() {
     switch (subsampling) {
-      case 1:  // 4:2:2
+      case TJSAMP_422:  // 4:2:2
         return new Dimension(16, 8);
-      case 2:
+      case TJSAMP_420:
         return new Dimension(16, 16);
-      case 4:
+      case TJSAMP_440:
         return new Dimension(8, 16);
       default:
         return new Dimension(8, 8);

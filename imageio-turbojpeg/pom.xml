@@ -55,6 +55,7 @@
       <groupId>com.twelvemonkeys.imageio</groupId>
       <artifactId>imageio-tiff</artifactId>
       <version>3.4.1</version>
+      <scope>test</scope>
     </dependency>
   </dependencies>
 </project>

@@ -1,6 +1,9 @@
 package de.digitalcollections.turbojpeg.imageio;
 
+import de.digitalcollections.turbojpeg.Info;
 import de.digitalcollections.turbojpeg.TurboJpeg;
+import de.digitalcollections.turbojpeg.TurboJpegException;
+import de.digitalcollections.turbojpeg.lib.enums.TJCS;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Locale;
@@ -84,7 +87,21 @@ public class TurboJpegImageReaderSpi extends ImageReaderSpi {
     } catch (IOException e) {
       return false;
     }
-    return Arrays.equals(b, HEADER_MAGIC);
+    if (!Arrays.equals(b, HEADER_MAGIC)) {
+      return false;
+    }
+
+    stream.reset();
+    try {
+      Info info = this.lib.getInfo(TurboJpegImageReader.bufferFromStream(stream).array());
+      stream.reset();
+      if (info == null || info.getColorspace() == TJCS.TJCS_CMYK) {
+        return false;
+      }
+    } catch (TurboJpegException e) {
+      return false;
+    }
+    return true;
   }
 
   @Override

@@ -19,8 +19,9 @@ public interface libturbojpeg {
                   TJSAMP jpegSubsamp, int jpegQual, int flags);
   int tjDecompress2(Pointer handle, @In Buffer jpegBuf, @u_int32_t long jpegSize, @Out Buffer dstBuf,
                     int width, int pitch, int height, TJPF pixelFormat, int flags);
-  int tjDecompressHeader2(Pointer handle, Buffer jpegBuf, @u_int32_t long jpegSize,
-                          @Out IntByReference width, @Out IntByReference  height, @Out IntByReference jpegSubsamp);
+  int tjDecompressHeader3(Pointer handle, Buffer jpegBuf, @u_int32_t long jpegSize,
+                          @Out IntByReference width, @Out IntByReference  height, @Out IntByReference jpegSubsamp,
+                          @Out IntByReference jpegColorspace);
   int tjTransform(Pointer handle, @In Buffer jpegBuf, @u_int32_t long jpegSize, int n, PointerByReference outBuf,
                   @Out NativeLongByReference dstSizes, @Direct tjtransform transform, int flags);
   int tjDestroy(Pointer handle);

@@ -1,5 +1,6 @@
 package de.digitalcollections.turbojpeg.lib.enums;
 
+import java.util.Arrays;
 import jnr.ffi.util.EnumMapper.IntegerEnum;
 
 import static java.awt.image.BufferedImage.TYPE_3BYTE_BGR;
@@ -18,7 +19,8 @@ public enum TJPF implements IntegerEnum {
   TJPF_RGBA(7),
   TJPF_BGRA(8),
   TJPF_AGBR(9),
-  TJPF_ARGB(10);
+  TJPF_ARGB(10),
+  TJPF_CMYK(11);
 
   private int val;
 
@@ -43,5 +45,12 @@ public enum TJPF implements IntegerEnum {
   @Override
   public int intValue() {
     return val;
+  }
+
+  public static TJPF fromInt(int val) {
+    return Arrays.stream(TJPF.values())
+        .filter(v -> v.val == val)
+        .findFirst()
+        .orElseThrow(() -> new IllegalArgumentException("Unknown TJPF: " + val));
   }
 }

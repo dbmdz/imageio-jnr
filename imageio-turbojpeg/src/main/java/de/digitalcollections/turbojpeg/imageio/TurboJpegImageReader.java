@@ -67,7 +67,7 @@ public class TurboJpegImageReader extends ImageReader {
     }
   }
 
-  private ByteBuffer bufferFromStream(ImageInputStream stream) throws IOException {
+  static ByteBuffer bufferFromStream(ImageInputStream stream) throws IOException {
     ByteArrayOutputStream bos = new ByteArrayOutputStream();
     final byte[] buf = new byte[8192];
     int n;

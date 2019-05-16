@@ -242,4 +242,12 @@ class TurboJpegImageReaderTest {
     assertThat(img.getWidth()).isEqualTo(1);
     assertThat(img.getHeight()).isEqualTo(1);
   }
+
+  @Test
+  public void testReadCMYKDelegatesToDefault() throws IOException {
+    File inFile = new File(ClassLoader.getSystemResource("cmyk.jpg").getFile());
+    ImageInputStream is = ImageIO.createImageInputStream(inFile);
+    ImageReader reader = ImageIO.getImageReaders(is).next();
+    assertThat(reader).isNotInstanceOf(TurboJpegImageReader.class);
+  }
 }
