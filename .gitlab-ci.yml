@@ -1,5 +1,17 @@
 include: "https://raw.githubusercontent.com/dbmdz/development/master/ci/.gitlab-ci-base.yml"
 
+compile:openjdk11:libturbjpeg:
+  extends: .compile
+  image: "$BUILD_IMAGE_ANSIBLE_MAVEN_JDK11_LIBTURBOJPEG"
+  variables:
+    JAVA_HOME: "/usr/lib/jvm/java-11-openjdk-amd64"
+
+verify:openjdk11:libturbjpeg:
+  extends: .verify
+  image: "$BUILD_IMAGE_ANSIBLE_MAVEN_JDK11_LIBTURBOJPEG"
+  variables:
+    JAVA_HOME: "/usr/lib/jvm/java-11-openjdk-amd64"
+
 before_script:
   - wget https://github.com/uclouvain/openjpeg/releases/download/v2.3.0/openjpeg-v2.3.0-linux-x86_64.tar.gz -O /tmp/openjpeg.tar.gz
   - tar -xvf /tmp/openjpeg.tar.gz
