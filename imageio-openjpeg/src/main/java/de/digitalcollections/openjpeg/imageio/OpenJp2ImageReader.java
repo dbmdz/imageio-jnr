@@ -46,6 +46,9 @@ public class OpenJp2ImageReader extends ImageReader {
     } else {
       throw new IllegalArgumentException("Bad input.");
     }
+    if (this.streamWrapper != null) {
+      this.streamWrapper.close();
+    }
     this.streamWrapper = new ImageInputStreamWrapper(stream, lib);
   }
 
@@ -208,12 +211,8 @@ public class OpenJp2ImageReader extends ImageReader {
   @Override
   public void dispose() {
     if (this.streamWrapper != null) {
-      try {
-        this.streamWrapper.close();
-        this.streamWrapper = null;
-      } catch (IOException e) {
-        throw new RuntimeException(e);
-      }
+      this.streamWrapper.close();
+      this.streamWrapper = null;
     }
     this.info = null;
   }
