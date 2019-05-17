@@ -3,7 +3,6 @@ package de.digitalcollections.openjpeg;
 import de.digitalcollections.openjpeg.lib.callbacks.opj_stream_read_fn;
 import de.digitalcollections.openjpeg.lib.callbacks.opj_stream_skip_fn;
 import de.digitalcollections.openjpeg.lib.libopenjp2;
-import java.io.IOException;
 import jnr.ffi.Pointer;
 
 public abstract class InStreamWrapper {
@@ -36,7 +35,7 @@ public abstract class InStreamWrapper {
 
   protected abstract long skip(long numBytes, Pointer userData);
 
-  public void close() throws IOException {
+  public void close() {
     lib.opj_stream_destroy(this.stream);
     this.stream = null;
   }
