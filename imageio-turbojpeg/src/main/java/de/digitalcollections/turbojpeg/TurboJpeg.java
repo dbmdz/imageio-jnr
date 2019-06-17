@@ -218,8 +218,8 @@ public class TurboJpeg {
       boolean flipCoords = rotation == 90 || rotation == 270;
       if (region != null) {
         Dimension mcuSize = info.getMCUSize();
-        if ((region.width != width && region.width % mcuSize.width != 0) ||
-            (region.height != height && region.height % mcuSize.height != 0)) {
+        if (((region.x + region.width) != width && region.width % mcuSize.width != 0)
+            || ((region.y + region.height) != height && region.height % mcuSize.height != 0)) {
           throw new IllegalArgumentException(String.format(
                   "Invalid cropping region, width must be divisible by %d, height by %d", mcuSize.width, mcuSize.height));
         }
