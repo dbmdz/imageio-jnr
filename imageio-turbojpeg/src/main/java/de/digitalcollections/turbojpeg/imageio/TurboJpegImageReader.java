@@ -123,9 +123,9 @@ public class TurboJpegImageReader extends ImageReader {
     if (region == null) {
       return null;
     }
-    boolean modified = false;
-    int originalWidth = getWidth(0);
-    int originalHeight = getHeight(0);
+    final int originalWidth = getWidth(0);
+    final int originalHeight = getHeight(0);
+    final Rectangle originalRegion = (Rectangle) region.clone();
     if (rotation == 90) {
       int x = region.x;
       region.x = originalHeight - region.height - region.y;
@@ -153,26 +153,32 @@ public class TurboJpegImageReader extends ImageReader {
       extraCrop.x = region.x % mcuSize.width;
       region.x -= extraCrop.x;
       if (region.width > 0) {
-        region.width += extraCrop.x;
+        region.width = Math.min(region.width + extraCrop.x, originalWidth - region.x);
       }
-      modified = true;
     }
     if (region.y % mcuSize.height != 0) {
       extraCrop.y = region.y % mcuSize.height;
       region.y -= extraCrop.y;
       if (region.height > 0) {
-        region.height += extraCrop.y;
+        region.height = Math.min(region.height + extraCrop.y, originalHeight - region.y);
       }
-      modified = true;
     }
-    if (region.width % mcuSize.width != 0) {
+    if ((region.x + region.width) != originalWidth && region.width % mcuSize.width != 0) {
       region.width = (int) (mcuSize.width * (Math.ceil(region.getWidth() / mcuSize.width)));
-      modified = true;
     }
-    if (region.height % mcuSize.height != 0) {
+    if ((region.y + region.height) != originalHeight && region.height % mcuSize.height != 0) {
       region.height = (int) (mcuSize.height * (Math.ceil(region.getHeight() / mcuSize.height)));
-      modified = true;
     }
+    if (region.height > originalHeight) {
+      region.height = originalHeight;
+    }
+    if (region.width > originalWidth) {
+      region.width = originalWidth;
+    }
+    boolean modified = originalRegion.x != region.x
+                       ||  originalRegion.y != region.y
+                       || originalRegion.width != region.width
+                       || originalRegion.height != region.height;
     if (modified) {
       return extraCrop;
     } else {
@@ -235,12 +241,18 @@ public class TurboJpegImageReader extends ImageReader {
       }
       if (param != null && param.getSourceRegion() != null) {
         region = param.getSourceRegion();
-        scaleRegion(imageIndex, region);
         if (!isRegionFullImage(imageIndex, region)) {
+          scaleRegion(imageIndex, region);
           extraCrop = adjustRegion(info.getMCUSize(), region, rotation);
         } else {
           region = null;
         }
+      }
+      if (region != null && (region.x + region.width > getWidth(0)
+                             || region.y + region.height > getHeight(0))) {
+        throw new IllegalArgumentException(String.format(
+            "Selected region (%dx%d+%d+%d) exceeds the image boundaries (%dx%d).",
+            region.width, region.height, region.x, region.y, getWidth(imageIndex), getWidth(imageIndex)));
       }
       if (region != null || rotation != 0) {
         data = lib.transform(data.array(), info, region, rotation);

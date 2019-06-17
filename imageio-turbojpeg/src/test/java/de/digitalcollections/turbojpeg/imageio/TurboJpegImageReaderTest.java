@@ -250,4 +250,14 @@ class TurboJpegImageReaderTest {
     ImageReader reader = ImageIO.getImageReaders(is).next();
     assertThat(reader).isNotInstanceOf(TurboJpegImageReader.class);
   }
+
+  @Test
+  public void testDoubleFreeCrash() throws IOException {
+    ImageReader reader = getReader("thumbnail.jpg");
+    TurboJpegImageReadParam param = (TurboJpegImageReadParam) reader.getDefaultReadParam();
+    param.setSourceRegion(new Rectangle(0, 0, reader.getWidth(4), reader.getHeight(4)));
+    BufferedImage img = reader.read(4, param);
+    assertThat(img.getWidth()).isEqualTo(180);
+    assertThat(img.getHeight()).isEqualTo(136);
+  }
 }
