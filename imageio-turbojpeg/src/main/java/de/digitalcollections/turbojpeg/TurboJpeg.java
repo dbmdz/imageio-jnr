@@ -135,7 +135,7 @@ public class TurboJpeg {
    */
   public ByteBuffer encode(Raster img, int quality) throws TurboJpegException {
     Pointer codec = null;
-    Pointer bufPtr = null;
+    PointerByReference bufPtrRef = null;
     try {
       TJPF pixelFmt;
       switch (img.getNumBands()) {
@@ -157,7 +157,8 @@ public class TurboJpeg {
 
       // Allocate JPEG target buffer
       int bufSize = (int) lib.tjBufSize(img.getWidth(), img.getHeight(), sampling);
-      bufPtr = lib.tjAlloc(bufSize);
+      Pointer bufPtr = lib.tjAlloc(bufSize);
+      bufPtrRef = new PointerByReference(bufPtr);
       NativeLongByReference lenPtr = new NativeLongByReference(bufSize);
 
       // Wrap source image data buffer with ByteBuffer to pass it over the ABI
@@ -177,22 +178,22 @@ public class TurboJpeg {
       }
       int rv = lib.tjCompress2(
               codec, inBuf, img.getWidth(), 0, img.getHeight(), pixelFmt,
-              new PointerByReference(bufPtr), lenPtr, sampling, quality, 0);
+              bufPtrRef, lenPtr, sampling, quality, 0);
       if (rv != 0) {
         LOG.error("Could not compress image (dimensions: {}x{}, format: {}, sampling: {}, quality: {}",
                 img.getWidth(), img.getHeight(), pixelFmt, sampling, quality);
         throw new TurboJpegException(lib.tjGetErrorStr());
       }
       ByteBuffer outBuf = ByteBuffer.allocate(lenPtr.getValue().intValue()).order(runtime.byteOrder());
-      bufPtr.get(0, outBuf.array(), 0, lenPtr.getValue().intValue());
+      bufPtrRef.getValue().get(0, outBuf.array(), 0, lenPtr.getValue().intValue());
       ((Buffer) outBuf).rewind();
       return outBuf;
     } finally {
       if (codec != null && codec.address() != 0) {
         lib.tjDestroy(codec);
       }
-      if (bufPtr != null && bufPtr.address() != 0) {
-        lib.tjFree(bufPtr);
+      if (bufPtrRef != null && bufPtrRef.getValue() != null && bufPtrRef.getValue().address() != 0) {
+        lib.tjFree(bufPtrRef.getValue());
       }
     }
   }
@@ -208,7 +209,7 @@ public class TurboJpeg {
    */
   public ByteBuffer transform(byte[] jpegData, Info info, Rectangle region, int rotation) throws TurboJpegException {
     Pointer codec = null;
-    Pointer bufPtr = null;
+    PointerByReference bufPtrRef = null;
     try {
       codec = lib.tjInitTransform();
       tjtransform transform = new tjtransform(runtime);
@@ -241,12 +242,6 @@ public class TurboJpeg {
         }
       }
       if (rotation != 0) {
-        if (flipCoords) {
-          int w = width;
-          int h = height;
-          height = w;
-          width = h;
-        }
         TJXOP op;
         switch (rotation) {
           case 90:
@@ -263,20 +258,11 @@ public class TurboJpeg {
         }
         transform.op.set(op.intValue());
       }
-      int bufWidth = width;
-      if (width == 0 && region != null) {
-        bufWidth = info.getWidth() - region.x;
-      }
-      int bufHeight = height;
-      if (height == 0 && region != null) {
-        bufHeight = info.getHeight() - region.y;
-      }
-      int bufSize = (int) lib.tjBufSize(bufWidth, bufHeight, TJSAMP.TJSAMP_444);
-      bufPtr = lib.tjAlloc(bufSize);
-      NativeLongByReference lenRef = new NativeLongByReference(bufSize);
       Buffer inBuf = ByteBuffer.wrap(jpegData).order(runtime.byteOrder());
+      NativeLongByReference lenRef = new NativeLongByReference();
+      bufPtrRef = new PointerByReference();
       int rv = lib.tjTransform(
-              codec, inBuf, jpegData.length, 1, new PointerByReference(bufPtr),
+              codec, inBuf, jpegData.length, 1, bufPtrRef,
               lenRef, transform, 0);
       if (rv != 0) {
         LOG.error("Could not compress image (crop: {},{},{},{}, rotate: {})",
@@ -284,15 +270,15 @@ public class TurboJpeg {
         throw new TurboJpegException(lib.tjGetErrorStr());
       }
       ByteBuffer outBuf = ByteBuffer.allocate(lenRef.getValue().intValue()).order(runtime.byteOrder());
-      bufPtr.get(0, outBuf.array(), 0, lenRef.getValue().intValue());
+      bufPtrRef.getValue().get(0, outBuf.array(), 0, lenRef.getValue().intValue());
       ((Buffer) outBuf).rewind();
       return outBuf;
     } finally {
       if (codec != null && codec.address() != 0) {
         lib.tjDestroy(codec);
       }
-      if (bufPtr != null && bufPtr.address() != 0) {
-        lib.tjFree(bufPtr);
+      if (bufPtrRef != null && bufPtrRef.getValue() != null && bufPtrRef.getValue().address() != 0) {
+        lib.tjFree(bufPtrRef.getValue());
       }
     }
   }
