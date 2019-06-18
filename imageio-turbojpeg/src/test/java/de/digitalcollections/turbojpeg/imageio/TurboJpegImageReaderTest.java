@@ -17,6 +17,7 @@ import org.junit.jupiter.api.Test;
 import static de.digitalcollections.turbojpeg.imageio.CustomAssertions.assertThat;
 
 class TurboJpegImageReaderTest {
+
   @Test
   public void testReaderIsRegistered() {
     Supplier<List<ImageReader>> getReaderIter = () -> Lists.newArrayList(ImageIO.getImageReadersBySuffix("jpg"));
@@ -259,5 +260,15 @@ class TurboJpegImageReaderTest {
     BufferedImage img = reader.read(4, param);
     assertThat(img.getWidth()).isEqualTo(180);
     assertThat(img.getHeight()).isEqualTo(136);
+  }
+
+  @Test
+  public void testCroppingRequiresReallocation() throws IOException {
+    ImageReader reader = getReader("needs_realloc.jpg");
+    TurboJpegImageReadParam param = (TurboJpegImageReadParam) reader.getDefaultReadParam();
+    param.setSourceRegion(new Rectangle(1281, 1281, 365, 10));
+    BufferedImage img = reader.read(3, param);
+    assertThat(img.getWidth()).isEqualTo(365);
+    assertThat(img.getHeight()).isEqualTo(10);
   }
 }
