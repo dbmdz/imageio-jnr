@@ -13,6 +13,7 @@ import org.junit.jupiter.api.Test;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class OpenJp2ImageReaderTest {
+
   @Test
   public void testReaderIsRegistered() {
     assertThat(Lists.newArrayList(ImageIO.getImageReadersBySuffix("jp2"))).isNotEmpty();
@@ -99,20 +100,5 @@ class OpenJp2ImageReaderTest {
     BufferedImage bwImg = reader.read(0, null);
 
     assertThat(rgbImg.getRGB(256, 256)).isNotEqualTo(bwImg.getRGB(256, 256));
-  }
-
-  @Test
-  public void testCanRead16BitImageWithColorspace() throws IOException {
-    // Image is licensed under CC BY-NC-SA 4.0
-    OpenJp2ImageReader reader = getReader("bpp_16.jp2");
-    BufferedImage img = reader.read(0, null);
-
-    assertThat(img.getType()).isEqualTo(BufferedImage.TYPE_3BYTE_BGR);
-
-    // Pixel at 2,0 should have following color information: 46 (R), 43 (G), 47 (B)
-    // Underlying image has color information encoded as BGR
-    assertThat(img.getRaster().getDataBuffer().getElem(6)).isEqualTo(47); // B
-    assertThat(img.getRaster().getDataBuffer().getElem(7)).isEqualTo(43); // G
-    assertThat(img.getRaster().getDataBuffer().getElem(8)).isEqualTo(46); // R
   }
 }
