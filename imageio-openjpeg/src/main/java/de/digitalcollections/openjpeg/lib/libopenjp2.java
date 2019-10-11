@@ -32,6 +32,7 @@ public interface libopenjp2 {
   String opj_version();
 
   /* Stream functions */
+  Pointer opj_stream_create_default_file_stream(String filename, boolean isReadStream);
   Pointer opj_stream_create(@size_t long bufSize, boolean isInput);
   void opj_stream_set_read_function(Pointer stream, opj_stream_read_fn read_fn);
   void opj_stream_set_write_function(Pointer stream, opj_stream_write_fn write_fn);

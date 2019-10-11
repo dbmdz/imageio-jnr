@@ -15,7 +15,10 @@ import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferByte;
 import java.awt.image.PixelInterleavedSampleModel;
 import java.awt.image.Raster;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import jnr.ffi.LibraryLoader;
 import jnr.ffi.Pointer;
 import jnr.ffi.Runtime;
@@ -72,14 +75,39 @@ public class OpenJpeg {
   }
 
   /**
+   * Obtain information about the JPEG200 image located at the given path.
+   */
+  public Info getInfo(Path filePath) throws IOException {
+    if (!Files.exists(filePath)) {
+      throw new FileNotFoundException(String.format("File not found at %s", filePath));
+    } else if (!Files.isReadable(filePath)) {
+      throw new IOException(String.format("File not readable at %s", filePath));
+    }
+    Pointer ptr = lib.opj_stream_create_default_file_stream(filePath.toAbsolutePath().toString(), true);
+    try {
+      return getInfo(ptr);
+    } finally {
+      lib.opj_stream_destroy(ptr);
+    }
+  }
+
+  /**
    * Obtain information about the JPEG200 image in the input stream.
    */
   public Info getInfo(InStreamWrapper wrapper) throws IOException {
+    try {
+      return this.getInfo(wrapper.getNativeStream());
+    } finally {
+      wrapper.close();
+    }
+  }
+
+  private Info getInfo(Pointer stream) throws IOException {
     Pointer codec = null;
     opj_image img = null;
     try {
       codec = getCodec(0);
-      img = getImage(wrapper, codec);
+      img = getImage(stream, codec);
       return getInfo(codec, img);
     } finally {
       if (codec != null) {
@@ -88,7 +116,6 @@ public class OpenJpeg {
       if (img != null) {
         img.free(lib);
       }
-      wrapper.close();
     }
   }
 
@@ -129,10 +156,10 @@ public class OpenJpeg {
     return codec;
   }
 
-  private opj_image getImage(InStreamWrapper wrapper, Pointer codec) throws IOException {
+  private opj_image getImage(Pointer stream, Pointer codec) throws IOException {
     opj_image img = new opj_image(Runtime.getRuntime(lib));
     PointerByReference imgPtr = new PointerByReference();
-    if (!lib.opj_read_header(wrapper.getNativeStream(), codec, imgPtr)) {
+    if (!lib.opj_read_header(stream, codec, imgPtr)) {
       throw new IOException("Error while reading header.");
     }
     img.useMemory(imgPtr.getValue());
@@ -150,11 +177,43 @@ public class OpenJpeg {
    */
   public BufferedImage decode(InStreamWrapper wrapper, Rectangle area, int reduceFactor)
       throws IOException {
+    try {
+      return decode(wrapper.getNativeStream(), area, reduceFactor);
+    } finally {
+      wrapper.close();
+    }
+  }
+
+  /**
+   * Decode the JPEG2000 image located at the given path to a BufferedImage.
+   * @param filePath Path to the JPEG2000 image file.
+   * @param area Region of the image to decode
+   * @param reduceFactor Scale down the image by a factor of 2^reduceFactor
+   * @return the decoded image
+   * @throws IOException if there's a problem decoding the image or reading the file
+   */
+  public BufferedImage decode(Path filePath, Rectangle area, int reduceFactor)
+      throws IOException {
+    if (!Files.exists(filePath)) {
+      throw new FileNotFoundException(String.format("File not found at %s", filePath));
+    } else if (!Files.isReadable(filePath)) {
+      throw new IOException(String.format("File not readable at %s", filePath));
+    }
+    Pointer ptr = lib.opj_stream_create_default_file_stream(filePath.toAbsolutePath().toString(), true);
+    try {
+      return decode(ptr, area, reduceFactor);
+    } finally {
+      lib.opj_stream_destroy(ptr);
+    }
+  }
+
+  private BufferedImage decode(Pointer stream, Rectangle area, int reduceFactor)
+      throws IOException {
     Pointer codec = null;
     opj_image img = null;
     try {
       codec = getCodec(reduceFactor);
-      img = getImage(wrapper, codec);
+      img = getImage(stream, codec);
 
       // Configure decoding area
       int targetWidth;
@@ -170,7 +229,7 @@ public class OpenJpeg {
             area.x, area.y, area.x + area.width, area.y + area.height);
       }
 
-      if (!lib.opj_decode(codec, wrapper.getNativeStream(), Struct.getMemory(img))) {
+      if (!lib.opj_decode(codec, stream, Struct.getMemory(img))) {
         throw new IOException("Could not decode image!");
       }
 
@@ -219,7 +278,6 @@ public class OpenJpeg {
       if (codec != null) {
         lib.opj_destroy_codec(codec);
       }
-      wrapper.close();
     }
   }
 
