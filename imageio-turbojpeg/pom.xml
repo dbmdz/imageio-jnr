@@ -54,7 +54,7 @@
       <!-- For testing compatibility with JPEG in TIF -->
       <groupId>com.twelvemonkeys.imageio</groupId>
       <artifactId>imageio-tiff</artifactId>
-      <version>3.4.2</version>
+      <version>3.5</version>
       <scope>test</scope>
     </dependency>
   </dependencies>
