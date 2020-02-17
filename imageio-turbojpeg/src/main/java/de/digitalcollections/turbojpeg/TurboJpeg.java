@@ -24,7 +24,7 @@ import jnr.ffi.byref.PointerByReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/** Java bindings for libturbojpeg via JFFI **/
+/** Java bindings for libturbojpeg via JFFI * */
 public class TurboJpeg {
 
   private static final Logger LOG = LoggerFactory.getLogger(TurboJpeg.class);
@@ -41,7 +41,8 @@ public class TurboJpeg {
    *
    * @param jpegData jpeg image data
    * @return information about the jpeg image
-   * @throws de.digitalcollections.turbojpeg.TurboJpegException if decompressing header with library fails
+   * @throws de.digitalcollections.turbojpeg.TurboJpegException if decompressing header with library
+   *     fails
    */
   public Info getInfo(byte[] jpegData) throws TurboJpegException {
     Pointer codec = null;
@@ -52,8 +53,15 @@ public class TurboJpeg {
       IntByReference height = new IntByReference();
       IntByReference jpegSubsamp = new IntByReference();
       IntByReference jpegColorspace = new IntByReference();
-      int rv = lib.tjDecompressHeader3(
-              codec, ByteBuffer.wrap(jpegData), jpegData.length, width, height, jpegSubsamp, jpegColorspace);
+      int rv =
+          lib.tjDecompressHeader3(
+              codec,
+              ByteBuffer.wrap(jpegData),
+              jpegData.length,
+              width,
+              height,
+              jpegSubsamp,
+              jpegColorspace);
       if (rv != 0) {
         throw new TurboJpegException(lib.tjGetErrorStr());
       }
@@ -68,7 +76,12 @@ public class TurboJpeg {
         f.useMemory(factorPtr);
         factors[i] = f;
       }
-      return new Info(width.getValue(), height.getValue(), jpegSubsamp.getValue(), jpegColorspace.getValue(), factors);
+      return new Info(
+          width.getValue(),
+          height.getValue(),
+          jpegSubsamp.getValue(),
+          jpegColorspace.getValue(),
+          factors);
     } finally {
       if (codec != null && codec.address() != 0) {
         lib.tjDestroy(codec);
@@ -76,15 +89,18 @@ public class TurboJpeg {
     }
   }
 
-  /** Decode the JPEG image in the input buffer into a BufferedImage.
+  /**
+   * Decode the JPEG image in the input buffer into a BufferedImage.
    *
-   * @param jpegData  JPEG data input buffer
+   * @param jpegData JPEG data input buffer
    * @param info Information about the JPEG image in the buffer
-   * @param size Target decompressed dimensions, must be among the available sizes (see {@link Info#getAvailableSizes()})
+   * @param size Target decompressed dimensions, must be among the available sizes (see {@link
+   *     Info#getAvailableSizes()})
    * @return The decoded image
    * @throws TurboJpegException if decompression with library fails
    */
-  public BufferedImage decode(byte[] jpegData, Info info, Dimension size) throws TurboJpegException {
+  public BufferedImage decode(byte[] jpegData, Info info, Dimension size)
+      throws TurboJpegException {
     Pointer codec = null;
     try {
       codec = lib.tjInitDecompress();
@@ -92,8 +108,8 @@ public class TurboJpeg {
       int height = info.getHeight();
       if (size != null) {
         if (!info.getAvailableSizes().contains(size)) {
-          throw new IllegalArgumentException(String.format(
-                  "Invalid size, must be one of %s", info.getAvailableSizes()));
+          throw new IllegalArgumentException(
+              String.format("Invalid size, must be one of %s", info.getAvailableSizes()));
         } else {
           width = size.width;
           height = size.height;
@@ -107,12 +123,22 @@ public class TurboJpeg {
         imgType = BufferedImage.TYPE_3BYTE_BGR;
       }
       BufferedImage img = new BufferedImage(width, height, imgType);
-      // Wrap the underlying data buffer of the image with a ByteBuffer so we can pass it over the ABI
-      ByteBuffer outBuf = ByteBuffer.wrap(((DataBufferByte) img.getRaster().getDataBuffer()).getData())
+      // Wrap the underlying data buffer of the image with a ByteBuffer so we can pass it over the
+      // ABI
+      ByteBuffer outBuf =
+          ByteBuffer.wrap(((DataBufferByte) img.getRaster().getDataBuffer()).getData())
               .order(runtime.byteOrder());
-      int rv = lib.tjDecompress2(
-              codec, ByteBuffer.wrap(jpegData), jpegData.length, outBuf,
-              width, isGray ? width : width * 3, height, isGray ? TJPF.TJPF_GRAY : TJPF.TJPF_BGR, 0);
+      int rv =
+          lib.tjDecompress2(
+              codec,
+              ByteBuffer.wrap(jpegData),
+              jpegData.length,
+              outBuf,
+              width,
+              isGray ? width : width * 3,
+              height,
+              isGray ? TJPF.TJPF_GRAY : TJPF.TJPF_BGR,
+              0);
       if (rv != 0) {
         LOG.error("Could not decompress JPEG (dimensions: {}x{}, gray: {})", width, height, isGray);
         throw new TurboJpegException(lib.tjGetErrorStr());
@@ -143,7 +169,7 @@ public class TurboJpeg {
           pixelFmt = TJPF.TJPF_BGRX; // 4BYTE_BGRA
           break;
         case 3:
-          pixelFmt = TJPF.TJPF_BGR;  // 3BYTE_BGR
+          pixelFmt = TJPF.TJPF_BGR; // 3BYTE_BGR
           break;
         case 1:
           pixelFmt = TJPF.TJPF_GRAY; // 1BYTE_GRAY
@@ -164,27 +190,46 @@ public class TurboJpeg {
       // Wrap source image data buffer with ByteBuffer to pass it over the ABI
       ByteBuffer inBuf;
       if (img.getNumBands() == 1 && img.getSampleModel().getSampleSize(0) == 1) {
-        // For binary images, we need to convert our (0, 1) binary values into (0, 255) greyscale values
+        // For binary images, we need to convert our (0, 1) binary values into (0, 255) greyscale
+        // values
         int[] buf = new int[img.getWidth() * img.getHeight()];
         img.getPixels(0, 0, img.getWidth(), img.getHeight(), buf);
         byte[] byteBuf = new byte[buf.length];
         for (int i = 0; i < buf.length; i++) {
           byteBuf[i] = (byte) (buf[i] == 0 ? 0x00 : 0xFF);
         }
-        inBuf = ByteBuffer.wrap(byteBuf).order(runtime.byteOrder());;
+        inBuf = ByteBuffer.wrap(byteBuf).order(runtime.byteOrder());
+        ;
       } else {
-        inBuf = ByteBuffer.wrap(((DataBufferByte) img.getDataBuffer()).getData())
-            .order(runtime.byteOrder());
+        inBuf =
+            ByteBuffer.wrap(((DataBufferByte) img.getDataBuffer()).getData())
+                .order(runtime.byteOrder());
       }
-      int rv = lib.tjCompress2(
-              codec, inBuf, img.getWidth(), 0, img.getHeight(), pixelFmt,
-              bufPtrRef, lenPtr, sampling, quality, 0);
+      int rv =
+          lib.tjCompress2(
+              codec,
+              inBuf,
+              img.getWidth(),
+              0,
+              img.getHeight(),
+              pixelFmt,
+              bufPtrRef,
+              lenPtr,
+              sampling,
+              quality,
+              0);
       if (rv != 0) {
-        LOG.error("Could not compress image (dimensions: {}x{}, format: {}, sampling: {}, quality: {}",
-                img.getWidth(), img.getHeight(), pixelFmt, sampling, quality);
+        LOG.error(
+            "Could not compress image (dimensions: {}x{}, format: {}, sampling: {}, quality: {}",
+            img.getWidth(),
+            img.getHeight(),
+            pixelFmt,
+            sampling,
+            quality);
         throw new TurboJpegException(lib.tjGetErrorStr());
       }
-      ByteBuffer outBuf = ByteBuffer.allocate(lenPtr.getValue().intValue()).order(runtime.byteOrder());
+      ByteBuffer outBuf =
+          ByteBuffer.allocate(lenPtr.getValue().intValue()).order(runtime.byteOrder());
       bufPtrRef.getValue().get(0, outBuf.array(), 0, lenPtr.getValue().intValue());
       ((Buffer) outBuf).rewind();
       return outBuf;
@@ -192,13 +237,16 @@ public class TurboJpeg {
       if (codec != null && codec.address() != 0) {
         lib.tjDestroy(codec);
       }
-      if (bufPtrRef != null && bufPtrRef.getValue() != null && bufPtrRef.getValue().address() != 0) {
+      if (bufPtrRef != null
+          && bufPtrRef.getValue() != null
+          && bufPtrRef.getValue().address() != 0) {
         lib.tjFree(bufPtrRef.getValue());
       }
     }
   }
 
-  /** Transform a JPEG image without decoding it fully
+  /**
+   * Transform a JPEG image without decoding it fully
    *
    * @param jpegData JPEG input buffer
    * @param info Information about the JPEG (from {@link #getInfo(byte[])}
@@ -207,7 +255,8 @@ public class TurboJpeg {
    * @return The transformed JPEG data
    * @throws TurboJpegException if image transformation fails
    */
-  public ByteBuffer transform(byte[] jpegData, Info info, Rectangle region, int rotation) throws TurboJpegException {
+  public ByteBuffer transform(byte[] jpegData, Info info, Rectangle region, int rotation)
+      throws TurboJpegException {
     Pointer codec = null;
     PointerByReference bufPtrRef = null;
     try {
@@ -221,15 +270,18 @@ public class TurboJpeg {
         Dimension mcuSize = info.getMCUSize();
         if (((region.x + region.width) != width && region.width % mcuSize.width != 0)
             || ((region.y + region.height) != height && region.height % mcuSize.height != 0)) {
-          throw new IllegalArgumentException(String.format(
-                  "Invalid cropping region, width must be divisible by %d, height by %d", mcuSize.width, mcuSize.height));
+          throw new IllegalArgumentException(
+              String.format(
+                  "Invalid cropping region, width must be divisible by %d, height by %d",
+                  mcuSize.width, mcuSize.height));
         }
         width = region.width;
         height = region.height;
         transform.options.set(TJXOPT.TJXOPT_CROP | TJXOPT.TJXOPT_TRIM);
         transform.r.x.set(region.x);
         transform.r.y.set(region.y);
-        // If any cropping dimension equals the original dimension, libturbojpeg requires it to be set to 0
+        // If any cropping dimension equals the original dimension, libturbojpeg requires it to be
+        // set to 0
         if ((region.x + region.width) >= (flipCoords ? info.getHeight() : info.getWidth())) {
           transform.r.w.set(0);
         } else {
@@ -261,15 +313,19 @@ public class TurboJpeg {
       Buffer inBuf = ByteBuffer.wrap(jpegData).order(runtime.byteOrder());
       NativeLongByReference lenRef = new NativeLongByReference();
       bufPtrRef = new PointerByReference();
-      int rv = lib.tjTransform(
-              codec, inBuf, jpegData.length, 1, bufPtrRef,
-              lenRef, transform, 0);
+      int rv = lib.tjTransform(codec, inBuf, jpegData.length, 1, bufPtrRef, lenRef, transform, 0);
       if (rv != 0) {
-        LOG.error("Could not compress image (crop: {},{},{},{}, rotate: {})",
-                transform.r.x, transform.r.y, transform.r.w, transform.r.h, rotation);
+        LOG.error(
+            "Could not compress image (crop: {},{},{},{}, rotate: {})",
+            transform.r.x,
+            transform.r.y,
+            transform.r.w,
+            transform.r.h,
+            rotation);
         throw new TurboJpegException(lib.tjGetErrorStr());
       }
-      ByteBuffer outBuf = ByteBuffer.allocate(lenRef.getValue().intValue()).order(runtime.byteOrder());
+      ByteBuffer outBuf =
+          ByteBuffer.allocate(lenRef.getValue().intValue()).order(runtime.byteOrder());
       bufPtrRef.getValue().get(0, outBuf.array(), 0, lenRef.getValue().intValue());
       ((Buffer) outBuf).rewind();
       return outBuf;
@@ -277,7 +333,9 @@ public class TurboJpeg {
       if (codec != null && codec.address() != 0) {
         lib.tjDestroy(codec);
       }
-      if (bufPtrRef != null && bufPtrRef.getValue() != null && bufPtrRef.getValue().address() != 0) {
+      if (bufPtrRef != null
+          && bufPtrRef.getValue() != null
+          && bufPtrRef.getValue().address() != 0) {
         lib.tjFree(bufPtrRef.getValue());
       }
     }

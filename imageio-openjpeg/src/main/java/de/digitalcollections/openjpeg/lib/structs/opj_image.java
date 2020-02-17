@@ -6,9 +6,14 @@ import jnr.ffi.Runtime;
 import jnr.ffi.Struct;
 
 public class opj_image extends Struct {
-  /** XOsiz: horizontal offset from the origin of the reference grid to the left side of the image area */
+  /**
+   * XOsiz: horizontal offset from the origin of the reference grid to the left side of the image
+   * area
+   */
   public u_int32_t x0 = new u_int32_t();
-  /** YOsiz: vertical offset from the origin of the reference grid to the top side of the image area */
+  /**
+   * YOsiz: vertical offset from the origin of the reference grid to the top side of the image area
+   */
   public Unsigned32 y0 = new Unsigned32();
   /** Xsiz: width of the reference grid */
   public Unsigned32 x1 = new Unsigned32();

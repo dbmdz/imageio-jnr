@@ -11,9 +11,11 @@ public enum CODEC_FORMAT implements EnumMapper.IntegerEnum {
   OPJ_CODEC_JPX(4);
 
   private final int value;
-  CODEC_FORMAT(int value){
+
+  CODEC_FORMAT(int value) {
     this.value = value;
   }
+
   public int intValue() {
     return value;
   }

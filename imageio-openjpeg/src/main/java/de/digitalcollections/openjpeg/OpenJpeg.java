@@ -33,8 +33,10 @@ public class OpenJpeg {
 
   @SuppressWarnings("checkstyle:constantname")
   private static final opj_msg_callback infoLogFn = (msg, data) -> LOGGER.debug(msg.trim());
+
   @SuppressWarnings("checkstyle:constantname")
   private static final opj_msg_callback warnLogFn = (msg, data) -> LOGGER.warn(msg.trim());
+
   @SuppressWarnings("checkstyle:constantname")
   private static final opj_msg_callback errorLogFn = (msg, data) -> LOGGER.error(msg.trim());
 
@@ -44,14 +46,12 @@ public class OpenJpeg {
   static {
   }
 
-  /**
-   * Load the library.
-   */
+  /** Load the library. */
   public OpenJpeg() {
     this.lib = LibraryLoader.create(libopenjp2.class).load("openjp2");
     if (!lib.opj_version().startsWith("2.")) {
-      throw new UnsatisfiedLinkError(String.format(
-          "OpenJPEG version must be at least 2.0.0 (found: %s)", lib.opj_version()));
+      throw new UnsatisfiedLinkError(
+          String.format("OpenJPEG version must be at least 2.0.0 (found: %s)", lib.opj_version()));
     }
     this.runtime = Runtime.getRuntime(lib);
   }
@@ -74,16 +74,15 @@ public class OpenJpeg {
     }
   }
 
-  /**
-   * Obtain information about the JPEG200 image located at the given path.
-   */
+  /** Obtain information about the JPEG200 image located at the given path. */
   public Info getInfo(Path filePath) throws IOException {
     if (!Files.exists(filePath)) {
       throw new FileNotFoundException(String.format("File not found at %s", filePath));
     } else if (!Files.isReadable(filePath)) {
       throw new IOException(String.format("File not readable at %s", filePath));
     }
-    Pointer ptr = lib.opj_stream_create_default_file_stream(filePath.toAbsolutePath().toString(), true);
+    Pointer ptr =
+        lib.opj_stream_create_default_file_stream(filePath.toAbsolutePath().toString(), true);
     try {
       return getInfo(ptr);
     } finally {
@@ -91,9 +90,7 @@ public class OpenJpeg {
     }
   }
 
-  /**
-   * Obtain information about the JPEG200 image in the input stream.
-   */
+  /** Obtain information about the JPEG200 image in the input stream. */
   public Info getInfo(InStreamWrapper wrapper) throws IOException {
     try {
       return this.getInfo(wrapper.getNativeStream());
@@ -143,7 +140,6 @@ public class OpenJpeg {
     }
   }
 
-
   private Pointer getCodec(int reduceFactor) throws IOException {
     Pointer codec = lib.opj_create_decompress(CODEC_FORMAT.OPJ_CODEC_JP2);
     setupLogger(codec);
@@ -186,20 +182,21 @@ public class OpenJpeg {
 
   /**
    * Decode the JPEG2000 image located at the given path to a BufferedImage.
+   *
    * @param filePath Path to the JPEG2000 image file.
    * @param area Region of the image to decode
    * @param reduceFactor Scale down the image by a factor of 2^reduceFactor
    * @return the decoded image
    * @throws IOException if there's a problem decoding the image or reading the file
    */
-  public BufferedImage decode(Path filePath, Rectangle area, int reduceFactor)
-      throws IOException {
+  public BufferedImage decode(Path filePath, Rectangle area, int reduceFactor) throws IOException {
     if (!Files.exists(filePath)) {
       throw new FileNotFoundException(String.format("File not found at %s", filePath));
     } else if (!Files.isReadable(filePath)) {
       throw new IOException(String.format("File not readable at %s", filePath));
     }
-    Pointer ptr = lib.opj_stream_create_default_file_stream(filePath.toAbsolutePath().toString(), true);
+    Pointer ptr =
+        lib.opj_stream_create_default_file_stream(filePath.toAbsolutePath().toString(), true);
     try {
       return decode(ptr, area, reduceFactor);
     } finally {
@@ -219,14 +216,23 @@ public class OpenJpeg {
       int targetWidth;
       int targetHeight;
       if (area == null) {
-        if (!lib.opj_set_decode_area(codec, Struct.getMemory(img), img.x0.intValue(), img.y0.intValue(),
-                                     img.x1.intValue(), img.y1.intValue())) {
+        if (!lib.opj_set_decode_area(
+            codec,
+            Struct.getMemory(img),
+            img.x0.intValue(),
+            img.y0.intValue(),
+            img.x1.intValue(),
+            img.y1.intValue())) {
           throw new IOException("Could not set decoding area!");
         }
       } else {
         lib.opj_set_decode_area(
-            codec, Struct.getMemory(img),
-            area.x, area.y, area.x + area.width, area.y + area.height);
+            codec,
+            Struct.getMemory(img),
+            area.x,
+            area.y,
+            area.x + area.width,
+            area.y + area.height);
       }
 
       if (!lib.opj_decode(codec, stream, Struct.getMemory(img))) {
@@ -241,7 +247,8 @@ public class OpenJpeg {
 
       // 8bit color depth is assumed as default color depth here -> 2 ^ 8 = 256 colors are available
       // For 16bit color depth -> 2 ^ 16 = 65536 color are available.
-      // To "scale down" images with 16bit color depth to 8 bit, just a color depth factor needs to be
+      // To "scale down" images with 16bit color depth to 8 bit, just a color depth factor needs to
+      // be
       // calculated (65536 / 256 = 256) to correctly assign pixel in the underlying image buffer.
       // Note: prec and bpp seems to be interchanged in opj_image_comp struc.
       int colorDepthFactor = ((int) Math.pow(2, comps[0].prec.intValue())) / 256;
@@ -250,7 +257,8 @@ public class OpenJpeg {
       if (numcomps == 3) {
         bufImg = new BufferedImage(targetWidth, targetHeight, BufferedImage.TYPE_3BYTE_BGR);
 
-        // NOTE: We don't use bufImg.getRaster().setPixel, since directly accessing the underlying buffer is ~400% faster
+        // NOTE: We don't use bufImg.getRaster().setPixel, since directly accessing the underlying
+        // buffer is ~400% faster
         Pointer red = comps[0].data.get();
         Pointer green = comps[1].data.get();
         Pointer blue = comps[2].data.get();
@@ -291,8 +299,8 @@ public class OpenJpeg {
     }
     opj_image_comptparm[] params = Struct.arrayOf(runtime, opj_image_comptparm.class, numBands);
     for (int i = 0; i < numBands; i++) {
-      params[i].prec.set(8);  // One byte per component
-      params[i].bpp.set(8);   // 8bit depth
+      params[i].prec.set(8); // One byte per component
+      params[i].bpp.set(8); // 8bit depth
       params[i].sgnd.set(0);
       params[i].dx.set(1);
       params[i].dy.set(1);
@@ -344,7 +352,8 @@ public class OpenJpeg {
    * @param params encoding parameters
    * @throws IOException if encoding fails
    */
-  public void encode(Raster img, OutStreamWrapper output, opj_cparameters params) throws IOException {
+  public void encode(Raster img, OutStreamWrapper output, opj_cparameters params)
+      throws IOException {
     opj_image image = null;
     Pointer codec = null;
     try {

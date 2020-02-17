@@ -7,13 +7,15 @@ import java.util.Arrays;
 import java.util.stream.Stream;
 import javax.imageio.ImageWriteParam;
 
-/**
- * Parameters for encoding JPEG2000 images
- */
+/** Parameters for encoding JPEG2000 images */
 public class OpenJp2ImageWriteParam extends ImageWriteParam {
 
   public enum ProgressionOrder {
-    LRCP(0), RLCP(1), RPCL(2), PCRL(3), CPRL(4);
+    LRCP(0),
+    RLCP(1),
+    RPCL(2),
+    PCRL(3),
+    CPRL(4);
 
     private int val;
 
@@ -22,28 +24,26 @@ public class OpenJp2ImageWriteParam extends ImageWriteParam {
     }
 
     PROG_ORDER toNative() {
-      return Arrays.stream(PROG_ORDER.values())
-              .filter(v -> v.value == this.val)
-              .findFirst().get();
+      return Arrays.stream(PROG_ORDER.values()).filter(v -> v.value == this.val).findFirst().get();
     }
   }
 
   public static String COMPRESS_TYPE_LOSSY = "lossy";
   public static String COMPRESS_TYPE_LOSSLESS = "lossless";
 
-  /** Use irreversible wavelet compression (= lossy) **/
+  /** Use irreversible wavelet compression (= lossy) * */
   boolean compressLossy = false;
 
-  /** Write SOP marker before each packet **/
+  /** Write SOP marker before each packet * */
   boolean writeSOPMarkers = false;
 
-  /** Write EPH marker after each header packet **/
+  /** Write EPH marker after each header packet * */
   boolean writeEPHMarkers = false;
 
-  /** Number of resolutions to encode **/
+  /** Number of resolutions to encode * */
   int numResolutions = 6;
 
-  /** Progession order. Defaults to LRCP. **/
+  /** Progession order. Defaults to LRCP. * */
   ProgressionOrder progOrder = ProgressionOrder.LRCP;
 
   protected opj_cparameters toNativeParams(OpenJpeg lib) {
@@ -106,12 +106,10 @@ public class OpenJp2ImageWriteParam extends ImageWriteParam {
 
   @Override
   public String[] getCompressionTypes() {
-    return new String[]{"lossless", "lossy"};
+    return new String[] {"lossless", "lossy"};
   }
 
-  /**
-   * Set the compression type. Must be 'lossless' (default) or 'lossy'.
-   */
+  /** Set the compression type. Must be 'lossless' (default) or 'lossy'. */
   @Override
   public void setCompressionType(String compressionType) {
     if (Stream.of(COMPRESS_TYPE_LOSSLESS, COMPRESS_TYPE_LOSSY).noneMatch(compressionType::equals)) {
@@ -147,6 +145,7 @@ public class OpenJp2ImageWriteParam extends ImageWriteParam {
 
   /**
    * Write SOP markers after each packet.
+   *
    * @param writeSOPMarkers flag if sop markers should be written
    */
   public void setWriteSOPMarkers(boolean writeSOPMarkers) {
@@ -159,6 +158,7 @@ public class OpenJp2ImageWriteParam extends ImageWriteParam {
 
   /**
    * Write EPH marker after each header packet.
+   *
    * @param writeEPHMarkers flag if eph markers should be written
    */
   public void setWriteEPHMarkers(boolean writeEPHMarkers) {
@@ -166,10 +166,11 @@ public class OpenJp2ImageWriteParam extends ImageWriteParam {
   }
 
   /**
-   * Set the compression quality. Automatically switches compression type to lossy.
-   * {@link ImageWriteParam#setCompressionType} must have been set to {@link ImageWriteParam#MODE_EXPLICIT}.
+   * Set the compression quality. Automatically switches compression type to lossy. {@link
+   * ImageWriteParam#setCompressionType} must have been set to {@link
+   * ImageWriteParam#MODE_EXPLICIT}.
    *
-   * Quality must be between 0.0 (worst) and 1.0 (best).
+   * <p>Quality must be between 0.0 (worst) and 1.0 (best).
    */
   @Override
   public void setCompressionQuality(float quality) {
@@ -184,7 +185,8 @@ public class OpenJp2ImageWriteParam extends ImageWriteParam {
   /**
    * Set the number of resolutions to encode in the output image.
    *
-   * Each resolution will be 2^num times smaller than the native resolution.
+   * <p>Each resolution will be 2^num times smaller than the native resolution.
+   *
    * @param numResolutions the num resolutions
    */
   public void setNumResolutions(int numResolutions) {
@@ -197,6 +199,7 @@ public class OpenJp2ImageWriteParam extends ImageWriteParam {
 
   /**
    * Set the progression order of the encoded image.
+   *
    * @param progOrder the progression order
    */
   public void setProgressionOrder(ProgressionOrder progOrder) {

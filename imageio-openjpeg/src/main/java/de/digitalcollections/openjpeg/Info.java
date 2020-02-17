@@ -7,9 +7,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-/**
- * Information about an image from OpenJP2.
- */
+/** Information about an image from OpenJP2. */
 public class Info {
   private int numComponents;
   private int numResolutions;
@@ -94,30 +92,25 @@ public class Info {
     return numTilesX + numTilesY;
   }
 
-  /**
-   * Get the scale factors that are available for decoding.
-   */
+  /** Get the scale factors that are available for decoding. */
   public double[] getScaleFactors() {
-    return IntStream.range(0, this.numResolutions)
-        .mapToDouble(n -> Math.pow(2, n))
-        .toArray();
+    return IntStream.range(0, this.numResolutions).mapToDouble(n -> Math.pow(2, n)).toArray();
   }
 
-  /**
-   * Get the image sizes that are available for decoding.
-   */
+  /** Get the image sizes that are available for decoding. */
   public List<Dimension> getAvailableImageSizes() {
     return Arrays.stream(getScaleFactors())
-        .mapToObj(factor -> new Dimension((int) (this.width / factor), (int) (this.height / factor)))
+        .mapToObj(
+            factor -> new Dimension((int) (this.width / factor), (int) (this.height / factor)))
         .collect(Collectors.toList());
   }
 
-  /**
-   * Get the tile sizes that are available for decoding.
-   */
+  /** Get the tile sizes that are available for decoding. */
   public List<Dimension> getAvailableTileSizes() {
     return Arrays.stream(getScaleFactors())
-        .mapToObj(factor -> new Dimension((int) (this.tileWidth / factor), (int) (this.tileHeight / factor)))
+        .mapToObj(
+            factor ->
+                new Dimension((int) (this.tileWidth / factor), (int) (this.tileHeight / factor)))
         .collect(Collectors.toList());
   }
 }

@@ -7,5 +7,6 @@ import jnr.ffi.types.size_t;
 
 public interface opj_stream_skip_fn {
   @Delegate
-  @int64_t long func(@size_t long numBytes, Pointer userData);
+  @int64_t
+  long func(@size_t long numBytes, Pointer userData);
 }

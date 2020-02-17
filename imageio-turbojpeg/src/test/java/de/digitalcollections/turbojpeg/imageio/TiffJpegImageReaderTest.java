@@ -1,5 +1,7 @@
 package de.digitalcollections.turbojpeg.imageio;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import com.twelvemonkeys.imageio.plugins.tiff.TIFFImageReader;
 import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
@@ -13,8 +15,6 @@ import javax.imageio.ImageReader;
 import javax.imageio.stream.ImageInputStream;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 public class TiffJpegImageReaderTest {
   ImageReader getReader(Class<? extends ImageReader> clz) throws IOException {
@@ -31,12 +31,12 @@ public class TiffJpegImageReaderTest {
 
   private static Stream<Class<? extends ImageReader>> tiffReaders() {
     try {
-      Class<? extends ImageReader> sunReader = (Class<? extends ImageReader>) TiffJpegImageReaderTest.class
-          .getClassLoader()
-          .loadClass("com.sun.imageio.plugins.tiff.TIFFImageReader");
-      return Stream.of(
-          TIFFImageReader.class,
-          sunReader);
+      Class<? extends ImageReader> sunReader =
+          (Class<? extends ImageReader>)
+              TiffJpegImageReaderTest.class
+                  .getClassLoader()
+                  .loadClass("com.sun.imageio.plugins.tiff.TIFFImageReader");
+      return Stream.of(TIFFImageReader.class, sunReader);
     } catch (ClassNotFoundException e) {
       return Stream.of(TIFFImageReader.class);
     }
