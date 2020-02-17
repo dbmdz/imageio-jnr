@@ -1,12 +1,12 @@
 package de.digitalcollections.turbojpeg.lib.enums;
 
-import java.util.Arrays;
-import jnr.ffi.util.EnumMapper.IntegerEnum;
-
 import static java.awt.image.BufferedImage.TYPE_3BYTE_BGR;
 import static java.awt.image.BufferedImage.TYPE_4BYTE_ABGR;
 import static java.awt.image.BufferedImage.TYPE_4BYTE_ABGR_PRE;
 import static java.awt.image.BufferedImage.TYPE_BYTE_GRAY;
+
+import java.util.Arrays;
+import jnr.ffi.util.EnumMapper.IntegerEnum;
 
 public enum TJPF implements IntegerEnum {
   TJPF_RGB(0),

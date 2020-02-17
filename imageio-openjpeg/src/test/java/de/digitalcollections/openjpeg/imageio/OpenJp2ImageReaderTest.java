@@ -1,5 +1,7 @@
 package de.digitalcollections.openjpeg.imageio;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -9,8 +11,6 @@ import javax.imageio.ImageReadParam;
 import javax.imageio.ImageReader;
 import org.assertj.core.util.Lists;
 import org.junit.jupiter.api.Test;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 class OpenJp2ImageReaderTest {
 
@@ -95,8 +95,9 @@ class OpenJp2ImageReaderTest {
     ImageReader reader = getReader("rgb.jp2");
     BufferedImage rgbImg = reader.read(0, null);
 
-    reader.setInput(ImageIO.createImageInputStream(
-        new File(ClassLoader.getSystemResource("hires.jp2").getFile())));
+    reader.setInput(
+        ImageIO.createImageInputStream(
+            new File(ClassLoader.getSystemResource("hires.jp2").getFile())));
     BufferedImage bwImg = reader.read(0, null);
 
     assertThat(rgbImg.getRGB(256, 256)).isNotEqualTo(bwImg.getRGB(256, 256));

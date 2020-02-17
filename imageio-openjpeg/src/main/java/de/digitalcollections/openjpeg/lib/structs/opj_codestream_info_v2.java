@@ -19,7 +19,7 @@ public class opj_codestream_info_v2 extends Struct {
   /** number of tiles in Y */
   public Unsigned32 th;
 
-  /** number of components*/
+  /** number of components */
   public Unsigned32 nbcomps;
 
   /** Default information regarding tiles inside image */
@@ -29,7 +29,8 @@ public class opj_codestream_info_v2 extends Struct {
 
   public opj_codestream_info_v2(Runtime runtime) {
     super(runtime);
-    // NOTE: We run the initializers in the constructor, since we need an instantiated runtime for the
+    // NOTE: We run the initializers in the constructor, since we need an instantiated runtime for
+    // the
     //       inner struct
     tx0 = new Unsigned32();
     ty0 = new Unsigned32();
@@ -44,7 +45,8 @@ public class opj_codestream_info_v2 extends Struct {
 
   public void free(libopenjp2 lib) {
     if (this.tx0.getMemory().address() != 0) {
-      AddressByReference addr = new AddressByReference(jnr.ffi.Address.valueOf(this.tx0.getMemory().address()));
+      AddressByReference addr =
+          new AddressByReference(jnr.ffi.Address.valueOf(this.tx0.getMemory().address()));
       lib.opj_destroy_cstr_info(addr);
     }
   }

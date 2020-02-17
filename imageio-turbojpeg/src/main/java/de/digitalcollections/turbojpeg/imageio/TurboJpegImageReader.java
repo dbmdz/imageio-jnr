@@ -1,5 +1,10 @@
 package de.digitalcollections.turbojpeg.imageio;
 
+import static java.awt.image.BufferedImage.TYPE_3BYTE_BGR;
+import static java.awt.image.BufferedImage.TYPE_4BYTE_ABGR;
+import static java.awt.image.BufferedImage.TYPE_4BYTE_ABGR_PRE;
+import static java.awt.image.BufferedImage.TYPE_BYTE_GRAY;
+
 import de.digitalcollections.turbojpeg.Info;
 import de.digitalcollections.turbojpeg.TurboJpeg;
 import de.digitalcollections.turbojpeg.TurboJpegException;
@@ -19,11 +24,6 @@ import javax.imageio.spi.ImageReaderSpi;
 import javax.imageio.stream.ImageInputStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import static java.awt.image.BufferedImage.TYPE_3BYTE_BGR;
-import static java.awt.image.BufferedImage.TYPE_4BYTE_ABGR;
-import static java.awt.image.BufferedImage.TYPE_4BYTE_ABGR_PRE;
-import static java.awt.image.BufferedImage.TYPE_BYTE_GRAY;
 
 public class TurboJpegImageReader extends ImageReader {
 
@@ -52,9 +52,11 @@ public class TurboJpegImageReader extends ImageReader {
         LOGGER.error(e.getMessage());
         throw new IllegalArgumentException("Failed to read input.");
       } catch (TurboJpegException e) {
-        // NOTE: We do not cancel here, since this does not neccesarily have to be a problem, e.g. if setInput is
+        // NOTE: We do not cancel here, since this does not neccesarily have to be a problem, e.g.
+        // if setInput is
         // called from the TIFFImageReader.
-        // Users should have checked with the TurboJpegImageReaderSpi#canDecode method beforehand, anyways.
+        // Users should have checked with the TurboJpegImageReaderSpi#canDecode method beforehand,
+        // anyways.
       }
     } else {
       throw new IllegalArgumentException("Bad input.");
@@ -82,7 +84,10 @@ public class TurboJpegImageReader extends ImageReader {
     return new TurboJpegImageReadParam();
   }
 
-  /** The number of images corresponds to the number of different resolutions that can be directly decoded. */
+  /**
+   * The number of images corresponds to the number of different resolutions that can be directly
+   * decoded.
+   */
   @Override
   public int getNumImages(boolean allowSearch) throws IOException {
     return info.getAvailableSizes().size();
@@ -102,24 +107,25 @@ public class TurboJpegImageReader extends ImageReader {
   @Override
   public Iterator<ImageTypeSpecifier> getImageTypes(int imageIndex) throws IOException {
     return Stream.of(TYPE_3BYTE_BGR, TYPE_4BYTE_ABGR, TYPE_4BYTE_ABGR_PRE, TYPE_BYTE_GRAY)
-            .map(ImageTypeSpecifier::createFromBufferedImageType)
-            .iterator();
+        .map(ImageTypeSpecifier::createFromBufferedImageType)
+        .iterator();
   }
 
-  /** Since TurboJPEG can only crop to values divisible by the MCU size, we may need to
-   *  expand the cropping area to get a suitable rectangle.
-   *  Thus, cropping becomes a two-stage process:
-   *    - Crop to to nearest MCU boundaries (TurboJPEG)
-   *    - Crop to the actual region (Java)
+  /**
+   * Since TurboJPEG can only crop to values divisible by the MCU size, we may need to expand the
+   * cropping area to get a suitable rectangle. Thus, cropping becomes a two-stage process: - Crop
+   * to to nearest MCU boundaries (TurboJPEG) - Crop to the actual region (Java)
    *
-   * Additionally, since TurboJPEG applies rotation **before** cropping, but the ImageIO API is based on the
-   * assumption that rotation occurs **after** cropping, we have to transform the cropping region accordingly.
+   * <p>Additionally, since TurboJPEG applies rotation **before** cropping, but the ImageIO API is
+   * based on the assumption that rotation occurs **after** cropping, we have to transform the
+   * cropping region accordingly.
    *
    * @param mcuSize The size of the MCUs
    * @param region The source region to be cropped
    * @return The region that needs to be cropped from the image cropped to the expanded rectangle
    */
-  private Rectangle adjustRegion(Dimension mcuSize, Rectangle region, int rotation) throws IOException {
+  private Rectangle adjustRegion(Dimension mcuSize, Rectangle region, int rotation)
+      throws IOException {
     if (region == null) {
       return null;
     }
@@ -145,8 +151,10 @@ public class TurboJpegImageReader extends ImageReader {
       region.width = region.height;
       region.height = w;
     }
-    Rectangle extraCrop = new Rectangle(
-            0, 0,
+    Rectangle extraCrop =
+        new Rectangle(
+            0,
+            0,
             region.width == 0 ? originalWidth - region.x : region.width,
             region.height == 0 ? originalHeight - region.y : region.height);
     if (region.x % mcuSize.width != 0) {
@@ -175,10 +183,11 @@ public class TurboJpegImageReader extends ImageReader {
     if (region.width > originalWidth) {
       region.width = originalWidth;
     }
-    boolean modified = originalRegion.x != region.x
-                       ||  originalRegion.y != region.y
-                       || originalRegion.width != region.width
-                       || originalRegion.height != region.height;
+    boolean modified =
+        originalRegion.x != region.x
+            || originalRegion.y != region.y
+            || originalRegion.width != region.width
+            || originalRegion.height != region.height;
     if (modified) {
       return extraCrop;
     } else {
@@ -186,11 +195,15 @@ public class TurboJpegImageReader extends ImageReader {
     }
   }
 
-  /** While the regular cropping parameters are applied to the unscaled source image, the additional extra cropping
-   * on the Java side of things is applied to the decoded and possibly scaled image. Thus, we need to scale down the
-   * extra cropping rectangle. */
+  /**
+   * While the regular cropping parameters are applied to the unscaled source image, the additional
+   * extra cropping on the Java side of things is applied to the decoded and possibly scaled image.
+   * Thus, we need to scale down the extra cropping rectangle.
+   */
   private void adjustExtraCrop(int imageIndex, Info croppedInfo, Rectangle rectangle) {
-    double factor = croppedInfo.getAvailableSizes().get(imageIndex).getWidth() / croppedInfo.getAvailableSizes().get(0).getWidth();
+    double factor =
+        croppedInfo.getAvailableSizes().get(imageIndex).getWidth()
+            / croppedInfo.getAvailableSizes().get(0).getWidth();
     if (factor < 1) {
       rectangle.x = (int) Math.round(factor * rectangle.x);
       rectangle.y = (int) Math.round(factor * rectangle.y);
@@ -207,9 +220,10 @@ public class TurboJpegImageReader extends ImageReader {
     }
   }
 
-  /** The incoming cropping request always targets a specific resolution (i.e. downscaled if targetIndex > 0).
-   * However, TurobJPEG requires the cropping region to target the source resolution. Thus, we need to upscale
-   * the region passed by the user if the index != 0
+  /**
+   * The incoming cropping request always targets a specific resolution (i.e. downscaled if
+   * targetIndex > 0). However, TurobJPEG requires the cropping region to target the source
+   * resolution. Thus, we need to upscale the region passed by the user if the index != 0
    *
    * @param targetIndex Index of the targeted image resolution
    * @param sourceRegion Region relative to the targeted image resolution, will be modified
@@ -224,8 +238,10 @@ public class TurboJpegImageReader extends ImageReader {
     double scaleFactor = (double) nativeWidth / (double) getWidth(targetIndex);
     sourceRegion.x = (int) Math.ceil(scaleFactor * sourceRegion.x);
     sourceRegion.y = (int) Math.ceil(scaleFactor * sourceRegion.y);
-    sourceRegion.width = Math.min((int) Math.ceil(scaleFactor * sourceRegion.width), nativeWidth - sourceRegion.x);
-    sourceRegion.height = Math.min((int) Math.ceil(scaleFactor * sourceRegion.height), nativeHeight - sourceRegion.y);
+    sourceRegion.width =
+        Math.min((int) Math.ceil(scaleFactor * sourceRegion.width), nativeWidth - sourceRegion.x);
+    sourceRegion.height =
+        Math.min((int) Math.ceil(scaleFactor * sourceRegion.height), nativeHeight - sourceRegion.y);
   }
 
   @Override
@@ -248,17 +264,24 @@ public class TurboJpegImageReader extends ImageReader {
           region = null;
         }
       }
-      if (region != null && (region.x + region.width > getWidth(0)
-                             || region.y + region.height > getHeight(0))) {
-        throw new IllegalArgumentException(String.format(
-            "Selected region (%dx%d+%d+%d) exceeds the image boundaries (%dx%d).",
-            region.width, region.height, region.x, region.y, getWidth(imageIndex), getWidth(imageIndex)));
+      if (region != null
+          && (region.x + region.width > getWidth(0) || region.y + region.height > getHeight(0))) {
+        throw new IllegalArgumentException(
+            String.format(
+                "Selected region (%dx%d+%d+%d) exceeds the image boundaries (%dx%d).",
+                region.width,
+                region.height,
+                region.x,
+                region.y,
+                getWidth(imageIndex),
+                getWidth(imageIndex)));
       }
       if (region != null || rotation != 0) {
         data = lib.transform(data.array(), info, region, rotation);
       }
       Info transformedInfo = lib.getInfo(data.array());
-      BufferedImage img = lib.decode(
+      BufferedImage img =
+          lib.decode(
               data.array(), transformedInfo, transformedInfo.getAvailableSizes().get(imageIndex));
       if (extraCrop != null) {
         adjustExtraCrop(imageIndex, transformedInfo, extraCrop);
@@ -273,9 +296,10 @@ public class TurboJpegImageReader extends ImageReader {
   private boolean isRegionFullImage(int imageIndex, Rectangle region) throws IOException {
     int nativeWidth = getWidth(imageIndex);
     int nativeHeight = getHeight(imageIndex);
-    return region.x == 0 && region.y == 0
-            && (region.width == 0 || region.width == nativeWidth)
-            && (region.height == 0 || region.height == nativeHeight);
+    return region.x == 0
+        && region.y == 0
+        && (region.width == 0 || region.width == nativeWidth)
+        && (region.height == 0 || region.height == nativeHeight);
   }
 
   @Override

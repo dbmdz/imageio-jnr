@@ -34,7 +34,6 @@ public class opj_tccp_info extends Struct {
   /** precinct height */
   public Unsigned32[] prch = new Unsigned32[libopenjp2.OPJ_J2K_MAXRLVLS];
 
-
   public opj_tccp_info(Runtime runtime) {
     super(runtime);
   }

@@ -1,5 +1,7 @@
 package de.digitalcollections.turbojpeg.imageio;
 
+import static de.digitalcollections.turbojpeg.imageio.CustomAssertions.assertThat;
+
 import java.awt.Graphics;
 import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
@@ -14,13 +16,12 @@ import javax.imageio.stream.ImageInputStream;
 import org.assertj.core.util.Lists;
 import org.junit.jupiter.api.Test;
 
-import static de.digitalcollections.turbojpeg.imageio.CustomAssertions.assertThat;
-
 class TurboJpegImageReaderTest {
 
   @Test
   public void testReaderIsRegistered() {
-    Supplier<List<ImageReader>> getReaderIter = () -> Lists.newArrayList(ImageIO.getImageReadersBySuffix("jpg"));
+    Supplier<List<ImageReader>> getReaderIter =
+        () -> Lists.newArrayList(ImageIO.getImageReadersBySuffix("jpg"));
     assertThat(getReaderIter.get()).isNotEmpty();
     assertThat(getReaderIter.get()).hasAtLeastOneElementOfType(TurboJpegImageReader.class);
     getReaderIter = () -> Lists.newArrayList(ImageIO.getImageReadersByMIMEType("image/jpeg"));
@@ -59,9 +60,7 @@ class TurboJpegImageReaderTest {
     ImageReadParam param = reader.getDefaultReadParam();
     param.setSourceRegion(new Rectangle(32, 32, 96, 96));
     BufferedImage img = reader.read(0, param);
-    assertThat(img)
-        .hasDimensions(96, 96)
-        .hasNoPixelsOfColor(-1 /* white */);
+    assertThat(img).hasDimensions(96, 96).hasNoPixelsOfColor(-1 /* white */);
   }
 
   @Test
@@ -70,9 +69,7 @@ class TurboJpegImageReaderTest {
     ImageReadParam param = reader.getDefaultReadParam();
     param.setSourceRegion(new Rectangle(116, 148, 204, 172));
     BufferedImage img = reader.read(0, param);
-    assertThat(img)
-        .hasDimensions(204, 172)
-        .hasNoPixelsOfColor(-1 /* white */);
+    assertThat(img).hasDimensions(204, 172).hasNoPixelsOfColor(-1 /* white */);
   }
 
   @Test
@@ -81,9 +78,7 @@ class TurboJpegImageReaderTest {
     ImageReadParam param = reader.getDefaultReadParam();
     param.setSourceRegion(new Rectangle(87, 111, 152, 129));
     BufferedImage img = reader.read(2, param);
-    assertThat(img)
-        .hasDimensions(152, 129)
-        .hasNoPixelsOfColor(-1 /* white */);
+    assertThat(img).hasDimensions(152, 129).hasNoPixelsOfColor(-1 /* white */);
   }
 
   @Test
@@ -93,19 +88,13 @@ class TurboJpegImageReaderTest {
     param.setSourceRegion(new Rectangle(16, 16, 339, 319));
     param.setRotationDegree(90);
     BufferedImage img = reader.read(0, param);
-    assertThat(img)
-        .hasDimensions(319, 339)
-        .hasNoPixelsOfColor(-1 /* white */);
+    assertThat(img).hasDimensions(319, 339).hasNoPixelsOfColor(-1 /* white */);
     param.setRotationDegree(180);
     img = reader.read(0, param);
-    assertThat(img)
-        .hasDimensions(339, 319)
-        .hasNoPixelsOfColor(-1 /* white */);
+    assertThat(img).hasDimensions(339, 319).hasNoPixelsOfColor(-1 /* white */);
     param.setRotationDegree(270);
     img = reader.read(0, param);
-    assertThat(img)
-        .hasDimensions(319, 339)
-        .hasNoPixelsOfColor(-1 /* white */);
+    assertThat(img).hasDimensions(319, 339).hasNoPixelsOfColor(-1 /* white */);
   }
 
   @Test
@@ -117,7 +106,8 @@ class TurboJpegImageReaderTest {
     img = img.getSubimage(192, 116, 172, 204);
 
     // Need to copy the image so we can check the image data
-    BufferedImage copy = new BufferedImage(img.getWidth(), img.getHeight(), BufferedImage.TYPE_3BYTE_BGR);
+    BufferedImage copy =
+        new BufferedImage(img.getWidth(), img.getHeight(), BufferedImage.TYPE_3BYTE_BGR);
     Graphics g = copy.createGraphics();
     g.drawImage(img, 0, 0, null);
     assertThat(img).hasNoPixelsOfColor(-1);
@@ -130,19 +120,13 @@ class TurboJpegImageReaderTest {
     param.setSourceRegion(new Rectangle(116, 148, 204, 172));
     param.setRotationDegree(90);
     BufferedImage img = reader.read(0, param);
-    assertThat(img)
-        .hasDimensions(172, 204)
-        .hasNoPixelsOfColor(-1 /* white */);
+    assertThat(img).hasDimensions(172, 204).hasNoPixelsOfColor(-1 /* white */);
     param.setRotationDegree(180);
     img = reader.read(0, param);
-    assertThat(img)
-            .hasDimensions(204, 172)
-            .hasNoPixelsOfColor(-1 /* white */);
+    assertThat(img).hasDimensions(204, 172).hasNoPixelsOfColor(-1 /* white */);
     param.setRotationDegree(270);
     img = reader.read(0, param);
-    assertThat(img)
-            .hasDimensions(172, 204)
-            .hasNoPixelsOfColor(-1 /* white */);
+    assertThat(img).hasDimensions(172, 204).hasNoPixelsOfColor(-1 /* white */);
   }
 
   @Test
@@ -152,19 +136,13 @@ class TurboJpegImageReaderTest {
     param.setSourceRegion(new Rectangle(0, 0, 384, 368));
     param.setRotationDegree(90);
     BufferedImage img = reader.read(1, param);
-    assertThat(img)
-        .hasDimensions(368, 384)
-        .hasNoPixelsOfColor(-1 /* white */);
+    assertThat(img).hasDimensions(368, 384).hasNoPixelsOfColor(-1 /* white */);
     param.setRotationDegree(180);
     img = reader.read(1, param);
-    assertThat(img)
-            .hasDimensions(384, 368)
-            .hasNoPixelsOfColor(-1 /* white */);
+    assertThat(img).hasDimensions(384, 368).hasNoPixelsOfColor(-1 /* white */);
     param.setRotationDegree(270);
     img = reader.read(1, param);
-    assertThat(img)
-            .hasDimensions(368, 384)
-            .hasNoPixelsOfColor(-1 /* white */);
+    assertThat(img).hasDimensions(368, 384).hasNoPixelsOfColor(-1 /* white */);
   }
 
   @Test
@@ -172,8 +150,9 @@ class TurboJpegImageReaderTest {
     ImageReader reader = getReader("rgb.jpg");
     BufferedImage rgbImg = reader.read(1, null);
 
-    reader.setInput(ImageIO.createImageInputStream(
-        new File(ClassLoader.getSystemResource("crop_unaligned.jpg").getFile())));
+    reader.setInput(
+        ImageIO.createImageInputStream(
+            new File(ClassLoader.getSystemResource("crop_unaligned.jpg").getFile())));
     BufferedImage bwImg = reader.read(1, null);
 
     assertThat(rgbImg.getRGB(256, 256)).isNotEqualTo(bwImg.getRGB(256, 256));
@@ -221,8 +200,7 @@ class TurboJpegImageReaderTest {
     TurboJpegImageReadParam param = (TurboJpegImageReadParam) reader.getDefaultReadParam();
     param.setSourceRegion(new Rectangle(131, 57, 239, 397));
     BufferedImage img = reader.read(0, param);
-    assertThat(img).hasDimensions(239, 397)
-            .hasNoPixelsOfColor(-1);
+    assertThat(img).hasDimensions(239, 397).hasNoPixelsOfColor(-1);
   }
 
   @Test

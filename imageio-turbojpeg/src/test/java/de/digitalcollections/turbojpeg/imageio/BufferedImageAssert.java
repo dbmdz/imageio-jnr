@@ -1,11 +1,10 @@
 package de.digitalcollections.turbojpeg.imageio;
 
-import org.assertj.core.api.AbstractAssert;
-
-import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import javax.imageio.ImageIO;
+import org.assertj.core.api.AbstractAssert;
 
 class BufferedImageAssert extends AbstractAssert<BufferedImageAssert, BufferedImage> {
   public BufferedImageAssert(BufferedImage actual) {
@@ -31,8 +30,8 @@ class BufferedImageAssert extends AbstractAssert<BufferedImageAssert, BufferedIm
     isNotNull();
     int w = actual.getWidth();
     int h = actual.getHeight();
-    for (int x=0; x < w; x++) {
-      for (int y=0; y < h; y++) {
+    for (int x = 0; x < w; x++) {
+      for (int y = 0; y < h; y++) {
         if (actual.getRGB(x, y) == rgbColor) {
           String debugFilename = null;
           failWithMessage(
@@ -47,8 +46,9 @@ class BufferedImageAssert extends AbstractAssert<BufferedImageAssert, BufferedIm
   public BufferedImageAssert hasDimensions(int width, int height) {
     isNotNull();
     if (actual.getWidth() != width || actual.getHeight() != height) {
-      failWithMessage("Expected image to be of size %dx%d, but is %dx%d.%s",
-                      width, height, actual.getWidth(), actual.getHeight(), writeDebugImage());
+      failWithMessage(
+          "Expected image to be of size %dx%d, but is %dx%d.%s",
+          width, height, actual.getWidth(), actual.getHeight(), writeDebugImage());
     }
     return this;
   }

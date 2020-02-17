@@ -58,12 +58,14 @@ public class TurboJpegImageWriter extends ImageWriter {
   }
 
   @Override
-  public IIOMetadata convertImageMetadata(IIOMetadata inData, ImageTypeSpecifier imageType, ImageWriteParam param) {
+  public IIOMetadata convertImageMetadata(
+      IIOMetadata inData, ImageTypeSpecifier imageType, ImageWriteParam param) {
     return null;
   }
 
   @Override
-  public void write(IIOMetadata streamMetadata, IIOImage image, ImageWriteParam param) throws IOException {
+  public void write(IIOMetadata streamMetadata, IIOImage image, ImageWriteParam param)
+      throws IOException {
     RenderedImage img = image.getRenderedImage();
     if (stream == null) {
       throw new IOException("Set an output first!");

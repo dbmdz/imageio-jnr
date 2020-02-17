@@ -1,5 +1,7 @@
 package de.digitalcollections.openjpeg.imageio;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import de.digitalcollections.openjpeg.OpenJpeg;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
@@ -16,9 +18,6 @@ import javax.imageio.stream.ImageOutputStream;
 import org.assertj.core.util.Lists;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-
-import static org.assertj.core.api.Assertions.assertThat;
-
 
 class OpenJp2ImageWriterTest {
   private OpenJp2ImageWriter writer;
@@ -45,9 +44,10 @@ class OpenJp2ImageWriterTest {
     OpenJpeg lib = new OpenJpeg();
     // We need to pin the version so we can reliably compare checksums
     if (!lib.lib.opj_version().equals("2.3.0")) {
-      throw new RuntimeException(String.format(
-          "Writer tests must be run with version 2.3.0 of the shared library (installed version is %s)",
-          lib.lib.opj_version()));
+      throw new RuntimeException(
+          String.format(
+              "Writer tests must be run with version 2.3.0 of the shared library (installed version is %s)",
+              lib.lib.opj_version()));
     }
     writer = (OpenJp2ImageWriter) ImageIO.getImageWritersByFormatName("jpeg2000").next();
   }
@@ -61,14 +61,18 @@ class OpenJp2ImageWriterTest {
       writer.write(null, new IIOImage(in, null, null), param);
     }
     os.flush();
-    assertThat(sha1digest(new ByteArrayInputStream(os.toByteArray()))).isEqualTo(sha1digest(expected));
+    assertThat(sha1digest(new ByteArrayInputStream(os.toByteArray())))
+        .isEqualTo(sha1digest(expected));
   }
 
   @Test
   void writerIsDiscoverable() {
-    assertThat(Lists.newArrayList(ImageIO.getImageWritersByFormatName("jpeg2000"))).hasAtLeastOneElementOfType(OpenJp2ImageWriter.class);
-    assertThat(Lists.newArrayList(ImageIO.getImageWritersByMIMEType("image/jp2"))).hasAtLeastOneElementOfType(OpenJp2ImageWriter.class);
-    assertThat(Lists.newArrayList(ImageIO.getImageWritersBySuffix("jp2"))).hasAtLeastOneElementOfType(OpenJp2ImageWriter.class);
+    assertThat(Lists.newArrayList(ImageIO.getImageWritersByFormatName("jpeg2000")))
+        .hasAtLeastOneElementOfType(OpenJp2ImageWriter.class);
+    assertThat(Lists.newArrayList(ImageIO.getImageWritersByMIMEType("image/jp2")))
+        .hasAtLeastOneElementOfType(OpenJp2ImageWriter.class);
+    assertThat(Lists.newArrayList(ImageIO.getImageWritersBySuffix("jp2")))
+        .hasAtLeastOneElementOfType(OpenJp2ImageWriter.class);
   }
 
   @Test
@@ -89,7 +93,8 @@ class OpenJp2ImageWriterTest {
       writer.write(null, new IIOImage(in, null, null), param);
     }
     os.flush();
-    assertThat(sha1digest(new ByteArrayInputStream(os.toByteArray()))).isEqualTo(sha1digest(expected));
+    assertThat(sha1digest(new ByteArrayInputStream(os.toByteArray())))
+        .isEqualTo(sha1digest(expected));
   }
 
   @Test

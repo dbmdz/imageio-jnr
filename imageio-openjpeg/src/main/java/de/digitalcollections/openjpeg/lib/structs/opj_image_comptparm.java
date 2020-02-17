@@ -4,7 +4,9 @@ import jnr.ffi.Runtime;
 import jnr.ffi.Struct;
 
 public class opj_image_comptparm extends Struct {
-  /** XRsiz: horizontal separation of a sample of ith component with respect to the reference grid */
+  /**
+   * XRsiz: horizontal separation of a sample of ith component with respect to the reference grid
+   */
   public Unsigned32 dx = new Unsigned32();
   /** YRsiz: vertical separation of a sample of ith component with respect to the reference grid */
   public Unsigned32 dy = new Unsigned32();

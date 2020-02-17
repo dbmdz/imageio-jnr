@@ -1,5 +1,7 @@
 package de.digitalcollections.turbojpeg.imageio;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import com.google.common.collect.Lists;
 import com.google.common.collect.Streams;
 import java.awt.image.BufferedImage;
@@ -13,11 +15,11 @@ import javax.imageio.ImageWriter;
 import javax.imageio.stream.ImageOutputStream;
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
-/** NOTE: These tests can only be superficial, since TurboJPEG is merely a wrapping API for a number
- *  of different JPEG implementations and versions, which is why we cannot make bit-accurate assertions on the
- *  generated data. */
+/**
+ * NOTE: These tests can only be superficial, since TurboJPEG is merely a wrapping API for a number
+ * of different JPEG implementations and versions, which is why we cannot make bit-accurate
+ * assertions on the generated data.
+ */
 class TurboJpegImageWriterTest {
   @Test
   void writerIsDiscoverable() {
@@ -29,9 +31,11 @@ class TurboJpegImageWriterTest {
 
   @Test
   public void testEncode() throws IOException {
-    ImageWriter writer = Streams.stream(ImageIO.getImageWritersByFormatName("jpeg"))
-        .filter(TurboJpegImageWriter.class::isInstance)
-        .findFirst().get();
+    ImageWriter writer =
+        Streams.stream(ImageIO.getImageWritersByFormatName("jpeg"))
+            .filter(TurboJpegImageWriter.class::isInstance)
+            .findFirst()
+            .get();
     ImageWriteParam param = writer.getDefaultWriteParam();
     param.setCompressionMode(ImageWriteParam.MODE_EXPLICIT);
     param.setCompressionQuality(0.85f);
@@ -47,9 +51,11 @@ class TurboJpegImageWriterTest {
 
   @Test
   public void testEncodeBinary() throws Exception {
-    ImageWriter writer = Streams.stream(ImageIO.getImageWritersByFormatName("jpeg"))
-        .filter(TurboJpegImageWriter.class::isInstance)
-        .findFirst().get();
+    ImageWriter writer =
+        Streams.stream(ImageIO.getImageWritersByFormatName("jpeg"))
+            .filter(TurboJpegImageWriter.class::isInstance)
+            .findFirst()
+            .get();
     ImageWriteParam param = writer.getDefaultWriteParam();
     param.setCompressionMode(ImageWriteParam.MODE_EXPLICIT);
     param.setCompressionQuality(0.85f);
@@ -72,9 +78,11 @@ class TurboJpegImageWriterTest {
 
   @Test
   public void testCanReuseWriter() throws IOException {
-    ImageWriter writer = Streams.stream(ImageIO.getImageWritersByFormatName("jpeg"))
-        .filter(TurboJpegImageWriter.class::isInstance)
-        .findFirst().get();
+    ImageWriter writer =
+        Streams.stream(ImageIO.getImageWritersByFormatName("jpeg"))
+            .filter(TurboJpegImageWriter.class::isInstance)
+            .findFirst()
+            .get();
 
     BufferedImage in = ImageIO.read(ClassLoader.getSystemResource("rgb.jpg"));
     ByteArrayOutputStream rgb = new ByteArrayOutputStream();

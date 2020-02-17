@@ -17,7 +17,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * ImageReader for JPEG2000 images, based on the openjp2 library from the OpenJPEG project, accessed via JNR-FFI.
+ * ImageReader for JPEG2000 images, based on the openjp2 library from the OpenJPEG project, accessed
+ * via JNR-FFI.
  */
 public class OpenJp2ImageReader extends ImageReader {
   private static final Logger LOGGER = LoggerFactory.getLogger(OpenJp2ImageReader.class);
@@ -41,7 +42,7 @@ public class OpenJp2ImageReader extends ImageReader {
     if (input == null) {
       return;
     }
-    if (input instanceof  ImageInputStream) {
+    if (input instanceof ImageInputStream) {
       stream = (ImageInputStream) input;
     } else {
       throw new IllegalArgumentException("Bad input.");
@@ -55,7 +56,7 @@ public class OpenJp2ImageReader extends ImageReader {
   /**
    * Corresponds to the number of resolutions in the image.
    *
-   * Image 0 has the native resolution, all following indices are 1/2^idx times smaller.
+   * <p>Image 0 has the native resolution, all following indices are 1/2^idx times smaller.
    */
   @Override
   public int getNumImages(boolean allowSearch) throws IOException {
@@ -86,18 +87,14 @@ public class OpenJp2ImageReader extends ImageReader {
     return (int) (size / Math.pow(2, (double) imageIndex));
   }
 
-  /**
-   * Get the width of the given resolution of the image.
-   */
+  /** Get the width of the given resolution of the image. */
   @Override
   public int getWidth(int imageIndex) throws IOException {
     checkIndex(imageIndex);
     return adjustSize(info.getNativeSize().width, imageIndex);
   }
 
-  /**
-   * Get the height of the given resolution of the image.
-   */
+  /** Get the height of the given resolution of the image. */
   @Override
   public int getHeight(int imageIndex) throws IOException {
     checkIndex(imageIndex);
@@ -108,15 +105,17 @@ public class OpenJp2ImageReader extends ImageReader {
   public Iterator<ImageTypeSpecifier> getImageTypes(int imageIndex) throws IOException {
     checkIndex(imageIndex);
     // TODO: Support grayscale?
-    return Collections.singletonList(ImageTypeSpecifier.createFromBufferedImageType(BufferedImage.TYPE_3BYTE_BGR))
-                      .iterator();
+    return Collections.singletonList(
+            ImageTypeSpecifier.createFromBufferedImageType(BufferedImage.TYPE_3BYTE_BGR))
+        .iterator();
   }
 
   private Rectangle adjustRegion(int imageIndex, Rectangle sourceRegion) throws IOException {
     if (sourceRegion == null) {
       return null;
     }
-    if (sourceRegion.x == 0 && sourceRegion.y == 0
+    if (sourceRegion.x == 0
+        && sourceRegion.y == 0
         && sourceRegion.width == getWidth(imageIndex)
         && sourceRegion.height == getHeight(imageIndex)) {
       return null;
@@ -129,9 +128,7 @@ public class OpenJp2ImageReader extends ImageReader {
         (int) Math.ceil(scaleFactor * sourceRegion.height));
   }
 
-  /**
-   * Read the image in the given resolution.
-   */
+  /** Read the image in the given resolution. */
   @Override
   public BufferedImage read(int imageIndex, ImageReadParam param) throws IOException {
     checkIndex(imageIndex);
@@ -185,12 +182,11 @@ public class OpenJp2ImageReader extends ImageReader {
     int yOffset = getTileGridYOffset(imageIndex);
     int tileWidth = getTileWidth(imageIndex);
     int tileHeight = getTileHeight(imageIndex);
-    Rectangle region = new Rectangle(
-        xOffset + tileX * tileWidth,
-        yOffset + tileY * tileHeight,
-        tileWidth,
-        tileHeight);
-    if (region.x + region.width > getWidth(imageIndex) || region.y + region.height > getHeight(imageIndex)) {
+    Rectangle region =
+        new Rectangle(
+            xOffset + tileX * tileWidth, yOffset + tileY * tileHeight, tileWidth, tileHeight);
+    if (region.x + region.width > getWidth(imageIndex)
+        || region.y + region.height > getHeight(imageIndex)) {
       throw new IllegalArgumentException("Tile indices out of bounds.");
     }
     ImageReadParam param = getDefaultReadParam();

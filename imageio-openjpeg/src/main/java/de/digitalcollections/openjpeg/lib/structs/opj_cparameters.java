@@ -36,12 +36,15 @@ public class opj_cparameters extends Struct {
   public Unsigned32 numpocs = new Unsigned32();
   /** number of layers */
   public Signed32 tcp_numlayers = new Signed32();
-  /** rates of layers - might be subsequently limited by the max_cs_size field.
-   * Should be decreasing. 1 can be
-   * used as last value to indicate the last layer is lossless. */
+  /**
+   * rates of layers - might be subsequently limited by the max_cs_size field. Should be decreasing.
+   * 1 can be used as last value to indicate the last layer is lossless.
+   */
   public Float[] tcp_rates = array(new Float[100]);
-  /** different psnr for successive layers. Should be increasing. 0 can be
-   * used as last value to indicate the last layer is lossless. */
+  /**
+   * different psnr for successive layers. Should be increasing. 0 can be used as last value to
+   * indicate the last layer is lossless.
+   */
   public Float[] tcp_distoratio = array(new Float[100]);
   /** number of resolutions */
   public Signed32 numresolution = new Signed32();
@@ -64,15 +67,21 @@ public class opj_cparameters extends Struct {
   /** initial precinct height */
   public Signed32[] prch_init = array(new Signed32[libopenjp2.OPJ_J2K_MAXRLVLS]);
 
-  /**@name command line encoder parameters (not used inside the library) */
-    /*@{*/
+  /** @name command line encoder parameters (not used inside the library) */
+  /*@{*/
   /** input file name */
   String infile = new AsciiString(libopenjp2.OPJ_PATH_LEN);
   /** output file name */
   String outfile = new AsciiString(libopenjp2.OPJ_PATH_LEN);
-  /** DEPRECATED. Index generation is now handeld with the opj_encode_with_info() function. Set to NULL */
+  /**
+   * DEPRECATED. Index generation is now handeld with the opj_encode_with_info() function. Set to
+   * NULL
+   */
   public Signed32 index_on = new Signed32();
-  /** DEPRECATED. Index generation is now handeld with the opj_encode_with_info() function. Set to NULL */
+  /**
+   * DEPRECATED. Index generation is now handeld with the opj_encode_with_info() function. Set to
+   * NULL
+   */
   String index = new AsciiString(libopenjp2.OPJ_PATH_LEN);
   /** subimage encoding: origin image offset in x direction */
   Signed32 image_offset_x0 = new Signed32();
@@ -82,15 +91,16 @@ public class opj_cparameters extends Struct {
   Signed32 subsampling_dx = new Signed32();
   /** subsampling value for dy */
   Signed32 subsampling_dy = new Signed32();
-  /** input file format 0: PGX, 1: PxM, 2: BMP 3:TIF*/
+  /** input file format 0: PGX, 1: PxM, 2: BMP 3:TIF */
   Signed32 decod_format = new Signed32();
   /** output file format 0: J2K, 1: JP2, 2: JPT */
   Signed32 cod_format = new Signed32();
-    /*@}*/
+  /*@}*/
 
-    /* UniPG>> */ /* NOT YET USED IN THE V2 VERSION OF OPENJPEG */
-  /**@name JPWL encoding parameters */
-    /*@{*/
+  /* UniPG>> */
+  /* NOT YET USED IN THE V2 VERSION OF OPENJPEG */
+  /** @name JPWL encoding parameters */
+  /*@{*/
   /** enables writing of EPC in MH, thus activating JPWL */
   public Boolean jpwl_epc_on = new Boolean();
   /** error protection method for MH (0,1,16,32,37-128) */
@@ -117,51 +127,48 @@ public class opj_cparameters extends Struct {
   Signed32[] jpwl_sens_TPH_tileno = array(new Signed32[libopenjp2.JPWL_MAX_NO_TILESPECS]);
   /** sensitivity methods for TPHs (-1=no,0-7) */
   Signed32[] jpwl_sens_TPH = array(new Signed32[libopenjp2.JPWL_MAX_NO_TILESPECS]);
-    /*@}*/
-    /* <<UniPG */
+  /*@}*/
+  /* <<UniPG */
 
   /**
-   * DEPRECATED: use RSIZ, OPJ_PROFILE_* and MAX_COMP_SIZE instead
-   * Digital Cinema compliance 0-not compliant, 1-compliant
-   * */
+   * DEPRECATED: use RSIZ, OPJ_PROFILE_* and MAX_COMP_SIZE instead Digital Cinema compliance 0-not
+   * compliant, 1-compliant
+   */
   Signed32 cp_cinema = new Signed32();
   /**
-   * Maximum size (in bytes) for each component.
-   * If == 0, component size limitation is not considered
-   * */
+   * Maximum size (in bytes) for each component. If == 0, component size limitation is not
+   * considered
+   */
   Signed32 max_comp_size = new Signed32();
-  /**
-   * DEPRECATED: use RSIZ, OPJ_PROFILE_* and OPJ_EXTENSION_* instead
-   * Profile name
-   * */
+  /** DEPRECATED: use RSIZ, OPJ_PROFILE_* and OPJ_EXTENSION_* instead Profile name */
   Signed32 cp_rsiz = new Signed32();
-  /** Tile part generation*/
+  /** Tile part generation */
   Unsigned8 tp_on = new Unsigned8();
-  /** Flag for Tile part generation*/
+  /** Flag for Tile part generation */
   Unsigned8 tp_flag = new Unsigned8();
   /** MCT (multiple component transform) */
   public Unsigned8 tcp_mct = new Unsigned8();
-  /** Enable JPIP indexing*/
+  /** Enable JPIP indexing */
   Boolean jpip_on = new Boolean();
-  /** Naive implementation of MCT restricted to a single reversible array based
-   encoding without offset concerning all the components. */
+  /**
+   * Naive implementation of MCT restricted to a single reversible array based encoding without
+   * offset concerning all the components.
+   */
   Pointer mct_data = new Pointer();
   /**
-   * Maximum size (in bytes) for the whole codestream.
-   * If == 0, codestream size limitation is not considered
-   * If it does not comply with tcp_rates, max_cs_size prevails
-   * and a warning is issued.
-   * */
+   * Maximum size (in bytes) for the whole codestream. If == 0, codestream size limitation is not
+   * considered If it does not comply with tcp_rates, max_cs_size prevails and a warning is issued.
+   */
   Signed32 max_cs_size = new Signed32();
-  /** RSIZ value
-   To be used to combine OPJ_PROFILE_*, OPJ_EXTENSION_* and (sub)levels values. */
+  /** RSIZ value To be used to combine OPJ_PROFILE_*, OPJ_EXTENSION_* and (sub)levels values. */
   Unsigned16 rsiz = new Unsigned16();
 
   public opj_cparameters(Runtime runtime) {
     super(runtime);
-    // FIXME: For some reason this is neccessary, even though the `array(...)` call does exactly this.
+    // FIXME: For some reason this is neccessary, even though the `array(...)` call does exactly
+    // this.
     // Removing it causes a double free crash
-    for (int i=0; i < this.POC.length; i++) {
+    for (int i = 0; i < this.POC.length; i++) {
       this.POC[i] = inner(new opj_poc(runtime));
     }
   }
