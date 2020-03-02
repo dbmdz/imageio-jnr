@@ -32,7 +32,7 @@ public class OpenJpeg {
   private static final Logger LOGGER = LoggerFactory.getLogger(OpenJpeg.class);
 
   @SuppressWarnings("checkstyle:constantname")
-  private static final opj_msg_callback infoLogFn = (msg, data) -> LOGGER.debug(msg.trim());
+  private static final opj_msg_callback debugLogFn = (msg, data) -> LOGGER.debug(msg.trim());
 
   @SuppressWarnings("checkstyle:constantname")
   private static final opj_msg_callback warnLogFn = (msg, data) -> LOGGER.warn(msg.trim());
@@ -57,8 +57,8 @@ public class OpenJpeg {
   }
 
   private void setupLogger(Pointer codec) {
-    if (LOGGER.isInfoEnabled()) {
-      if (!lib.opj_set_info_handler(codec, infoLogFn)) {
+    if (LOGGER.isDebugEnabled()) {
+      if (!lib.opj_set_info_handler(codec, debugLogFn)) {
         throw new RuntimeException("Could not set info logging handler");
       }
     }
