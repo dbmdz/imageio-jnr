@@ -19,6 +19,7 @@
 
   <properties>
     <version.guava>28.2-jre</version.guava>
+    <version.imageio-tiff>3.5</version.imageio-tiff>
   </properties>
 
   <dependencies>
@@ -30,6 +31,13 @@
       <groupId>com.google.guava</groupId>
       <artifactId>guava</artifactId>
       <version>${version.guava}</version>
+    </dependency>
+    <dependency>
+      <!-- For testing compatibility with JPEG in TIF -->
+      <groupId>com.twelvemonkeys.imageio</groupId>
+      <artifactId>imageio-tiff</artifactId>
+      <version>${version.imageio-tiff}</version>
+      <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.assertj</groupId>
@@ -48,13 +56,6 @@
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-simple</artifactId>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <!-- For testing compatibility with JPEG in TIF -->
-      <groupId>com.twelvemonkeys.imageio</groupId>
-      <artifactId>imageio-tiff</artifactId>
-      <version>3.5</version>
       <scope>test</scope>
     </dependency>
   </dependencies>
