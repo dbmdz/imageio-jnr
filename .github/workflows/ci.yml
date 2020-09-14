@@ -1,0 +1,31 @@
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        java: [11, 14]
+        libs: ["libjpeg-dev", "libturbojpeg-dev"]
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install JPEG library
+        run: sudo apt install ${{ matrix.libs }}
+      - name: Set up JDK
+        uses: actions/setup-java@v1
+        with:
+          java-version: ${{ matrix.java }}
+      - uses: actions/cache@v2
+        env:
+          cache-name: cache-maven-artifacts
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+      - name: Build with Maven
+        run: mvn -B -Pintegration verify
+      - name: Report Coverage
+        uses: codecov/codecov-action@v1
