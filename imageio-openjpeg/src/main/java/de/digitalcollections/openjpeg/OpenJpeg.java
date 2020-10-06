@@ -275,6 +275,19 @@ public class OpenJpeg {
         for (int i = 0; i < targetWidth * targetHeight; i++) {
           data[i] = (byte) (ptr.getInt(i * 4) / colorDepthFactor);
         }
+      } else if (numcomps == 4) {
+        bufImg = new BufferedImage(targetWidth, targetHeight, BufferedImage.TYPE_4BYTE_ABGR );
+        Pointer red = comps[0].data.get();
+        Pointer green = comps[1].data.get();
+        Pointer blue = comps[2].data.get();
+        Pointer alpha = comps[3].data.get();
+        byte[] bgrData = ((DataBufferByte) bufImg.getRaster().getDataBuffer()).getData();
+        for (int i = 0, j = 0; i < targetWidth * targetHeight; i++) {
+          bgrData[j++] = (byte) (alpha.getInt(i * 4) / colorDepthFactor);
+          bgrData[j++] = (byte) (blue.getInt(i * 4) / colorDepthFactor);
+          bgrData[j++] = (byte) (green.getInt(i * 4) / colorDepthFactor);
+          bgrData[j++] = (byte) (red.getInt(i * 4) / colorDepthFactor);
+        }
       } else {
         throw new IOException(String.format("Unsupported number of components: %d", numcomps));
       }
