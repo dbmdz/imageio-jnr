@@ -1,8 +1,6 @@
 # imageio-jnr
 
 [![Javadocs](https://javadoc.io/badge/de.digitalcollections.imageio/imageio-jnr.svg)](https://javadoc.io/doc/de.digitalcollections.imageio/imageio-jnr)
-[![Build Status](https://img.shields.io/travis/dbmdz/imageio-jnr/master.svg)](https://travis-ci.org/dbmdz/imageio-jnr)
-[![Codecov](https://img.shields.io/codecov/c/github/dbmdz/imageio-jnr/master.svg)](https://codecov.io/gh/dbmdz/imageio-jnr)
 [![License](https://img.shields.io/github/license/dbmdz/imageio-jnr.svg)](LICENSE)
 [![GitHub release](https://img.shields.io/github/release/dbmdz/imageio-jnr.svg)](https://github.com/dbmdz/imageio-jnr/releases)
 [![Maven Central](https://img.shields.io/maven-central/v/de.digitalcollections.imageio/imageio-jnr.svg)](https://search.maven.org/search?q=a:imageio-jnr)
