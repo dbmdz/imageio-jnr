@@ -1,11 +1,13 @@
 package de.digitalcollections.openjpeg.imageio;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import javax.imageio.ImageIO;
 import javax.imageio.ImageReadParam;
 import javax.imageio.ImageReader;
@@ -101,5 +103,29 @@ class OpenJp2ImageReaderTest {
     BufferedImage bwImg = reader.read(0, null);
 
     assertThat(rgbImg.getRGB(256, 256)).isNotEqualTo(bwImg.getRGB(256, 256));
+  }
+
+  private void assertImageEquals( String expectedImageName, String actualImageName ) throws IOException {
+    OpenJp2ImageReader reader = getReader( actualImageName );
+    BufferedImage actualImage = reader.read(0, null);
+
+    InputStream input = ClassLoader.getSystemResourceAsStream( expectedImageName);
+    BufferedImage expectedImg = ImageIO.read( input );
+    int width = expectedImg.getWidth();
+    assertEquals( width, actualImage.getWidth() );
+    int height = expectedImg.getHeight();
+    assertEquals( height, actualImage.getHeight() );
+    for( int x = 0; x < width; x++ ) {
+      for( int y = 0; y < height; y++ ) {
+        int expected = expectedImg.getRGB( x, y );
+        int actual = actualImage.getRGB( x, y );
+        assertEquals( expected, actual, "RGB of Pixel " + x + "," + y );
+      }
+    }
+  }
+
+  @Test
+  public void testReadRGBA() throws Exception {
+    assertImageEquals( "rgba.png", "rgba.jp2" );
   }
 }
