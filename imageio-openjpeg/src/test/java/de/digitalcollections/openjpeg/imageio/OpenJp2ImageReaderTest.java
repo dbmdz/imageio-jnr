@@ -119,6 +119,10 @@ class OpenJp2ImageReaderTest {
       for( int y = 0; y < height; y++ ) {
         int expected = expectedImg.getRGB( x, y );
         int actual = actualImage.getRGB( x, y );
+        if( expected >> 24 == 0 && actual >> 24 == 0 ) {
+          // transparent
+          continue;
+        }
         assertEquals( expected, actual, "RGB of Pixel " + x + "," + y );
       }
     }
@@ -127,5 +131,15 @@ class OpenJp2ImageReaderTest {
   @Test
   public void testReadRGBA() throws Exception {
     assertImageEquals( "rgba.png", "rgba.jp2" );
+  }
+
+  @Test
+  public void testReadCMYK() throws Exception {
+    assertImageEquals( "cmyk.png", "cmyk.jp2" );
+  }
+
+  @Test
+  public void testReadCMYK_withAlpha() throws Exception {
+    assertImageEquals( "cmykWithAlpha.png", "cmykWithAlpha.jp2" );
   }
 }
