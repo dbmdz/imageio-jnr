@@ -142,4 +142,9 @@ class OpenJp2ImageReaderTest {
   public void testReadCMYK_withAlpha() throws Exception {
     assertImageEquals( "cmykWithAlpha.png", "cmykWithAlpha.jp2" );
   }
+
+  @Test
+  public void testReadGrayWithAlpha() throws Exception {
+    assertImageEquals( "grayWithAlpha.png", "grayWithAlpha.jp2" );
+  }
 }
