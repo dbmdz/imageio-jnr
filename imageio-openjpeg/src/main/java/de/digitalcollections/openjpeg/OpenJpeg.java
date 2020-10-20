@@ -285,6 +285,21 @@ public class OpenJpeg {
           }
         }
         break;
+        case 2: {
+          // gray with alpha
+          bufImg = new BufferedImage(targetWidth, targetHeight, BufferedImage.TYPE_4BYTE_ABGR);
+          Pointer gray = comps[0].data.get();
+          Pointer alpha = comps[1].data.get();
+          byte[] bgrData = ((DataBufferByte) bufImg.getRaster().getDataBuffer()).getData();
+          for (int i = 0, j = 0; i < targetWidth * targetHeight; i++) {
+            bgrData[j++] = (byte) (alpha.getInt(i * 4) / colorDepthFactor);
+            byte colValue = (byte) (gray.getInt(i * 4) / colorDepthFactor);
+            bgrData[j++] = colValue;
+            bgrData[j++] = colValue;
+            bgrData[j++] = colValue;
+          }
+        }
+        break;
         case 4: {
           if( colorSpace == COLOR_SPACE.OPJ_CLRSPC_CMYK ) {
             bufImg = decodeCMYK( targetWidth, targetHeight, numcomps, colorDepthFactor, comps );
