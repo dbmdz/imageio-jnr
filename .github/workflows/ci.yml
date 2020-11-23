@@ -15,7 +15,7 @@ jobs:
       - name: Install specific version 2.3 of OpenJPEG library
         run: wget https://github.com/uclouvain/openjpeg/releases/download/v2.3.0/openjpeg-v2.3.0-linux-x86_64.tar.gz -O /tmp/openjpeg.tar.gz && cd /tmp/ && tar -xvf /tmp/openjpeg.tar.gz
       - name: Set environment variable for OpenJPEG library
-        run: echo '::set-env name=LD_LIBRARY_PATH::/tmp/openjpeg-v2.3.0-linux-x86_64/lib'
+        run: echo "LD_LIBRARY_PATH=/tmp/openjpeg-v2.3.0-linux-x86_64/lib" >> $GITHUB_ENV
       - name: Install TurboJPEG library
         run: sudo apt install libturbojpeg
       - name: Set up JDK
@@ -52,7 +52,7 @@ jobs:
       - name: Install specific version 2.3 of OpenJPEG library
         run: wget https://github.com/uclouvain/openjpeg/releases/download/v2.3.0/openjpeg-v2.3.0-linux-x86_64.tar.gz -O /tmp/openjpeg.tar.gz && cd /tmp/ && tar -xvf /tmp/openjpeg.tar.gz
       - name: Set environment variable for OpenJPEG library
-        run: echo '::set-env name=LD_LIBRARY_PATH::/tmp/openjpeg-v2.3.0-linux-x86_64/lib'
+        run: echo "LD_LIBRARY_PATH=/tmp/openjpeg-v2.3.0-linux-x86_64/lib" >> $GITHUB_ENV
       - name: Install TurboJPEG library
         run: sudo apt install libturbojpeg
       - name: Publish to the Maven Central Repository
