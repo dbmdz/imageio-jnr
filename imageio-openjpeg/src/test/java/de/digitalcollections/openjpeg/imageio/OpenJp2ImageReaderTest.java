@@ -147,4 +147,14 @@ class OpenJp2ImageReaderTest {
   public void testReadGrayWithAlpha() throws Exception {
     assertImageEquals( "grayWithAlpha.png", "grayWithAlpha.jp2" );
   }
+
+  @Test
+  public void testReadYUV() throws Exception {
+    OpenJp2ImageReader reader = getReader( "yuv.jp2" );
+    try {
+      reader.read(0, null);
+    } catch( IOException ex ) {
+      assertEquals("Images with YUV color space are currently not supported.", ex.getMessage());
+    }
+  }
 }
