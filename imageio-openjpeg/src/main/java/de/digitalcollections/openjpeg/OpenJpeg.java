@@ -250,6 +250,11 @@ public class OpenJpeg {
       targetHeight = comps[0].h.intValue();
       COLOR_SPACE colorSpace = img.color_space.get();
 
+      if( colorSpace == COLOR_SPACE.OPJ_CLRSPC_SYCC ) {
+        // prevent a JVM crash because the 3 color components has a different size
+        throw new IOException("Images with YUV color space are currently not supported.");
+      }
+
       // 8bit color depth is assumed as default color depth here -> 2 ^ 8 = 256 colors are available
       // For 16bit color depth -> 2 ^ 16 = 65536 color are available.
       // To "scale down" images with 16bit color depth to 8 bit, just a color depth factor needs to
