@@ -130,30 +130,30 @@ class OpenJp2ImageReaderTest {
 
   @Test
   public void testReadRGBA() throws Exception {
-    assertImageEquals( "rgba.png", "rgba.jp2" );
+    assertImageEquals("rgba.png", "rgba.jp2");
   }
 
   @Test
   public void testReadCMYK() throws Exception {
-    assertImageEquals( "cmyk.png", "cmyk.jp2" );
+    assertImageEquals("cmyk.png", "cmyk.jp2");
   }
 
   @Test
   public void testReadCMYK_withAlpha() throws Exception {
-    assertImageEquals( "cmykWithAlpha.png", "cmykWithAlpha.jp2" );
+    assertImageEquals("cmykWithAlpha.png", "cmykWithAlpha.jp2");
   }
 
   @Test
   public void testReadGrayWithAlpha() throws Exception {
-    assertImageEquals( "grayWithAlpha.png", "grayWithAlpha.jp2" );
+    assertImageEquals("grayWithAlpha.png", "grayWithAlpha.jp2");
   }
 
   @Test
   public void testReadYUV() throws Exception {
-    OpenJp2ImageReader reader = getReader( "yuv.jp2" );
+    OpenJp2ImageReader reader = getReader("yuv.jp2");
     try {
       reader.read(0, null);
-    } catch( IOException ex ) {
+    } catch (IOException ex) {
       assertEquals("Images with YUV color space are currently not supported.", ex.getMessage());
     }
   }

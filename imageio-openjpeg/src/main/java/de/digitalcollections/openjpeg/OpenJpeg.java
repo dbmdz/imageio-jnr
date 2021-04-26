@@ -250,7 +250,7 @@ public class OpenJpeg {
       targetHeight = comps[0].h.intValue();
       COLOR_SPACE colorSpace = img.color_space.get();
 
-      if( colorSpace == COLOR_SPACE.OPJ_CLRSPC_SYCC ) {
+      if (colorSpace == COLOR_SPACE.OPJ_CLRSPC_SYCC) {
         // prevent a JVM crash because the 3 color components has a different size
         throw new IOException("Images with YUV color space are currently not supported.");
       }
@@ -264,70 +264,75 @@ public class OpenJpeg {
       int colorDepthFactor = ((int) Math.pow(2, comps[0].prec.intValue())) / 256;
       colorDepthFactor = colorDepthFactor > 0 ? colorDepthFactor : 1;
 
-      switch( numcomps ) {
-        case 3: {
-          bufImg = new BufferedImage(targetWidth, targetHeight, BufferedImage.TYPE_3BYTE_BGR);
+      switch (numcomps) {
+        case 3:
+          {
+            bufImg = new BufferedImage(targetWidth, targetHeight, BufferedImage.TYPE_3BYTE_BGR);
 
-          // NOTE: We don't use bufImg.getRaster().setPixel, since directly accessing the underlying
-          // buffer is ~400% faster
-          Pointer red = comps[0].data.get();
-          Pointer green = comps[1].data.get();
-          Pointer blue = comps[2].data.get();
-          byte[] bgrData = ((DataBufferByte) bufImg.getRaster().getDataBuffer()).getData();
-          for (int i = 0; i < targetWidth * targetHeight; i++) {
-            bgrData[i * 3] = (byte) (blue.getInt(i * 4) / colorDepthFactor);
-            bgrData[i * 3 + 1] = (byte) (green.getInt(i * 4) / colorDepthFactor);
-            bgrData[i * 3 + 2] = (byte) (red.getInt(i * 4) / colorDepthFactor);
-          }
-        }
-        break;
-        case 1: {
-          bufImg = new BufferedImage(targetWidth, targetHeight, BufferedImage.TYPE_BYTE_GRAY);
-          Pointer ptr = comps[0].data.get();
-          byte[] data = ((DataBufferByte) bufImg.getRaster().getDataBuffer()).getData();
-          for (int i = 0; i < targetWidth * targetHeight; i++) {
-            data[i] = (byte) (ptr.getInt(i * 4) / colorDepthFactor);
-          }
-        }
-        break;
-        case 2: {
-          // gray with alpha
-          bufImg = new BufferedImage(targetWidth, targetHeight, BufferedImage.TYPE_4BYTE_ABGR);
-          Pointer gray = comps[0].data.get();
-          Pointer alpha = comps[1].data.get();
-          byte[] bgrData = ((DataBufferByte) bufImg.getRaster().getDataBuffer()).getData();
-          for (int i = 0, j = 0; i < targetWidth * targetHeight; i++) {
-            bgrData[j++] = (byte) (alpha.getInt(i * 4) / colorDepthFactor);
-            byte colValue = (byte) (gray.getInt(i * 4) / colorDepthFactor);
-            bgrData[j++] = colValue;
-            bgrData[j++] = colValue;
-            bgrData[j++] = colValue;
-          }
-        }
-        break;
-        case 4: {
-          if( colorSpace == COLOR_SPACE.OPJ_CLRSPC_CMYK ) {
-            bufImg = decodeCMYK( targetWidth, targetHeight, numcomps, colorDepthFactor, comps );
-          } else {
-            bufImg = new BufferedImage(targetWidth, targetHeight, BufferedImage.TYPE_4BYTE_ABGR );
+            // NOTE: We don't use bufImg.getRaster().setPixel, since directly accessing the
+            // underlying buffer is ~400% faster
             Pointer red = comps[0].data.get();
             Pointer green = comps[1].data.get();
             Pointer blue = comps[2].data.get();
-            Pointer alpha = comps[3].data.get();
+            byte[] bgrData = ((DataBufferByte) bufImg.getRaster().getDataBuffer()).getData();
+            for (int i = 0; i < targetWidth * targetHeight; i++) {
+              bgrData[i * 3] = (byte) (blue.getInt(i * 4) / colorDepthFactor);
+              bgrData[i * 3 + 1] = (byte) (green.getInt(i * 4) / colorDepthFactor);
+              bgrData[i * 3 + 2] = (byte) (red.getInt(i * 4) / colorDepthFactor);
+            }
+          }
+          break;
+        case 1:
+          {
+            bufImg = new BufferedImage(targetWidth, targetHeight, BufferedImage.TYPE_BYTE_GRAY);
+            Pointer ptr = comps[0].data.get();
+            byte[] data = ((DataBufferByte) bufImg.getRaster().getDataBuffer()).getData();
+            for (int i = 0; i < targetWidth * targetHeight; i++) {
+              data[i] = (byte) (ptr.getInt(i * 4) / colorDepthFactor);
+            }
+          }
+          break;
+        case 2:
+          {
+            // gray with alpha
+            bufImg = new BufferedImage(targetWidth, targetHeight, BufferedImage.TYPE_4BYTE_ABGR);
+            Pointer gray = comps[0].data.get();
+            Pointer alpha = comps[1].data.get();
             byte[] bgrData = ((DataBufferByte) bufImg.getRaster().getDataBuffer()).getData();
             for (int i = 0, j = 0; i < targetWidth * targetHeight; i++) {
               bgrData[j++] = (byte) (alpha.getInt(i * 4) / colorDepthFactor);
-              bgrData[j++] = (byte) (blue.getInt(i * 4) / colorDepthFactor);
-              bgrData[j++] = (byte) (green.getInt(i * 4) / colorDepthFactor);
-              bgrData[j++] = (byte) (red.getInt(i * 4) / colorDepthFactor);
+              byte colValue = (byte) (gray.getInt(i * 4) / colorDepthFactor);
+              bgrData[j++] = colValue;
+              bgrData[j++] = colValue;
+              bgrData[j++] = colValue;
             }
           }
-        }
-        break;
-        case 5: {
-          bufImg = decodeCMYK( targetWidth, targetHeight, numcomps, colorDepthFactor, comps );
-        }
-        break;
+          break;
+        case 4:
+          {
+            if (colorSpace == COLOR_SPACE.OPJ_CLRSPC_CMYK) {
+              bufImg = decodeCMYK(targetWidth, targetHeight, numcomps, colorDepthFactor, comps);
+            } else {
+              bufImg = new BufferedImage(targetWidth, targetHeight, BufferedImage.TYPE_4BYTE_ABGR);
+              Pointer red = comps[0].data.get();
+              Pointer green = comps[1].data.get();
+              Pointer blue = comps[2].data.get();
+              Pointer alpha = comps[3].data.get();
+              byte[] bgrData = ((DataBufferByte) bufImg.getRaster().getDataBuffer()).getData();
+              for (int i = 0, j = 0; i < targetWidth * targetHeight; i++) {
+                bgrData[j++] = (byte) (alpha.getInt(i * 4) / colorDepthFactor);
+                bgrData[j++] = (byte) (blue.getInt(i * 4) / colorDepthFactor);
+                bgrData[j++] = (byte) (green.getInt(i * 4) / colorDepthFactor);
+                bgrData[j++] = (byte) (red.getInt(i * 4) / colorDepthFactor);
+              }
+            }
+          }
+          break;
+        case 5:
+          {
+            bufImg = decodeCMYK(targetWidth, targetHeight, numcomps, colorDepthFactor, comps);
+          }
+          break;
         default:
           throw new IOException(String.format("Unsupported number of components: %d", numcomps));
       }
@@ -344,6 +349,7 @@ public class OpenJpeg {
 
   /**
    * decode image with CMYK color space.
+   *
    * @param width width in pixel
    * @param height height in pixel
    * @param numcomps number of components
@@ -351,20 +357,25 @@ public class OpenJpeg {
    * @param comps the components
    * @return the image
    */
-  private BufferedImage decodeCMYK( int width, int height, int numcomps, int colorDepthFactor, opj_image_comp[] comps ) {
+  private BufferedImage decodeCMYK(
+      int width, int height, int numcomps, int colorDepthFactor, opj_image_comp[] comps) {
     boolean hasAlpha = numcomps > 4;
-    ColorModel colorModel = new ComponentColorModel(new CMYKColorSpace(), hasAlpha, false, Transparency.TRANSLUCENT, DataBuffer.TYPE_BYTE);
-    BufferedImage bufImg = new BufferedImage(colorModel, colorModel.createCompatibleWritableRaster(width, height), false, null);
+    ColorModel colorModel =
+        new ComponentColorModel(
+            new CMYKColorSpace(), hasAlpha, false, Transparency.TRANSLUCENT, DataBuffer.TYPE_BYTE);
+    BufferedImage bufImg =
+        new BufferedImage(
+            colorModel, colorModel.createCompatibleWritableRaster(width, height), false, null);
 
     Pointer[] data = new Pointer[numcomps];
-    for( int i = 0; i < data.length; i++ ) {
+    for (int i = 0; i < data.length; i++) {
       // cyan, magenta, yellow, key, (alpha)
       data[i] = comps[i].data.get();
     }
 
     byte[] bgrData = ((DataBufferByte) bufImg.getRaster().getDataBuffer()).getData();
     for (int i = 0, j = 0; i < width * height; i++) {
-      for( int c = 0; c < data.length; c++ ) {
+      for (int c = 0; c < data.length; c++) {
         bgrData[j++] = (byte) (data[c].getInt(i * 4) / colorDepthFactor);
       }
     }
