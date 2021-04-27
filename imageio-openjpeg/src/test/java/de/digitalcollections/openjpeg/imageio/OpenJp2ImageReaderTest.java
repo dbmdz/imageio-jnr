@@ -90,6 +90,21 @@ class OpenJp2ImageReaderTest {
     assertThat(img.getType()).isEqualTo(BufferedImage.TYPE_BYTE_GRAY);
     assertThat(img.getWidth()).isEqualTo(512);
     assertThat(img.getHeight()).isEqualTo(512);
+    InputStream input = ClassLoader.getSystemResourceAsStream("gray_control.png");
+    BufferedImage controlImg = ImageIO.read(input);
+    assertImageEquals(controlImg, img);
+  }
+
+  @Test
+  public void testReadBinary() throws Exception {
+    OpenJp2ImageReader reader = getReader("binary.jp2");
+    BufferedImage img = reader.read(0, null);
+    assertThat(img.getWidth()).isEqualTo(7216);
+    assertThat(img.getHeight()).isEqualTo(4910);
+    assertThat(img.getType()).isEqualTo(BufferedImage.TYPE_BYTE_BINARY);
+    InputStream input = ClassLoader.getSystemResourceAsStream("binary_control.png");
+    BufferedImage controlImg = ImageIO.read(input);
+    assertImageEquals(controlImg, img);
   }
 
   @Test
@@ -105,27 +120,33 @@ class OpenJp2ImageReaderTest {
     assertThat(rgbImg.getRGB(256, 256)).isNotEqualTo(bwImg.getRGB(256, 256));
   }
 
-  private void assertImageEquals( String expectedImageName, String actualImageName ) throws IOException {
-    OpenJp2ImageReader reader = getReader( actualImageName );
-    BufferedImage actualImage = reader.read(0, null);
-
-    InputStream input = ClassLoader.getSystemResourceAsStream( expectedImageName);
-    BufferedImage expectedImg = ImageIO.read( input );
-    int width = expectedImg.getWidth();
-    assertEquals( width, actualImage.getWidth() );
-    int height = expectedImg.getHeight();
-    assertEquals( height, actualImage.getHeight() );
-    for( int x = 0; x < width; x++ ) {
-      for( int y = 0; y < height; y++ ) {
-        int expected = expectedImg.getRGB( x, y );
-        int actual = actualImage.getRGB( x, y );
-        if( expected >> 24 == 0 && actual >> 24 == 0 ) {
+  private void assertImageEquals(BufferedImage expected, BufferedImage actual) {
+    int width = expected.getWidth();
+    assertEquals(width, actual.getWidth());
+    int height = expected.getHeight();
+    assertEquals(height, actual.getHeight());
+    for (int x = 0; x < width; x++) {
+      for (int y = 0; y < height; y++) {
+        int expectedPixel = expected.getRGB(x, y);
+        int actualPixel = actual.getRGB(x, y);
+        if (expectedPixel >> 24 == 0 && actualPixel >> 24 == 0) {
           // transparent
           continue;
         }
-        assertEquals( expected, actual, "RGB of Pixel " + x + "," + y );
+        assertEquals(expectedPixel, actualPixel, "RGB of Pixel " + x + "," + y);
       }
     }
+  }
+
+  private void assertImageEquals(String expectedImageName, String actualImageName)
+      throws IOException {
+    OpenJp2ImageReader reader = getReader(actualImageName);
+    BufferedImage actualImage = reader.read(0, null);
+
+    InputStream input = ClassLoader.getSystemResourceAsStream(expectedImageName);
+    BufferedImage expectedImg = ImageIO.read(input);
+
+    assertImageEquals(expectedImg, actualImage);
   }
 
   @Test

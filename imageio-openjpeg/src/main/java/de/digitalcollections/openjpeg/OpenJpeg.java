@@ -260,8 +260,7 @@ public class OpenJpeg {
       // To "scale down" images with 16bit color depth to 8 bit, just a color depth factor needs to
       // be
       // calculated (65536 / 256 = 256) to correctly assign pixel in the underlying image buffer.
-      // Note: prec and bpp seems to be interchanged in opj_image_comp struc.
-      int colorDepthFactor = ((int) Math.pow(2, comps[0].prec.intValue())) / 256;
+      int colorDepthFactor = ((int) Math.pow(2, comps[0].bpp.intValue())) / 256;
       colorDepthFactor = colorDepthFactor > 0 ? colorDepthFactor : 1;
 
       switch (numcomps) {
@@ -284,11 +283,28 @@ public class OpenJpeg {
           break;
         case 1:
           {
-            bufImg = new BufferedImage(targetWidth, targetHeight, BufferedImage.TYPE_BYTE_GRAY);
             Pointer ptr = comps[0].data.get();
-            byte[] data = ((DataBufferByte) bufImg.getRaster().getDataBuffer()).getData();
-            for (int i = 0; i < targetWidth * targetHeight; i++) {
-              data[i] = (byte) (ptr.getInt(i * 4) / colorDepthFactor);
+            if (comps[0].bpp.intValue() == 1) {
+              // 1Bit binary image
+              bufImg = new BufferedImage(targetWidth, targetHeight, BufferedImage.TYPE_BYTE_BINARY);
+              byte[] data = ((DataBufferByte) bufImg.getRaster().getDataBuffer()).getData();
+              // TYPE_BYTE_BINARY bit-packs 8 pixels into a single byte.
+              for (int i = 0; i < (targetWidth * targetHeight) / 8; i++) {
+                int baseIdx = i * 8;
+                byte packed = 0;
+                for (int j = 0; j < 8 && baseIdx + j < targetWidth * targetHeight; j++) {
+                  byte px = (byte) ptr.getInt((baseIdx + j) * 4);
+                  packed |= px << (7 - j);
+                }
+                data[i] = packed;
+              }
+            } else {
+              // 8Bit grayscale image
+              bufImg = new BufferedImage(targetWidth, targetHeight, BufferedImage.TYPE_BYTE_GRAY);
+              byte[] data = ((DataBufferByte) bufImg.getRaster().getDataBuffer()).getData();
+              for (int i = 0, j = 0; i < targetWidth * targetHeight; i++) {
+                data[i] = (byte) ptr.getInt(i * 4);
+              }
             }
           }
           break;
