@@ -19,6 +19,7 @@ public class TurboJpegImageReadParam extends JPEGImageReadParam {
   public void setRotationDegree(int rotationDegree) {
     if (rotationDegree == 90 || rotationDegree == 180 || rotationDegree == 270) {
       this.rotationDegree = rotationDegree;
+      return;
     }
     throw new IllegalArgumentException("Illegal rotation, must be 90, 180 or 270");
   }
