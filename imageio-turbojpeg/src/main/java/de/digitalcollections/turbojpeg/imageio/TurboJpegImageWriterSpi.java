@@ -93,7 +93,9 @@ public class TurboJpegImageWriterSpi extends ImageWriterSpi {
     // TODO: Support all image types, if necessary convert before encoding
     int bufferedImageType = type.getBufferedImageType();
     return (type.getNumBands() == 3 || type.getNumBands() == 1)
-        && (bufferedImageType == TYPE_3BYTE_BGR || bufferedImageType == TYPE_4BYTE_ABGR || bufferedImageType == TYPE_BYTE_GRAY);
+        && (bufferedImageType == TYPE_3BYTE_BGR
+            || bufferedImageType == TYPE_4BYTE_ABGR
+            || bufferedImageType == TYPE_BYTE_GRAY);
   }
 
   @Override
