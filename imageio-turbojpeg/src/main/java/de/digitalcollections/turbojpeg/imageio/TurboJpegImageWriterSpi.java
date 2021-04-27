@@ -4,7 +4,6 @@ import static java.awt.image.BufferedImage.TYPE_3BYTE_BGR;
 import static java.awt.image.BufferedImage.TYPE_4BYTE_ABGR;
 import static java.awt.image.BufferedImage.TYPE_BYTE_GRAY;
 
-import com.google.common.collect.ImmutableSet;
 import de.digitalcollections.turbojpeg.TurboJpeg;
 import java.io.IOException;
 import java.util.Locale;
@@ -91,10 +90,10 @@ public class TurboJpegImageWriterSpi extends ImageWriterSpi {
 
   @Override
   public boolean canEncodeImage(ImageTypeSpecifier type) {
-    // TODO: Support all image types, if neccessary convert before encoding
-    return ((type.getNumBands() == 3 || type.getNumBands() == 1)
-        && ImmutableSet.of(TYPE_3BYTE_BGR, TYPE_4BYTE_ABGR, TYPE_BYTE_GRAY)
-            .contains(type.getBufferedImageType()));
+    // TODO: Support all image types, if necessary convert before encoding
+    int bufferedImageType = type.getBufferedImageType();
+    return (type.getNumBands() == 3 || type.getNumBands() == 1)
+        && (bufferedImageType == TYPE_3BYTE_BGR || bufferedImageType == TYPE_4BYTE_ABGR || bufferedImageType == TYPE_BYTE_GRAY);
   }
 
   @Override
