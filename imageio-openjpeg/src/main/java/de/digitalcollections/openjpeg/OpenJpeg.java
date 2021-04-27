@@ -53,6 +53,9 @@ public class OpenJpeg {
   /** Load the library. */
   public OpenJpeg() {
     this.lib = LibraryLoader.create(libopenjp2.class).load("openjp2");
+    if (this.lib == null) {
+      throw new UnsatisfiedLinkError("Could not load libopenjp2, make sure it is installed!");
+    }
     if (!lib.opj_version().startsWith("2.")) {
       throw new UnsatisfiedLinkError(
           String.format("OpenJPEG version must be at least 2.0.0 (found: %s)", lib.opj_version()));
