@@ -274,7 +274,7 @@ public class TurboJpegImageReader extends ImageReader {
                 region.x,
                 region.y,
                 getWidth(imageIndex),
-                getWidth(imageIndex)));
+                getHeight(imageIndex)));
       }
       if (region != null || rotation != 0) {
         data = lib.transform(data.array(), info, region, rotation);
