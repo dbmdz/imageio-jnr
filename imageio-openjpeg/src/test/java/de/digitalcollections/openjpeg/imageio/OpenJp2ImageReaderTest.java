@@ -170,6 +170,11 @@ class OpenJp2ImageReaderTest {
   }
 
   @Test
+  public void testReadGray16bitWithoutAlpha() throws Exception {
+      assertImageEquals("gray16bitWithoutAlpha.png", "gray16bitWithoutAlpha.jp2");
+  }
+
+  @Test
   public void testReadYUV() throws Exception {
     OpenJp2ImageReader reader = getReader("yuv.jp2");
     try {
