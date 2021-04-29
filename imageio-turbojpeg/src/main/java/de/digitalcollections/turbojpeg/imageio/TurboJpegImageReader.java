@@ -93,6 +93,11 @@ public class TurboJpegImageReader extends ImageReader {
     return info.getAvailableSizes().size();
   }
 
+  private Dimension getDimension(int imageIndex) {
+    checkIndex(imageIndex);
+    return info.getAvailableSizes().get(imageIndex);
+  }
+
   @Override
   public int getWidth(int imageIndex) throws IOException {
     checkIndex(imageIndex);
@@ -124,13 +129,12 @@ public class TurboJpegImageReader extends ImageReader {
    * @param region The source region to be cropped
    * @return The region that needs to be cropped from the image cropped to the expanded rectangle
    */
-  private Rectangle adjustRegion(Dimension mcuSize, Rectangle region, int rotation)
-      throws IOException {
+  Rectangle adjustRegion(Dimension mcuSize, Rectangle region, int rotation, Dimension imageSize) {
     if (region == null) {
       return null;
     }
-    final int originalWidth = getWidth(0);
-    final int originalHeight = getHeight(0);
+    final int originalWidth = imageSize.width;
+    final int originalHeight = imageSize.height;
     final Rectangle originalRegion = (Rectangle) region.clone();
     if (rotation == 90) {
       int x = region.x;
@@ -172,11 +176,23 @@ public class TurboJpegImageReader extends ImageReader {
       }
     }
     if ((region.x + region.width) != originalWidth && region.width % mcuSize.width != 0) {
-      region.width = (int) (mcuSize.width * (Math.ceil(region.getWidth() / mcuSize.width)));
+      int adjustedWidth = (int) (mcuSize.width * (Math.ceil(region.getWidth() / mcuSize.width)));
+      // ceil makes the region bigger than requested so we can crop it later. Sometimes that exceeds the image boundaries.
+      if (region.x + adjustedWidth > originalWidth) {
+        adjustedWidth = (int) (mcuSize.width * Math.floor(region.getWidth() / mcuSize.width));
+      }
+      region.width = adjustedWidth;
     }
+    // TODO is adjusting extraCrop necessary? Could region now be smaller than extraCrop?
     if ((region.y + region.height) != originalHeight && region.height % mcuSize.height != 0) {
-      region.height = (int) (mcuSize.height * (Math.ceil(region.getHeight() / mcuSize.height)));
+      int adjustedHeight = (int) (mcuSize.height * (Math.ceil(region.getHeight() / mcuSize.height)));
+      // ceil makes the region bigger than requested so we can crop it later. Sometimes that exceeds the image boundaries.
+      if (region.y + adjustedHeight > originalHeight) {
+        adjustedHeight = (int) (mcuSize.height * Math.floor(region.getHeight() / mcuSize.height));
+      }
+      region.height = adjustedHeight;
     }
+    // TODO is adjusting extraCrop necessary? Could region now be smaller than extraCrop?
     if (region.height > originalHeight) {
       region.height = originalHeight;
     }
@@ -259,7 +275,8 @@ public class TurboJpegImageReader extends ImageReader {
         region = param.getSourceRegion();
         if (!isRegionFullImage(imageIndex, region)) {
           scaleRegion(imageIndex, region);
-          extraCrop = adjustRegion(info.getMCUSize(), region, rotation);
+          // adjustments need native image size → imageIndex == 0
+          extraCrop = adjustRegion(info.getMCUSize(), region, rotation, getDimension(0));
         } else {
           region = null;
         }
