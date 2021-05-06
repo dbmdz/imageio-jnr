@@ -2,11 +2,12 @@ package de.digitalcollections.openjpeg.imageio;
 
 import de.digitalcollections.openjpeg.Info;
 import de.digitalcollections.openjpeg.OpenJpeg;
+import de.digitalcollections.openjpeg.lib.enums.COLOR_SPACE;
 import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
-import java.util.Collections;
 import java.util.Iterator;
+import java.util.stream.Stream;
 import javax.imageio.ImageReadParam;
 import javax.imageio.ImageReader;
 import javax.imageio.ImageTypeSpecifier;
@@ -104,10 +105,38 @@ public class OpenJp2ImageReader extends ImageReader {
   @Override
   public Iterator<ImageTypeSpecifier> getImageTypes(int imageIndex) throws IOException {
     checkIndex(imageIndex);
-    // TODO: Support grayscale?
-    return Collections.singletonList(
-            ImageTypeSpecifier.createFromBufferedImageType(BufferedImage.TYPE_3BYTE_BGR))
-        .iterator();
+    int numComps = info.getNumComponents();
+    ImageTypeSpecifier spec = null;
+    if (numComps == 3) {
+      spec = ImageTypeSpecifier.createFromBufferedImageType(BufferedImage.TYPE_3BYTE_BGR);
+    } else if (numComps == 2) {
+      spec = ImageTypeSpecifier.createFromBufferedImageType(BufferedImage.TYPE_4BYTE_ABGR);
+    } else if (numComps == 4) {
+      if (info.getColorSpace() == COLOR_SPACE.OPJ_CLRSPC_CMYK) {
+        spec =
+            new ImageTypeSpecifier(
+                OpenJpeg.COLOR_MODEL_CMYK_ALPHA,
+                OpenJpeg.COLOR_MODEL_CMYK_ALPHA.createCompatibleSampleModel(
+                    info.getNativeSize().width, info.getNativeSize().height));
+      }
+      spec = ImageTypeSpecifier.createFromBufferedImageType(BufferedImage.TYPE_4BYTE_ABGR);
+    } else if (numComps == 1) {
+      spec =
+          ImageTypeSpecifier.createFromBufferedImageType(
+              info.getBitsPerPixel() > 1
+                  ? BufferedImage.TYPE_BYTE_GRAY
+                  : BufferedImage.TYPE_BYTE_BINARY);
+    } else if (numComps == 5) {
+      spec =
+          new ImageTypeSpecifier(
+              OpenJpeg.COLOR_MODEL_CMYK,
+              OpenJpeg.COLOR_MODEL_CMYK.createCompatibleSampleModel(
+                  info.getNativeSize().width, info.getNativeSize().height));
+    }
+    if (spec == null) {
+      return Stream.<ImageTypeSpecifier>empty().iterator();
+    }
+    return Stream.of(spec).iterator();
   }
 
   private Rectangle adjustRegion(int imageIndex, Rectangle sourceRegion) throws IOException {

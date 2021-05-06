@@ -1,5 +1,6 @@
 package de.digitalcollections.openjpeg;
 
+import de.digitalcollections.openjpeg.lib.enums.COLOR_SPACE;
 import java.awt.Dimension;
 import java.awt.Point;
 import java.util.Arrays;
@@ -19,6 +20,8 @@ public class Info {
   private int numTilesY;
   private int width;
   private int height;
+  private int bitsPerPixel;
+  private COLOR_SPACE colorSpace;
 
   void setNumComponents(int numComponents) {
     this.numComponents = numComponents;
@@ -58,6 +61,14 @@ public class Info {
 
   public void setTileOriginY(int tileOriginY) {
     this.tileOriginY = tileOriginY;
+  }
+
+  public void setBitsPerPixel(int bitsPerPixel) {
+    this.bitsPerPixel = bitsPerPixel;
+  }
+
+  public void setColorSpace(COLOR_SPACE colorSpace) {
+    this.colorSpace = colorSpace;
   }
 
   public int getNumComponents() {
@@ -112,5 +123,13 @@ public class Info {
             factor ->
                 new Dimension((int) (this.tileWidth / factor), (int) (this.tileHeight / factor)))
         .collect(Collectors.toList());
+  }
+
+  public int getBitsPerPixel() {
+    return bitsPerPixel;
+  }
+
+  public COLOR_SPACE getColorSpace() {
+    return colorSpace;
   }
 }

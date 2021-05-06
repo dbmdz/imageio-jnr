@@ -8,6 +8,7 @@ import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.List;
 import java.util.function.Supplier;
 import javax.imageio.ImageIO;
@@ -266,5 +267,18 @@ class TurboJpegImageReaderTest {
 
     assertThat(region).isEqualTo(regionExpected);
     assertThat(extraCrop).isEqualTo(extraCropExpected);
+  }
+
+  @Test
+  public void testReadGrayscale() throws IOException {
+    ImageReader reader = getReader("grayscale.jpg");
+    assertThat(reader.getRawImageType(0).getNumComponents()).isEqualTo(1);
+    TurboJpegImageReadParam param = (TurboJpegImageReadParam) reader.getDefaultReadParam();
+    BufferedImage img = reader.read(0, param);
+    assertThat(img).hasDimensions(1955, 524);
+    assertThat(img.getType()).isEqualTo(BufferedImage.TYPE_BYTE_GRAY);
+    InputStream input = ClassLoader.getSystemResourceAsStream("grayscale_control.png");
+    BufferedImage controlImg = ImageIO.read(input);
+    assertThat(img).isEqualTo(controlImg);
   }
 }

@@ -44,6 +44,13 @@ public class OpenJpeg {
   @SuppressWarnings("checkstyle:constantname")
   private static final opj_msg_callback errorLogFn = (msg, data) -> LOGGER.error(msg.trim());
 
+  public static final ColorModel COLOR_MODEL_CMYK =
+      new ComponentColorModel(
+          new CMYKColorSpace(), false, false, Transparency.TRANSLUCENT, DataBuffer.TYPE_BYTE);
+  public static final ColorModel COLOR_MODEL_CMYK_ALPHA =
+      new ComponentColorModel(
+          new CMYKColorSpace(), true, false, Transparency.TRANSLUCENT, DataBuffer.TYPE_BYTE);
+
   public libopenjp2 lib;
   public Runtime runtime;
 
@@ -138,6 +145,8 @@ public class OpenJpeg {
       info.setTileOriginX(csInfo.tx0.intValue());
       info.setTileOriginY(csInfo.ty0.intValue());
       info.setNumResolutions(csInfo.m_default_tile_info.tccp_info.get().numresolutions.intValue());
+      info.setBitsPerPixel(img.comps.get().bpp.intValue());
+      info.setColorSpace(img.color_space.get());
 
       return info;
     } finally {
@@ -379,9 +388,7 @@ public class OpenJpeg {
   private BufferedImage decodeCMYK(
       int width, int height, int numcomps, int colorDepthFactor, opj_image_comp[] comps) {
     boolean hasAlpha = numcomps > 4;
-    ColorModel colorModel =
-        new ComponentColorModel(
-            new CMYKColorSpace(), hasAlpha, false, Transparency.TRANSLUCENT, DataBuffer.TYPE_BYTE);
+    ColorModel colorModel = hasAlpha ? COLOR_MODEL_CMYK_ALPHA : COLOR_MODEL_CMYK;
     BufferedImage bufImg =
         new BufferedImage(
             colorModel, colorModel.createCompatibleWritableRaster(width, height), false, null);
