@@ -1,13 +1,12 @@
 package de.digitalcollections.turbojpeg.imageio;
 
 import static java.awt.image.BufferedImage.TYPE_3BYTE_BGR;
-import static java.awt.image.BufferedImage.TYPE_4BYTE_ABGR;
-import static java.awt.image.BufferedImage.TYPE_4BYTE_ABGR_PRE;
 import static java.awt.image.BufferedImage.TYPE_BYTE_GRAY;
 
 import de.digitalcollections.turbojpeg.Info;
 import de.digitalcollections.turbojpeg.TurboJpeg;
 import de.digitalcollections.turbojpeg.TurboJpegException;
+import de.digitalcollections.turbojpeg.lib.enums.TJCS;
 import java.awt.Dimension;
 import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
@@ -111,9 +110,11 @@ public class TurboJpegImageReader extends ImageReader {
 
   @Override
   public Iterator<ImageTypeSpecifier> getImageTypes(int imageIndex) throws IOException {
-    return Stream.of(TYPE_3BYTE_BGR, TYPE_4BYTE_ABGR, TYPE_4BYTE_ABGR_PRE, TYPE_BYTE_GRAY)
-        .map(ImageTypeSpecifier::createFromBufferedImageType)
-        .iterator();
+    return Stream.of(
+        ImageTypeSpecifier.createFromBufferedImageType(
+            info.getColorspace() == TJCS.TJCS_GRAY ? TYPE_BYTE_GRAY : TYPE_3BYTE_BGR
+        )
+    ).iterator();
   }
 
   /**

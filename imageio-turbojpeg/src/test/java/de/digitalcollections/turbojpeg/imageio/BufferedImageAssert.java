@@ -1,5 +1,7 @@
 package de.digitalcollections.turbojpeg.imageio;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -49,6 +51,29 @@ class BufferedImageAssert extends AbstractAssert<BufferedImageAssert, BufferedIm
       failWithMessage(
           "Expected image to be of size %dx%d, but is %dx%d.%s",
           width, height, actual.getWidth(), actual.getHeight(), writeDebugImage());
+    }
+    return this;
+  }
+
+  public BufferedImageAssert isEqualTo(BufferedImage other) {
+    int width = other.getWidth();
+    assertEquals(width, actual.getWidth());
+    int height = other.getHeight();
+    assertEquals(height, actual.getHeight());
+    for (int x = 0; x < width; x++) {
+      for (int y = 0; y < height; y++) {
+        int expectedPixel = other.getRGB(x, y);
+        int actualPixel = actual.getRGB(x, y);
+        if (expectedPixel >> 24 == 0 && actualPixel >> 24 == 0) {
+          // transparent
+          continue;
+        }
+        if (expectedPixel != actualPixel) {
+          failWithMessage(
+              "Expected pixel with color '%s' at x=%d, y=%d, got '%s'",
+              expectedPixel, x, y, actualPixel);
+        }
+      }
     }
     return this;
   }
