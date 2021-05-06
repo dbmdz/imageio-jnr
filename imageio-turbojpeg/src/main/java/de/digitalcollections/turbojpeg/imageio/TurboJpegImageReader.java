@@ -93,6 +93,11 @@ public class TurboJpegImageReader extends ImageReader {
     return info.getAvailableSizes().size();
   }
 
+  private Dimension getDimension(int imageIndex) {
+    checkIndex(imageIndex);
+    return info.getAvailableSizes().get(imageIndex);
+  }
+
   @Override
   public int getWidth(int imageIndex) throws IOException {
     checkIndex(imageIndex);
@@ -113,8 +118,9 @@ public class TurboJpegImageReader extends ImageReader {
 
   /**
    * Since TurboJPEG can only crop to values divisible by the MCU size, we may need to expand the
-   * cropping area to get a suitable rectangle. Thus, cropping becomes a two-stage process: - Crop
-   * to to nearest MCU boundaries (TurboJPEG) - Crop to the actual region (Java)
+   * cropping area to get a suitable rectangle. Thus, cropping becomes a two-stage process: 1. Crop
+   * to to nearest MCU boundaries (TurboJPEG) 2. Crop to the actual region (Java).
+   * <strong>This method <em>mutates</em> the region!</strong>
    *
    * <p>Additionally, since TurboJPEG applies rotation **before** cropping, but the ImageIO API is
    * based on the assumption that rotation occurs **after** cropping, we have to transform the
@@ -122,15 +128,18 @@ public class TurboJpegImageReader extends ImageReader {
    *
    * @param mcuSize The size of the MCUs
    * @param region The source region to be cropped
+   * @param rotation Degrees the image is supposed to be rotated.
+   * @param imageSize Dimensions of the image the cropping region targets
    * @return The region that needs to be cropped from the image cropped to the expanded rectangle
    */
-  private Rectangle adjustRegion(Dimension mcuSize, Rectangle region, int rotation)
-      throws IOException {
+  Rectangle adjustRegion(Dimension mcuSize, Rectangle region, int rotation, Dimension imageSize) {
     if (region == null) {
       return null;
     }
-    final int originalWidth = getWidth(0);
-    final int originalHeight = getHeight(0);
+    final int originalWidth = imageSize.width;
+    final int originalHeight = imageSize.height;
+
+    // Recalculate the cropping region based on the desired rotation.
     final Rectangle originalRegion = (Rectangle) region.clone();
     if (rotation == 90) {
       int x = region.x;
@@ -151,12 +160,15 @@ public class TurboJpegImageReader extends ImageReader {
       region.width = region.height;
       region.height = w;
     }
+
+    // Calculate how much of the region returned from libjpeg has to be cropped on the JVM-side
     Rectangle extraCrop =
         new Rectangle(
             0,
             0,
             region.width == 0 ? originalWidth - region.x : region.width,
             region.height == 0 ? originalHeight - region.y : region.height);
+    // X-Offset + Width
     if (region.x % mcuSize.width != 0) {
       extraCrop.x = region.x % mcuSize.width;
       region.x -= extraCrop.x;
@@ -164,6 +176,7 @@ public class TurboJpegImageReader extends ImageReader {
         region.width = Math.min(region.width + extraCrop.x, originalWidth - region.x);
       }
     }
+    // Y-Offset + Height
     if (region.y % mcuSize.height != 0) {
       extraCrop.y = region.y % mcuSize.height;
       region.y -= extraCrop.y;
@@ -171,18 +184,19 @@ public class TurboJpegImageReader extends ImageReader {
         region.height = Math.min(region.height + extraCrop.y, originalHeight - region.y);
       }
     }
+
     if ((region.x + region.width) != originalWidth && region.width % mcuSize.width != 0) {
-      region.width = (int) (mcuSize.width * (Math.ceil(region.getWidth() / mcuSize.width)));
+      region.width = Math.min(
+            (int) (mcuSize.width * (Math.ceil(region.getWidth() / mcuSize.width))),
+            imageSize.width - region.x);
     }
+
     if ((region.y + region.height) != originalHeight && region.height % mcuSize.height != 0) {
-      region.height = (int) (mcuSize.height * (Math.ceil(region.getHeight() / mcuSize.height)));
+      region.height = Math.min(
+          (int) (mcuSize.height * (Math.ceil(region.getHeight() / mcuSize.height))),
+          imageSize.height - region.y);
     }
-    if (region.height > originalHeight) {
-      region.height = originalHeight;
-    }
-    if (region.width > originalWidth) {
-      region.width = originalWidth;
-    }
+
     boolean modified =
         originalRegion.x != region.x
             || originalRegion.y != region.y
@@ -259,7 +273,8 @@ public class TurboJpegImageReader extends ImageReader {
         region = param.getSourceRegion();
         if (!isRegionFullImage(imageIndex, region)) {
           scaleRegion(imageIndex, region);
-          extraCrop = adjustRegion(info.getMCUSize(), region, rotation);
+          // adjustments need native image size → imageIndex == 0
+          extraCrop = adjustRegion(info.getMCUSize(), region, rotation, getDimension(0));
         } else {
           region = null;
         }

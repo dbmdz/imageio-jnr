@@ -2,6 +2,7 @@ package de.digitalcollections.turbojpeg.imageio;
 
 import static de.digitalcollections.turbojpeg.imageio.CustomAssertions.assertThat;
 
+import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
@@ -248,5 +249,22 @@ class TurboJpegImageReaderTest {
     BufferedImage img = reader.read(3, param);
     assertThat(img.getWidth()).isEqualTo(365);
     assertThat(img.getHeight()).isEqualTo(10);
+  }
+
+  @Test
+  void testAdjustMCURegion() {
+    TurboJpegImageReader reader = new TurboJpegImageReader(null, null);
+
+    Dimension mcuSize = new Dimension(16, 16);
+    Rectangle region = new Rectangle(1185, 327, 309, 36);
+    int rotation = 0;
+    Dimension imageSize = new Dimension(1500, 2260);
+
+    Rectangle extraCrop = reader.adjustRegion(mcuSize, region, rotation, imageSize);
+    Rectangle regionExpected = new Rectangle(1184, 320, 316, 48);
+    Rectangle extraCropExpected = new Rectangle(1, 7, 309, 36);
+
+    assertThat(region).isEqualTo(regionExpected);
+    assertThat(extraCrop).isEqualTo(extraCropExpected);
   }
 }
