@@ -252,7 +252,7 @@ class TurboJpegImageReaderTest {
   }
 
   @Test
-  void testAdjustMCURegion() throws IOException {
+  void testAdjustMCURegion() {
     TurboJpegImageReader reader = new TurboJpegImageReader(null, null);
 
     Dimension mcuSize = new Dimension(16, 16);
@@ -260,11 +260,11 @@ class TurboJpegImageReaderTest {
     int rotation = 0;
     Dimension imageSize = new Dimension(1500, 2260);
 
-    Rectangle actual = reader.adjustRegion(mcuSize, region, rotation, imageSize);
-    Rectangle expected = new Rectangle(1184, 320, 320, 48);
+    Rectangle extraCrop = reader.adjustRegion(mcuSize, region, rotation, imageSize);
+    Rectangle regionExpected = new Rectangle(1184, 320, 316, 48);
+    Rectangle extraCropExpected = new Rectangle(1, 7, 309, 36);
 
-//    assertThat(actual).isEqualTo(expected);
-    assertThat(region.x + region.width).isLessThanOrEqualTo(imageSize.width);
-    assertThat(region.y + region.height).isLessThanOrEqualTo(imageSize.height);
+    assertThat(region).isEqualTo(regionExpected);
+    assertThat(extraCrop).isEqualTo(extraCropExpected);
   }
 }
