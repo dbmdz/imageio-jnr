@@ -300,15 +300,17 @@ public class OpenJpeg {
               // 1Bit binary image
               bufImg = new BufferedImage(targetWidth, targetHeight, BufferedImage.TYPE_BYTE_BINARY);
               byte[] data = ((DataBufferByte) bufImg.getRaster().getDataBuffer()).getData();
-              // TYPE_BYTE_BINARY bit-packs 8 pixels into a single byte.
-              for (int i = 0; i < (targetWidth * targetHeight) / 8; i++) {
-                int baseIdx = i * 8;
-                byte packed = 0;
-                for (int j = 0; j < 8 && baseIdx + j < targetWidth * targetHeight; j++) {
-                  byte px = (byte) ptr.getInt((baseIdx + j) * 4);
-                  packed |= px << (7 - j);
+              // TYPE_BYTE_BINARY bit-packs 8 pixels into a single byte, zero-padding scanlines at the end
+              int stride = (int) Math.ceil((double) targetWidth / 8);
+              for (int scanline = 0; scanline < targetHeight; scanline++) {
+                for (int linePos = 0; linePos < stride; linePos++) {
+                  int srcIdx = (scanline * targetWidth) + (linePos * 8);
+                  int pixToPack = linePos * 8 > targetWidth ? 8 - (linePos * 8 - targetWidth) : 8;
+                  for (int packedIdx = 0; packedIdx < pixToPack; packedIdx++) {
+                    byte px = (byte) ptr.getInt((srcIdx + packedIdx) * 4);
+                    data[scanline * stride + linePos] |= px << (7 - packedIdx);
+                  }
                 }
-                data[i] = packed;
               }
             } else {
               // 8Bit/16Bit grayscale image

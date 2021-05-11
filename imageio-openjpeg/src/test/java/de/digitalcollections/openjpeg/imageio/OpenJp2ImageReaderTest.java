@@ -183,4 +183,9 @@ class OpenJp2ImageReaderTest {
       assertEquals("Images with YUV color space are currently not supported.", ex.getMessage());
     }
   }
+
+  @Test
+  public void testReadWeirdGrayscale() throws IOException {
+    assertImageEquals("gray2_control.png", "gray2.jp2");
+  }
 }
