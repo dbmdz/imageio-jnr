@@ -111,17 +111,16 @@ public class TurboJpegImageReader extends ImageReader {
   @Override
   public Iterator<ImageTypeSpecifier> getImageTypes(int imageIndex) throws IOException {
     return Stream.of(
-        ImageTypeSpecifier.createFromBufferedImageType(
-            info.getColorspace() == TJCS.TJCS_GRAY ? TYPE_BYTE_GRAY : TYPE_3BYTE_BGR
-        )
-    ).iterator();
+            ImageTypeSpecifier.createFromBufferedImageType(
+                info.getColorspace() == TJCS.TJCS_GRAY ? TYPE_BYTE_GRAY : TYPE_3BYTE_BGR))
+        .iterator();
   }
 
   /**
    * Since TurboJPEG can only crop to values divisible by the MCU size, we may need to expand the
    * cropping area to get a suitable rectangle. Thus, cropping becomes a two-stage process: 1. Crop
-   * to to nearest MCU boundaries (TurboJPEG) 2. Crop to the actual region (Java).
-   * <strong>This method <em>mutates</em> the region!</strong>
+   * to to nearest MCU boundaries (TurboJPEG) 2. Crop to the actual region (Java). <strong>This
+   * method <em>mutates</em> the region!</strong>
    *
    * <p>Additionally, since TurboJPEG applies rotation **before** cropping, but the ImageIO API is
    * based on the assumption that rotation occurs **after** cropping, we have to transform the
@@ -187,15 +186,17 @@ public class TurboJpegImageReader extends ImageReader {
     }
 
     if ((region.x + region.width) != originalWidth && region.width % mcuSize.width != 0) {
-      region.width = Math.min(
-            (int) (mcuSize.width * (Math.ceil(region.getWidth() / mcuSize.width))),
-            imageSize.width - region.x);
+      region.width =
+          Math.min(
+              (int) (mcuSize.width * (Math.ceil(region.getWidth() / mcuSize.width))),
+              imageSize.width - region.x);
     }
 
     if ((region.y + region.height) != originalHeight && region.height % mcuSize.height != 0) {
-      region.height = Math.min(
-          (int) (mcuSize.height * (Math.ceil(region.getHeight() / mcuSize.height))),
-          imageSize.height - region.y);
+      region.height =
+          Math.min(
+              (int) (mcuSize.height * (Math.ceil(region.getHeight() / mcuSize.height))),
+              imageSize.height - region.y);
     }
 
     boolean modified =

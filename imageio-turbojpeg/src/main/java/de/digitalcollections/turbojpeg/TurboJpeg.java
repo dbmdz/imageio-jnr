@@ -273,8 +273,7 @@ public class TurboJpeg {
           throw new IllegalArgumentException(
               String.format(
                   "Invalid cropping region %d×%d, width must be divisible by %d, height by %d",
-                  region.width, region.height,
-                  mcuSize.width, mcuSize.height));
+                  region.width, region.height, mcuSize.width, mcuSize.height));
         }
         width = region.width;
         height = region.height;

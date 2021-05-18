@@ -300,7 +300,8 @@ public class OpenJpeg {
               // 1Bit binary image
               bufImg = new BufferedImage(targetWidth, targetHeight, BufferedImage.TYPE_BYTE_BINARY);
               byte[] data = ((DataBufferByte) bufImg.getRaster().getDataBuffer()).getData();
-              // TYPE_BYTE_BINARY bit-packs 8 pixels into a single byte, zero-padding scanlines at the end
+              // TYPE_BYTE_BINARY bit-packs 8 pixels into a single byte, zero-padding scanlines at
+              // the end
               int stride = (int) Math.ceil((double) targetWidth / 8);
               for (int scanline = 0; scanline < targetHeight; scanline++) {
                 for (int linePos = 0; linePos < stride; linePos++) {
