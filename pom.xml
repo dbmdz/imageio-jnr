@@ -52,7 +52,7 @@
     <maven.compiler.target>1.8</maven.compiler.target>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
-    <version.assertj>3.19.0</version.assertj>
+    <version.assertj>3.20.2</version.assertj>
     <version.jnr-ffi>2.2.2</version.jnr-ffi>
     <version.slf4j>2.0.0-alpha1</version.slf4j>
     <version.junit-jupiter>5.7.2</version.junit-jupiter>
