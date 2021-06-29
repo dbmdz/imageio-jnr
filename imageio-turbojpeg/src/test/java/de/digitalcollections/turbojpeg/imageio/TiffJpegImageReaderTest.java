@@ -29,6 +29,7 @@ public class TiffJpegImageReaderTest {
     return reader;
   }
 
+  @SuppressWarnings("unchecked")
   private static Stream<Class<? extends ImageReader>> tiffReaders() {
     try {
       Class<? extends ImageReader> sunReader =

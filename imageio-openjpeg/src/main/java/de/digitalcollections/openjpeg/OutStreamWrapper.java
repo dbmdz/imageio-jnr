@@ -4,21 +4,19 @@ import de.digitalcollections.openjpeg.lib.callbacks.opj_stream_seek_fn;
 import de.digitalcollections.openjpeg.lib.callbacks.opj_stream_skip_fn;
 import de.digitalcollections.openjpeg.lib.callbacks.opj_stream_write_fn;
 import de.digitalcollections.openjpeg.lib.libopenjp2;
-import java.io.IOException;
 import jnr.ffi.Pointer;
 
 public abstract class OutStreamWrapper {
-  private libopenjp2 lib;
+  private final libopenjp2 lib;
   private Pointer stream;
 
   // NOTE: We cannot use method references, since their evaluation creates a temporary instance of
-  // the functional
-  // interface. That is, if we set the callbacks in the constructor without storing the method
-  // references, the
-  // temporary instances would get garbage-collected at some point, which would lead to bad things.
-  private opj_stream_write_fn writeCallback;
-  private opj_stream_skip_fn skipCallback;
-  private opj_stream_seek_fn seekCallback;
+  // the functional interface. That is, if we set the callbacks in the constructor without storing
+  // the method references, the temporary instances would get garbage-collected at some point,
+  // which would lead to bad things.
+  private final opj_stream_write_fn writeCallback;
+  private final opj_stream_skip_fn skipCallback;
+  private final opj_stream_seek_fn seekCallback;
 
   protected OutStreamWrapper(libopenjp2 lib) {
     this.lib = lib;
@@ -45,7 +43,7 @@ public abstract class OutStreamWrapper {
 
   protected abstract boolean seek(long numBytes, Pointer userData);
 
-  public void close() throws IOException {
+  public void close() {
     this.lib.opj_stream_destroy(this.stream);
     this.stream = null;
   }

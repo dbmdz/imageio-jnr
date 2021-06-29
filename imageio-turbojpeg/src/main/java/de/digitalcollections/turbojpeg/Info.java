@@ -10,11 +10,11 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class Info {
-  private int width;
-  private int height;
-  private TJSAMP subsampling;
-  private TJCS colorspace;
-  List<Dimension> availableSizes;
+  private final int width;
+  private final int height;
+  private final TJSAMP subsampling;
+  private final TJCS colorspace;
+  final List<Dimension> availableSizes;
 
   public int getWidth() {
     return width;

@@ -19,7 +19,8 @@ import javax.imageio.stream.ImageOutputStream;
  * via JNR-FFI.
  */
 public class OpenJp2ImageWriter extends ImageWriter {
-  private OpenJpeg lib;
+
+  private final OpenJpeg lib;
 
   private ImageOutputStream stream = null;
   private ImageOutputStreamWrapper wrapper = null;
@@ -32,16 +33,17 @@ public class OpenJp2ImageWriter extends ImageWriter {
   @Override
   public void setOutput(Object output) {
     super.setOutput(output);
-    if (output != null) {
-      if (!(output instanceof ImageOutputStream)) {
-        throw new IllegalArgumentException("Output not an ImageOutputStream");
-      }
-      this.stream = (ImageOutputStream) output;
-      this.wrapper = new ImageOutputStreamWrapper(this.stream, lib);
-    } else {
+    if (output == null) {
       this.stream = null;
       this.wrapper = null;
+      return;
     }
+
+    if (!(output instanceof ImageOutputStream)) {
+      throw new IllegalArgumentException("Output not an ImageOutputStream");
+    }
+    this.stream = (ImageOutputStream) output;
+    this.wrapper = new ImageOutputStreamWrapper(this.stream, lib);
   }
 
   @Override

@@ -31,7 +31,7 @@ public class TurboJpegImageWriterSpi extends ImageWriterSpi {
   private static final String[] readerSpiNames = {
     "de.digitalcollections.turbojpeg.imageio.TurboJpegImageReaderSpi"
   };
-  private static final Class[] outputTypes = {ImageOutputStream.class};
+  private static final Class<?>[] outputTypes = {ImageOutputStream.class};
 
   private TurboJpeg lib;
 

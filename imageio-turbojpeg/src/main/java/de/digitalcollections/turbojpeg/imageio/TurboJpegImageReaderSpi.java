@@ -20,7 +20,7 @@ import org.slf4j.LoggerFactory;
 public class TurboJpegImageReaderSpi extends ImageReaderSpi {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(TurboJpegImageReaderSpi.class);
-  private static byte[] HEADER_MAGIC = new byte[] {(byte) 0xff, (byte) 0xd8};
+  private static final byte[] HEADER_MAGIC = new byte[] {(byte) 0xff, (byte) 0xd8};
   private static final String vendorName =
       "Münchener Digitalisierungszentrum/Digitale Bibliothek, Bayerische Staatsbibliothek";
   private static final String version = "0.2.6";

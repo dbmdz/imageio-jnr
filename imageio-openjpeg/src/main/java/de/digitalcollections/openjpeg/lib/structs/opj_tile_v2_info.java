@@ -16,7 +16,7 @@ public class opj_tile_v2_info extends Struct {
   public Unsigned32 mct = new Unsigned32();
 
   /** information concerning tile component parameters */
-  public StructRef<opj_tccp_info> tccp_info = new StructRef<>(opj_tccp_info.class);
+  public final StructRef<opj_tccp_info> tccp_info = new StructRef<>(opj_tccp_info.class);
 
   public opj_tile_v2_info(Runtime runtime) {
     super(runtime);

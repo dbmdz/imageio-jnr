@@ -7,17 +7,17 @@ import jnr.ffi.Struct;
 
 public class opj_cparameters extends Struct {
   /** size of tile: tile_size_on = false (not in argument) or = true (in argument) */
-  public Boolean tile_size_on = new Boolean();
+  public final Boolean tile_size_on = new Boolean();
   /** XTOsiz */
-  public Signed32 cp_tx0 = new Signed32();
+  public final Signed32 cp_tx0 = new Signed32();
   /** YTOsiz */
-  public Signed32 cp_ty0 = new Signed32();
+  public final Signed32 cp_ty0 = new Signed32();
   /** XTsiz */
-  public Signed32 cp_tdx = new Signed32();
+  public final Signed32 cp_tdx = new Signed32();
   /** YTsiz */
-  public Signed32 cp_tdy = new Signed32();
+  public final Signed32 cp_tdy = new Signed32();
   /** allocation by rate/distortion */
-  public Signed32 cp_disto_alloc = new Signed32();
+  public final Signed32 cp_disto_alloc = new Signed32();
   /** allocation by fixed layer */
   public Signed32 cp_fixed_alloc = new Signed32();
   /** add fixed_quality */
@@ -27,27 +27,27 @@ public class opj_cparameters extends Struct {
   /** comment for coding */
   public String cp_comment = new AsciiStringRef();
   /** csty : coding style */
-  public Signed32 csty = new Signed32();
+  public final Signed32 csty = new Signed32();
   /** progression order (default OPJ_LRCP) */
-  public Enum<PROG_ORDER> prog_order = new Enum<>(PROG_ORDER.class);
+  public final Enum<PROG_ORDER> prog_order = new Enum<>(PROG_ORDER.class);
   /** progression order changes */
-  public opj_poc POC[] = array(new opj_poc[32]);
+  public final opj_poc[] POC = array(new opj_poc[32]);
   /** number of progression order changes (POC), default to 0 */
   public Unsigned32 numpocs = new Unsigned32();
   /** number of layers */
-  public Signed32 tcp_numlayers = new Signed32();
+  public final Signed32 tcp_numlayers = new Signed32();
   /**
    * rates of layers - might be subsequently limited by the max_cs_size field. Should be decreasing.
    * 1 can be used as last value to indicate the last layer is lossless.
    */
-  public Float[] tcp_rates = array(new Float[100]);
+  public final Float[] tcp_rates = array(new Float[100]);
   /**
    * different psnr for successive layers. Should be increasing. 0 can be used as last value to
    * indicate the last layer is lossless.
    */
   public Float[] tcp_distoratio = array(new Float[100]);
   /** number of resolutions */
-  public Signed32 numresolution = new Signed32();
+  public final Signed32 numresolution = new Signed32();
   /** initial code block width, default to 64 */
   public Signed32 cblockw_init = new Signed32();
   /** initial code block height, default to 64 */
@@ -55,7 +55,7 @@ public class opj_cparameters extends Struct {
   /** mode switch (cblk_style) */
   public Signed32 mode = new Signed32();
   /** 1 : use the irreversible DWT 9-7, 0 : use lossless compression (default) */
-  public Signed32 irreversible = new Signed32();
+  public final Signed32 irreversible = new Signed32();
   /** region of interest: affected component in [0..3], -1 means no ROI */
   public Signed32 roi_compno = new Signed32();
   /** region of interest: upshift value */
@@ -67,7 +67,7 @@ public class opj_cparameters extends Struct {
   /** initial precinct height */
   public Signed32[] prch_init = array(new Signed32[libopenjp2.OPJ_J2K_MAXRLVLS]);
 
-  /** @name command line encoder parameters (not used inside the library) */
+  /* @name command line encoder parameters (not used inside the library) */
   /*@{*/
   /** input file name */
   String infile = new AsciiString(libopenjp2.OPJ_PATH_LEN);
@@ -99,7 +99,7 @@ public class opj_cparameters extends Struct {
 
   /* UniPG>> */
   /* NOT YET USED IN THE V2 VERSION OF OPENJPEG */
-  /** @name JPWL encoding parameters */
+  /* @name JPWL encoding parameters */
   /*@{*/
   /** enables writing of EPC in MH, thus activating JPWL */
   public Boolean jpwl_epc_on = new Boolean();
@@ -147,7 +147,7 @@ public class opj_cparameters extends Struct {
   /** Flag for Tile part generation */
   Unsigned8 tp_flag = new Unsigned8();
   /** MCT (multiple component transform) */
-  public Unsigned8 tcp_mct = new Unsigned8();
+  public final Unsigned8 tcp_mct = new Unsigned8();
   /** Enable JPIP indexing */
   Boolean jpip_on = new Boolean();
   /**

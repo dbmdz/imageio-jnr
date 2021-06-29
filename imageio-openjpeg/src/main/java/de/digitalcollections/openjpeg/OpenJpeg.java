@@ -51,11 +51,8 @@ public class OpenJpeg {
       new ComponentColorModel(
           new CMYKColorSpace(), true, false, Transparency.TRANSLUCENT, DataBuffer.TYPE_BYTE);
 
-  public libopenjp2 lib;
+  public final libopenjp2 lib;
   public Runtime runtime;
-
-  static {
-  }
 
   /** Load the library. */
   public OpenJpeg() {
@@ -90,13 +87,7 @@ public class OpenJpeg {
 
   /** Obtain information about the JPEG200 image located at the given path. */
   public Info getInfo(Path filePath) throws IOException {
-    if (!Files.exists(filePath)) {
-      throw new FileNotFoundException(String.format("File not found at %s", filePath));
-    } else if (!Files.isReadable(filePath)) {
-      throw new IOException(String.format("File not readable at %s", filePath));
-    }
-    Pointer ptr =
-        lib.opj_stream_create_default_file_stream(filePath.toAbsolutePath().toString(), true);
+    Pointer ptr = createPointer(filePath);
     try {
       return getInfo(ptr);
     } finally {
@@ -206,18 +197,21 @@ public class OpenJpeg {
    * @throws IOException if there's a problem decoding the image or reading the file
    */
   public BufferedImage decode(Path filePath, Rectangle area, int reduceFactor) throws IOException {
-    if (!Files.exists(filePath)) {
-      throw new FileNotFoundException(String.format("File not found at %s", filePath));
-    } else if (!Files.isReadable(filePath)) {
-      throw new IOException(String.format("File not readable at %s", filePath));
-    }
-    Pointer ptr =
-        lib.opj_stream_create_default_file_stream(filePath.toAbsolutePath().toString(), true);
+    Pointer ptr = createPointer(filePath);
     try {
       return decode(ptr, area, reduceFactor);
     } finally {
       lib.opj_stream_destroy(ptr);
     }
+  }
+
+  private Pointer createPointer(Path filePath) throws IOException {
+    if (!Files.exists(filePath)) {
+      throw new FileNotFoundException(String.format("File not found at %s", filePath));
+    } else if (!Files.isReadable(filePath)) {
+      throw new IOException(String.format("File not readable at %s", filePath));
+    }
+    return lib.opj_stream_create_default_file_stream(filePath.toAbsolutePath().toString(), true);
   }
 
   private BufferedImage decode(Pointer stream, Rectangle area, int reduceFactor)
@@ -404,8 +398,8 @@ public class OpenJpeg {
 
     byte[] bgrData = ((DataBufferByte) bufImg.getRaster().getDataBuffer()).getData();
     for (int i = 0, j = 0; i < width * height; i++) {
-      for (int c = 0; c < data.length; c++) {
-        bgrData[j++] = (byte) (data[c].getInt(i * 4) / colorDepthFactor);
+      for (Pointer datum : data) {
+        bgrData[j++] = (byte) (datum.getInt(i * 4) / colorDepthFactor);
       }
     }
 

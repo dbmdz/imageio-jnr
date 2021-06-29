@@ -28,8 +28,8 @@ import org.slf4j.LoggerFactory;
 public class TurboJpeg {
 
   private static final Logger LOG = LoggerFactory.getLogger(TurboJpeg.class);
-  public libturbojpeg lib;
-  public Runtime runtime;
+  public final libturbojpeg lib;
+  public final Runtime runtime;
 
   public TurboJpeg() {
     lib = LibraryLoader.create(libturbojpeg.class).load("turbojpeg");
@@ -199,7 +199,6 @@ public class TurboJpeg {
           byteBuf[i] = (byte) (buf[i] == 0 ? 0x00 : 0xFF);
         }
         inBuf = ByteBuffer.wrap(byteBuf).order(runtime.byteOrder());
-        ;
       } else {
         inBuf =
             ByteBuffer.wrap(((DataBufferByte) img.getDataBuffer()).getData())
@@ -275,8 +274,6 @@ public class TurboJpeg {
                   "Invalid cropping region %d×%d, width must be divisible by %d, height by %d",
                   region.width, region.height, mcuSize.width, mcuSize.height));
         }
-        width = region.width;
-        height = region.height;
         transform.options.set(TJXOPT.TJXOPT_CROP | TJXOPT.TJXOPT_TRIM);
         transform.r.x.set(region.x);
         transform.r.y.set(region.y);

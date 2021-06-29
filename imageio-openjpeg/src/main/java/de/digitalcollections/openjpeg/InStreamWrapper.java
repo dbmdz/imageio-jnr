@@ -7,15 +7,13 @@ import jnr.ffi.Pointer;
 
 public abstract class InStreamWrapper {
   private Pointer stream;
-  private libopenjp2 lib;
+  private final libopenjp2 lib;
 
   // NOTE: We cannot use method references, since their evaluation creates a temporary instance of
-  // the functional
-  // interface. That is, if we set the callbacks in the constructor as we should, the temporary
-  // instances would get
-  // garbage-collected at some point, which would lead to bad things.
-  private opj_stream_read_fn readCallback;
-  private opj_stream_skip_fn skipCallback;
+  // the functional interface. That is, if we set the callbacks in the constructor as we should,
+  // the temporary instances would get garbage-collected at some point, which would lead to bad things.
+  private final opj_stream_read_fn readCallback;
+  private final opj_stream_skip_fn skipCallback;
 
   protected InStreamWrapper(libopenjp2 lib) {
     this.lib = lib;

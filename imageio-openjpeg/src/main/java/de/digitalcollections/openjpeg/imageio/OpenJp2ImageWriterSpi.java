@@ -28,7 +28,7 @@ public class OpenJp2ImageWriterSpi extends ImageWriterSpi {
   private static final String[] readerSpiNames = {
     "de.digitalcollections.openjpeg.imageio.OpenJp2ImageWriterSpi"
   };
-  private static final Class[] outputTypes = {ImageOutputStream.class};
+  private static final Class<?>[] outputTypes = {ImageOutputStream.class};
 
   private OpenJpeg lib;
 

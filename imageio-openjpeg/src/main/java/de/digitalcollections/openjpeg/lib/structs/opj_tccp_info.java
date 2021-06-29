@@ -10,7 +10,7 @@ public class opj_tccp_info extends Struct {
   /** coding style */
   public Unsigned32 csty = new Unsigned32();
   /** number of resolutions */
-  public Unsigned32 numresolutions = new Unsigned32();
+  public final Unsigned32 numresolutions = new Unsigned32();
   /** log2 of code-blocks width */
   public Unsigned32 cblkw = new Unsigned32();
   /** log2 of code-blocks height */

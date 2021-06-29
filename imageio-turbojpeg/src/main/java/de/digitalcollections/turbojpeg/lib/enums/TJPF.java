@@ -22,7 +22,7 @@ public enum TJPF implements IntegerEnum {
   TJPF_ARGB(10),
   TJPF_CMYK(11);
 
-  private int val;
+  private final int val;
 
   public static TJPF fromImageType(int imageType) {
     switch (imageType) {
