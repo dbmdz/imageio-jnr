@@ -118,8 +118,9 @@ public class OpenJp2ImageReader extends ImageReader {
                 OpenJpeg.COLOR_MODEL_CMYK_ALPHA,
                 OpenJpeg.COLOR_MODEL_CMYK_ALPHA.createCompatibleSampleModel(
                     info.getNativeSize().width, info.getNativeSize().height));
+      } else {
+        spec = ImageTypeSpecifier.createFromBufferedImageType(BufferedImage.TYPE_4BYTE_ABGR);
       }
-      spec = ImageTypeSpecifier.createFromBufferedImageType(BufferedImage.TYPE_4BYTE_ABGR);
     } else if (numComps == 1) {
       spec =
           ImageTypeSpecifier.createFromBufferedImageType(
