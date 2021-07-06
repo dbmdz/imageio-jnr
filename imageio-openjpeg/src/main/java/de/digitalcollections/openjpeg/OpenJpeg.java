@@ -51,7 +51,7 @@ public class OpenJpeg {
       new ComponentColorModel(
           new CMYKColorSpace(), true, false, Transparency.TRANSLUCENT, DataBuffer.TYPE_BYTE);
 
-  public final libopenjp2 lib;
+  public libopenjp2 lib;
   public Runtime runtime;
 
   /** Load the library. */
@@ -87,7 +87,7 @@ public class OpenJpeg {
 
   /** Obtain information about the JPEG200 image located at the given path. */
   public Info getInfo(Path filePath) throws IOException {
-    Pointer ptr = createPointer(filePath);
+    Pointer ptr = createOpjFileStream(filePath);
     try {
       return getInfo(ptr);
     } finally {
@@ -197,7 +197,7 @@ public class OpenJpeg {
    * @throws IOException if there's a problem decoding the image or reading the file
    */
   public BufferedImage decode(Path filePath, Rectangle area, int reduceFactor) throws IOException {
-    Pointer ptr = createPointer(filePath);
+    Pointer ptr = createOpjFileStream(filePath);
     try {
       return decode(ptr, area, reduceFactor);
     } finally {
@@ -205,7 +205,7 @@ public class OpenJpeg {
     }
   }
 
-  private Pointer createPointer(Path filePath) throws IOException {
+  private Pointer createOpjFileStream(Path filePath) throws IOException {
     if (!Files.exists(filePath)) {
       throw new FileNotFoundException(String.format("File not found at %s", filePath));
     } else if (!Files.isReadable(filePath)) {

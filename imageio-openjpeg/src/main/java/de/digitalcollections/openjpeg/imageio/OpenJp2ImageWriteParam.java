@@ -30,8 +30,8 @@ public class OpenJp2ImageWriteParam extends ImageWriteParam {
     }
   }
 
-  public static final String COMPRESS_TYPE_LOSSY = "lossy";
-  public static final String COMPRESS_TYPE_LOSSLESS = "lossless";
+  public static String COMPRESS_TYPE_LOSSY = "lossy";
+  public static String COMPRESS_TYPE_LOSSLESS = "lossless";
 
   /** Use irreversible wavelet compression (= lossy) * */
   boolean compressLossy = false;

@@ -11,15 +11,15 @@ public class opj_image_comp extends Struct {
   /** YRsiz: vertical separation of a sample of ith component with respect to the reference grid */
   Unsigned32 dy = new Unsigned32();
   /** data width */
-  public final Unsigned32 w = new Unsigned32();
+  public Unsigned32 w = new Unsigned32();
   /** data height */
-  public final Unsigned32 h = new Unsigned32();
+  public Unsigned32 h = new Unsigned32();
   /** x component offset compared to the whole image */
   Unsigned32 x0 = new Unsigned32();
   /** y component offset compared to the whole image */
   Unsigned32 y0 = new Unsigned32();
   /** image depth in bits */
-  public final Unsigned32 bpp = new Unsigned32();
+  public Unsigned32 bpp = new Unsigned32();
   /** precision */
   public Unsigned32 prec = new Unsigned32();
   /** signed (1) / unsigned (0) */
@@ -29,7 +29,7 @@ public class opj_image_comp extends Struct {
   /** number of division by 2 of the out image compared to the original size of image */
   Unsigned32 factor = new Unsigned32();
   /** image component data */
-  public final Pointer data = new Pointer();
+  public Pointer data = new Pointer();
 
   /** alpha channel */
   Unsigned16 alpha = new Unsigned16();

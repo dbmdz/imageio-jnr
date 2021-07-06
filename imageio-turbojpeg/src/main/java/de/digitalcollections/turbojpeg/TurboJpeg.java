@@ -28,8 +28,8 @@ import org.slf4j.LoggerFactory;
 public class TurboJpeg {
 
   private static final Logger LOG = LoggerFactory.getLogger(TurboJpeg.class);
-  public final libturbojpeg lib;
-  public final Runtime runtime;
+  public libturbojpeg lib;
+  public Runtime runtime;
 
   public TurboJpeg() {
     lib = LibraryLoader.create(libturbojpeg.class).load("turbojpeg");

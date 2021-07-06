@@ -4,11 +4,11 @@ import jnr.ffi.Runtime;
 import jnr.ffi.Struct;
 
 public class tjtransform extends Struct {
-  public final tjregion r;
-  public final Signed32 op;
-  public final Signed32 options;
-  public final Pointer data;
-  public final Pointer customFilter;
+  public tjregion r;
+  public Signed32 op;
+  public Signed32 options;
+  public Pointer data;
+  public Pointer customFilter;
 
   public tjtransform(Runtime runtime) {
     super(runtime);

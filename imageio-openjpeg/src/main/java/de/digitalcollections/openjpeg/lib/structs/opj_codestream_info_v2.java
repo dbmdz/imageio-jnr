@@ -7,25 +7,25 @@ import jnr.ffi.byref.AddressByReference;
 
 public class opj_codestream_info_v2 extends Struct {
   /** tile origin in x = XTOsiz */
-  public final Unsigned32 tx0;
+  public Unsigned32 tx0;
   /** tile origin in y = YTOsiz */
-  public final Unsigned32 ty0;
+  public Unsigned32 ty0;
   /** tile size in x = XTsiz */
-  public final Unsigned32 tdx;
+  public Unsigned32 tdx;
   /** tile size in y = YTsiz */
-  public final Unsigned32 tdy;
+  public Unsigned32 tdy;
   /** number of tiles in X */
-  public final Unsigned32 tw;
+  public Unsigned32 tw;
   /** number of tiles in Y */
-  public final Unsigned32 th;
+  public Unsigned32 th;
 
   /** number of components */
-  public final Unsigned32 nbcomps;
+  public Unsigned32 nbcomps;
 
   /** Default information regarding tiles inside image */
-  public final opj_tile_v2_info m_default_tile_info;
+  public opj_tile_v2_info m_default_tile_info;
 
-  public final StructRef<opj_tile_v2_info> tinfo;
+  public StructRef<opj_tile_v2_info> tinfo;
 
   public opj_codestream_info_v2(Runtime runtime) {
     super(runtime);
