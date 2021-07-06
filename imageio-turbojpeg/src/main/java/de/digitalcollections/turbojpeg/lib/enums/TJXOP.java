@@ -12,7 +12,7 @@ public enum TJXOP implements IntegerEnum {
   TJXOP_ROT180(6),
   TJXOP_ROT270(7);
 
-  private int val;
+  private final int val;
 
   TJXOP(int val) {
     this.val = val;

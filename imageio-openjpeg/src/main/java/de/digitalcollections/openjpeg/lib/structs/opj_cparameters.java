@@ -31,7 +31,7 @@ public class opj_cparameters extends Struct {
   /** progression order (default OPJ_LRCP) */
   public Enum<PROG_ORDER> prog_order = new Enum<>(PROG_ORDER.class);
   /** progression order changes */
-  public opj_poc POC[] = array(new opj_poc[32]);
+  public opj_poc[] POC = array(new opj_poc[32]);
   /** number of progression order changes (POC), default to 0 */
   public Unsigned32 numpocs = new Unsigned32();
   /** number of layers */
@@ -40,7 +40,7 @@ public class opj_cparameters extends Struct {
    * rates of layers - might be subsequently limited by the max_cs_size field. Should be decreasing.
    * 1 can be used as last value to indicate the last layer is lossless.
    */
-  public Float[] tcp_rates = array(new Float[100]);
+  public final Float[] tcp_rates = array(new Float[100]);
   /**
    * different psnr for successive layers. Should be increasing. 0 can be used as last value to
    * indicate the last layer is lossless.
@@ -67,7 +67,7 @@ public class opj_cparameters extends Struct {
   /** initial precinct height */
   public Signed32[] prch_init = array(new Signed32[libopenjp2.OPJ_J2K_MAXRLVLS]);
 
-  /** @name command line encoder parameters (not used inside the library) */
+  /* @name command line encoder parameters (not used inside the library) */
   /*@{*/
   /** input file name */
   String infile = new AsciiString(libopenjp2.OPJ_PATH_LEN);
@@ -99,7 +99,7 @@ public class opj_cparameters extends Struct {
 
   /* UniPG>> */
   /* NOT YET USED IN THE V2 VERSION OF OPENJPEG */
-  /** @name JPWL encoding parameters */
+  /* @name JPWL encoding parameters */
   /*@{*/
   /** enables writing of EPC in MH, thus activating JPWL */
   public Boolean jpwl_epc_on = new Boolean();

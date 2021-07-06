@@ -15,7 +15,7 @@ import org.slf4j.LoggerFactory;
 public class OpenJp2ImageReaderSpi extends ImageReaderSpi {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(OpenJp2ImageReaderSpi.class);
-  private static byte[] HEADER_MAGIC =
+  private static final byte[] HEADER_MAGIC =
       new byte[] {0x00, 0x00, 0x00, 0x0c, 0x6a, 0x50, 0x20, 0x20, 0x0d, 0x0a, (byte) 0x87, 0x0a};
   private static final String vendorName =
       "Münchener Digitalisierungszentrum/Digitale Bibliothek, Bayerische Staatsbibliothek";
@@ -28,7 +28,7 @@ public class OpenJp2ImageReaderSpi extends ImageReaderSpi {
   private static final String[] writerSpiNames = {
     "de.digitalcollections.openjpeg.imageio.OpenJp2ImageWriterSpi"
   };
-  private static final Class[] inputTypes = {ImageInputStream.class};
+  private static final Class<?>[] inputTypes = {ImageInputStream.class};
 
   private OpenJpeg lib;
 

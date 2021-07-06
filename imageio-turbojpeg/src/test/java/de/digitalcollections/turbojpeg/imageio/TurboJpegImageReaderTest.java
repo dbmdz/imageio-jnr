@@ -278,6 +278,7 @@ class TurboJpegImageReaderTest {
     assertThat(img).hasDimensions(1955, 524);
     assertThat(img.getType()).isEqualTo(BufferedImage.TYPE_BYTE_GRAY);
     InputStream input = ClassLoader.getSystemResourceAsStream("grayscale_control.png");
+    assertThat(input).isNotNull();
     BufferedImage controlImg = ImageIO.read(input);
     assertThat(img).isEqualTo(controlImg);
   }

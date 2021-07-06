@@ -88,7 +88,7 @@ public class TurboJpegImageReader extends ImageReader {
    * decoded.
    */
   @Override
-  public int getNumImages(boolean allowSearch) throws IOException {
+  public int getNumImages(boolean allowSearch) {
     return info.getAvailableSizes().size();
   }
 
@@ -98,18 +98,18 @@ public class TurboJpegImageReader extends ImageReader {
   }
 
   @Override
-  public int getWidth(int imageIndex) throws IOException {
+  public int getWidth(int imageIndex) {
     checkIndex(imageIndex);
     return info.getAvailableSizes().get(imageIndex).width;
   }
 
   @Override
-  public int getHeight(int imageIndex) throws IOException {
+  public int getHeight(int imageIndex) {
     return info.getAvailableSizes().get(imageIndex).height;
   }
 
   @Override
-  public Iterator<ImageTypeSpecifier> getImageTypes(int imageIndex) throws IOException {
+  public Iterator<ImageTypeSpecifier> getImageTypes(int imageIndex) {
     return Stream.of(
             ImageTypeSpecifier.createFromBufferedImageType(
                 info.getColorspace() == TJCS.TJCS_GRAY ? TYPE_BYTE_GRAY : TYPE_3BYTE_BGR))
@@ -243,9 +243,8 @@ public class TurboJpegImageReader extends ImageReader {
    *
    * @param targetIndex Index of the targeted image resolution
    * @param sourceRegion Region relative to the targeted image resolution, will be modified
-   * @throws IOException if there's an error getting the image dimensions
    */
-  private void scaleRegion(int targetIndex, Rectangle sourceRegion) throws IOException {
+  private void scaleRegion(int targetIndex, Rectangle sourceRegion) {
     if (targetIndex == 0) {
       return;
     }
@@ -310,7 +309,7 @@ public class TurboJpegImageReader extends ImageReader {
     }
   }
 
-  private boolean isRegionFullImage(int imageIndex, Rectangle region) throws IOException {
+  private boolean isRegionFullImage(int imageIndex, Rectangle region) {
     int nativeWidth = getWidth(imageIndex);
     int nativeHeight = getHeight(imageIndex);
     return region.x == 0
@@ -320,12 +319,12 @@ public class TurboJpegImageReader extends ImageReader {
   }
 
   @Override
-  public IIOMetadata getStreamMetadata() throws IOException {
+  public IIOMetadata getStreamMetadata() {
     return null;
   }
 
   @Override
-  public IIOMetadata getImageMetadata(int imageIndex) throws IOException {
+  public IIOMetadata getImageMetadata(int imageIndex) {
     return null;
   }
 }

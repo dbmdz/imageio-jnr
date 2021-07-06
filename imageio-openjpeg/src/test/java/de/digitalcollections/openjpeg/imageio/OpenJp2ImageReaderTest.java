@@ -91,6 +91,7 @@ class OpenJp2ImageReaderTest {
     assertThat(img.getWidth()).isEqualTo(512);
     assertThat(img.getHeight()).isEqualTo(512);
     InputStream input = ClassLoader.getSystemResourceAsStream("gray_control.png");
+    assertThat(input).isNotNull();
     BufferedImage controlImg = ImageIO.read(input);
     assertImageEquals(controlImg, img);
   }
@@ -103,6 +104,7 @@ class OpenJp2ImageReaderTest {
     assertThat(img.getHeight()).isEqualTo(4910);
     assertThat(img.getType()).isEqualTo(BufferedImage.TYPE_BYTE_BINARY);
     InputStream input = ClassLoader.getSystemResourceAsStream("binary_control.png");
+    assertThat(input).isNotNull();
     BufferedImage controlImg = ImageIO.read(input);
     assertImageEquals(controlImg, img);
   }
@@ -144,6 +146,7 @@ class OpenJp2ImageReaderTest {
     BufferedImage actualImage = reader.read(0, null);
 
     InputStream input = ClassLoader.getSystemResourceAsStream(expectedImageName);
+    assertThat(input).isNotNull();
     BufferedImage expectedImg = ImageIO.read(input);
 
     assertImageEquals(expectedImg, actualImage);

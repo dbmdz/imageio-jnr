@@ -37,7 +37,7 @@ class TurboJpegImageWriterTest {
         Streams.stream(ImageIO.getImageWritersByFormatName("jpeg"))
             .filter(TurboJpegImageWriter.class::isInstance)
             .findFirst()
-            .get();
+            .orElseThrow(RuntimeException::new);
     ImageWriteParam param = writer.getDefaultWriteParam();
     param.setCompressionMode(ImageWriteParam.MODE_EXPLICIT);
     param.setCompressionQuality(0.85f);
@@ -57,7 +57,7 @@ class TurboJpegImageWriterTest {
         Streams.stream(ImageIO.getImageWritersByFormatName("jpeg"))
             .filter(TurboJpegImageWriter.class::isInstance)
             .findFirst()
-            .get();
+            .orElseThrow(RuntimeException::new);
     ImageWriteParam param = writer.getDefaultWriteParam();
     param.setCompressionMode(ImageWriteParam.MODE_EXPLICIT);
     param.setCompressionQuality(0.85f);
@@ -84,7 +84,7 @@ class TurboJpegImageWriterTest {
         Streams.stream(ImageIO.getImageWritersByFormatName("jpeg"))
             .filter(TurboJpegImageWriter.class::isInstance)
             .findFirst()
-            .get();
+            .orElseThrow(RuntimeException::new);
 
     BufferedImage in = ImageIO.read(ClassLoader.getSystemResource("rgb.jpg"));
     ByteArrayOutputStream rgb = new ByteArrayOutputStream();
@@ -111,7 +111,7 @@ class TurboJpegImageWriterTest {
         Streams.stream(ImageIO.getImageWritersByFormatName("jpeg"))
             .filter(TurboJpegImageWriter.class::isInstance)
             .findFirst()
-            .get();
+            .orElseThrow(RuntimeException::new);
     ImageWriteParam param = writer.getDefaultWriteParam();
     param.setCompressionMode(ImageWriteParam.MODE_EXPLICIT);
     param.setCompressionQuality(0.85f);

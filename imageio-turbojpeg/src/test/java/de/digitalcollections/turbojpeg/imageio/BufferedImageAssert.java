@@ -19,7 +19,7 @@ class BufferedImageAssert extends AbstractAssert<BufferedImageAssert, BufferedIm
       ImageIO.write(actual, "PNG", temp);
       return "\nDebug image was written to " + temp.getAbsolutePath();
     } catch (IOException e) {
-      System.err.println(String.format("Could not write debug image: %s", e));
+      System.err.printf("Could not write debug image: %s%n", e);
       return "";
     }
   }

@@ -7,7 +7,7 @@ import javax.imageio.stream.ImageOutputStream;
 import jnr.ffi.Pointer;
 
 class ImageOutputStreamWrapper extends OutStreamWrapper {
-  private ImageOutputStream os;
+  private final ImageOutputStream os;
 
   public ImageOutputStreamWrapper(ImageOutputStream os, OpenJpeg lib) {
     super(lib.lib);

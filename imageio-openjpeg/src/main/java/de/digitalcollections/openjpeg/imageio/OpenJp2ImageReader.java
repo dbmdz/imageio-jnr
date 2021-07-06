@@ -24,7 +24,7 @@ import org.slf4j.LoggerFactory;
 public class OpenJp2ImageReader extends ImageReader {
   private static final Logger LOGGER = LoggerFactory.getLogger(OpenJp2ImageReader.class);
 
-  private OpenJpeg lib;
+  private final OpenJpeg lib;
   private ImageInputStream stream = null;
   private ImageInputStreamWrapper streamWrapper = null;
   private Info info = null;
@@ -60,7 +60,7 @@ public class OpenJp2ImageReader extends ImageReader {
    * <p>Image 0 has the native resolution, all following indices are 1/2^idx times smaller.
    */
   @Override
-  public int getNumImages(boolean allowSearch) throws IOException {
+  public int getNumImages(boolean allowSearch) {
     return getInfo().getNumResolutions();
   }
 
@@ -85,25 +85,25 @@ public class OpenJp2ImageReader extends ImageReader {
   }
 
   private int adjustSize(int size, int imageIndex) {
-    return (int) (size / Math.pow(2, (double) imageIndex));
+    return (int) (size / Math.pow(2, imageIndex));
   }
 
   /** Get the width of the given resolution of the image. */
   @Override
-  public int getWidth(int imageIndex) throws IOException {
+  public int getWidth(int imageIndex) {
     checkIndex(imageIndex);
     return adjustSize(info.getNativeSize().width, imageIndex);
   }
 
   /** Get the height of the given resolution of the image. */
   @Override
-  public int getHeight(int imageIndex) throws IOException {
+  public int getHeight(int imageIndex) {
     checkIndex(imageIndex);
     return adjustSize(info.getNativeSize().height, imageIndex);
   }
 
   @Override
-  public Iterator<ImageTypeSpecifier> getImageTypes(int imageIndex) throws IOException {
+  public Iterator<ImageTypeSpecifier> getImageTypes(int imageIndex) {
     checkIndex(imageIndex);
     int numComps = info.getNumComponents();
     ImageTypeSpecifier spec = null;
@@ -140,7 +140,7 @@ public class OpenJp2ImageReader extends ImageReader {
     return Stream.of(spec).iterator();
   }
 
-  private Rectangle adjustRegion(int imageIndex, Rectangle sourceRegion) throws IOException {
+  private Rectangle adjustRegion(int imageIndex, Rectangle sourceRegion) {
     if (sourceRegion == null) {
       return null;
     }
@@ -176,31 +176,31 @@ public class OpenJp2ImageReader extends ImageReader {
   }
 
   @Override
-  public boolean isImageTiled(int imageIndex) throws IOException {
+  public boolean isImageTiled(int imageIndex) {
     checkIndex(imageIndex);
     return getInfo().getNumTiles() > 1;
   }
 
   @Override
-  public int getTileWidth(int imageIndex) throws IOException {
+  public int getTileWidth(int imageIndex) {
     checkIndex(imageIndex);
     return adjustSize(getInfo().getTileSize().width, imageIndex);
   }
 
   @Override
-  public int getTileHeight(int imageIndex) throws IOException {
+  public int getTileHeight(int imageIndex) {
     checkIndex(imageIndex);
     return adjustSize(getInfo().getTileSize().height, imageIndex);
   }
 
   @Override
-  public int getTileGridXOffset(int imageIndex) throws IOException {
+  public int getTileGridXOffset(int imageIndex) {
     checkIndex(imageIndex);
     return getInfo().getTileOrigin().x;
   }
 
   @Override
-  public int getTileGridYOffset(int imageIndex) throws IOException {
+  public int getTileGridYOffset(int imageIndex) {
     checkIndex(imageIndex);
     return getInfo().getTileOrigin().y;
   }
@@ -225,12 +225,12 @@ public class OpenJp2ImageReader extends ImageReader {
   }
 
   @Override
-  public IIOMetadata getStreamMetadata() throws IOException {
+  public IIOMetadata getStreamMetadata() {
     return null;
   }
 
   @Override
-  public IIOMetadata getImageMetadata(int imageIndex) throws IOException {
+  public IIOMetadata getImageMetadata(int imageIndex) {
     return null;
   }
 

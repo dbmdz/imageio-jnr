@@ -17,14 +17,16 @@ public class OpenJp2ImageWriteParam extends ImageWriteParam {
     PCRL(3),
     CPRL(4);
 
-    private int val;
+    private final int val;
 
     ProgressionOrder(int val) {
       this.val = val;
     }
 
     PROG_ORDER toNative() {
-      return Arrays.stream(PROG_ORDER.values()).filter(v -> v.value == this.val).findFirst().get();
+      // Exception should never been thrown since this is static, but unchecked
+      // Optional.get() triggers warnings
+      return Arrays.stream(PROG_ORDER.values()).filter(v -> v.value == this.val).findFirst().orElseThrow(RuntimeException::new);
     }
   }
 
