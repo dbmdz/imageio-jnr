@@ -212,6 +212,15 @@ class TurboJpegImageReaderTest {
   }
 
   @Test
+  public void testCropToOnePixel() throws IOException {
+    ImageReader reader = getReader("prime_shaped.jpg");
+    TurboJpegImageReadParam param = (TurboJpegImageReadParam) reader.getDefaultReadParam();
+    param.setSourceRegion(new Rectangle(0, 0, reader.getWidth(2), 1));
+    BufferedImage img = reader.read(2, param);
+    assertThat(img).hasDimensions(reader.getWidth(2), 1);
+  }
+
+  @Test
   public void testReadTinyImage() throws IOException {
     ImageReader reader = getReader("tiny.jpg");
     TurboJpegImageReadParam param = (TurboJpegImageReadParam) reader.getDefaultReadParam();
