@@ -55,7 +55,7 @@
     <version.assertj>3.20.2</version.assertj>
     <version.jnr-ffi>2.2.6</version.jnr-ffi>
     <version.slf4j>2.0.0-alpha1</version.slf4j>
-    <version.junit-jupiter>5.8.0</version.junit-jupiter>
+    <version.junit-jupiter>5.8.1</version.junit-jupiter>
 
     <!-- plugins -->
     <version.jacoco-maven-plugin>0.8.7</version.jacoco-maven-plugin>
