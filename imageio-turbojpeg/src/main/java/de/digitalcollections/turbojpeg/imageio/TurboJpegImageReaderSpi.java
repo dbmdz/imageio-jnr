@@ -81,7 +81,9 @@ public class TurboJpegImageReaderSpi extends ImageReaderSpi {
               try {
                 ImageReaderSpi defaultProvider =
                     (ImageReaderSpi) registry.getServiceProviderByClass(Class.forName(clsName));
-                registry.setOrdering((Class<ImageReaderSpi>) category, this, defaultProvider);
+                if (defaultProvider != null) {
+                  registry.setOrdering((Class<ImageReaderSpi>) category, this, defaultProvider);
+                }
               } catch (ClassNotFoundException e) {
                 // NOP
               }

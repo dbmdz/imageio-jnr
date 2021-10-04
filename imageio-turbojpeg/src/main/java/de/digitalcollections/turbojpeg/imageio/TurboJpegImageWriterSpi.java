@@ -81,7 +81,9 @@ public class TurboJpegImageWriterSpi extends ImageWriterSpi {
               try {
                 ImageWriterSpi defaultProvider =
                     (ImageWriterSpi) registry.getServiceProviderByClass(Class.forName(clsName));
-                registry.setOrdering((Class<ImageWriterSpi>) category, this, defaultProvider);
+                if (defaultProvider != null) {
+                  registry.setOrdering((Class<ImageWriterSpi>) category, this, defaultProvider);
+                }
               } catch (ClassNotFoundException e) {
                 // NOP
               }
