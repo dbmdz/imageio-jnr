@@ -10,10 +10,17 @@ import de.digitalcollections.turbojpeg.lib.structs.tjtransform;
 import java.awt.Dimension;
 import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
+import java.awt.image.DataBuffer;
 import java.awt.image.DataBufferByte;
+import java.awt.image.DataBufferInt;
+import java.awt.image.DataBufferShort;
+import java.awt.image.DataBufferUShort;
 import java.awt.image.Raster;
 import java.nio.Buffer;
 import java.nio.ByteBuffer;
+import java.nio.IntBuffer;
+import java.nio.ShortBuffer;
+
 import jnr.ffi.LibraryLoader;
 import jnr.ffi.Pointer;
 import jnr.ffi.Runtime;
@@ -123,11 +130,9 @@ public class TurboJpeg {
         imgType = BufferedImage.TYPE_3BYTE_BGR;
       }
       BufferedImage img = new BufferedImage(width, height, imgType);
-      // Wrap the underlying data buffer of the image with a ByteBuffer so we can pass it over the
+      // Wrap the underlying data buffer of the image with a ByteBuffer, so we can pass it over the
       // ABI
-      ByteBuffer outBuf =
-          ByteBuffer.wrap(((DataBufferByte) img.getRaster().getDataBuffer()).getData())
-              .order(runtime.byteOrder());
+      ByteBuffer outBuf = asByteBuffer(img.getRaster().getDataBuffer());
       int rv =
           lib.tjDecompress2(
               codec,
@@ -200,9 +205,7 @@ public class TurboJpeg {
         }
         inBuf = ByteBuffer.wrap(byteBuf).order(runtime.byteOrder());
       } else {
-        inBuf =
-            ByteBuffer.wrap(((DataBufferByte) img.getDataBuffer()).getData())
-                .order(runtime.byteOrder());
+        inBuf = asByteBuffer(img.getDataBuffer());
       }
       int rv =
           lib.tjCompress2(
@@ -336,5 +339,29 @@ public class TurboJpeg {
         lib.tjFree(bufPtrRef.getValue());
       }
     }
+  }
+
+  private ByteBuffer asByteBuffer(DataBuffer dataBuffer) {
+    ByteBuffer byteBuffer;
+    if (dataBuffer instanceof DataBufferByte) {
+      byte[] pixelData = ((DataBufferByte) dataBuffer).getData();
+      byteBuffer = ByteBuffer.wrap(pixelData).order(runtime.byteOrder());
+    } else if (dataBuffer instanceof DataBufferUShort) {
+      short[] pixelData = ((DataBufferUShort) dataBuffer).getData();
+      byteBuffer = ByteBuffer.allocate(pixelData.length * 2).order(runtime.byteOrder());
+      byteBuffer.asShortBuffer().put(ShortBuffer.wrap(pixelData));
+    } else if (dataBuffer instanceof DataBufferShort) {
+      short[] pixelData = ((DataBufferShort) dataBuffer).getData();
+      byteBuffer = ByteBuffer.allocate(pixelData.length * 2).order(runtime.byteOrder());
+      byteBuffer.asShortBuffer().put(ShortBuffer.wrap(pixelData));
+    } else if (dataBuffer instanceof DataBufferInt) {
+      int[] pixelData = ((DataBufferInt) dataBuffer).getData();
+      byteBuffer = ByteBuffer.allocate(pixelData.length * 4).order(runtime.byteOrder());
+      byteBuffer.asIntBuffer().put(IntBuffer.wrap(pixelData));
+    }
+    else {
+      throw new IllegalArgumentException("Unsupported DataBuffer type: " + dataBuffer.getClass());
+    }
+    return byteBuffer;
   }
 }
