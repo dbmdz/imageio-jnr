@@ -78,7 +78,7 @@ public interface libopenjp2 {
   boolean opj_encode(Pointer codec, Pointer stream);
 
   /* opj_image functions */
-  Pointer opj_image_create(@u_int32_t int numcmpts, Pointer cmtparms, COLOR_SPACE clrspc);
+  Pointer opj_image_create(@u_int32_t int numcmpts, @Direct Pointer cmtparms, COLOR_SPACE clrspc);
 
   void opj_image_destroy(Pointer image);
 
