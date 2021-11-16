@@ -23,13 +23,11 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Arrays;
 import jnr.ffi.LibraryLoader;
 import jnr.ffi.Pointer;
 import jnr.ffi.Runtime;
 import jnr.ffi.Struct;
 import jnr.ffi.byref.PointerByReference;
-import jnr.ffi.provider.ParameterFlags;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -426,14 +424,10 @@ public class OpenJpeg {
       params[i].w.set(img.getWidth());
       params[i].h.set(img.getHeight());
     }
-    // We need to keep references to every individual struct, or else we run the risk of them
-    // being deallocated during the call into `opj_image_create`.
-    Pointer[] paramsPtrs = Arrays.stream(params)
-        .map(p -> Struct.getMemory(p, ParameterFlags.DIRECT)).toArray(Pointer[]::new);
 
     COLOR_SPACE cspace = numBands == 3 ? COLOR_SPACE.OPJ_CLRSPC_SRGB : COLOR_SPACE.OPJ_CLRSPC_GRAY;
     opj_image outImg = new opj_image(runtime);
-    Pointer imgPtr = lib.opj_image_create(params.length, paramsPtrs[0], cspace);
+    Pointer imgPtr = lib.opj_image_create(params.length, Struct.getMemory(params[0]), cspace);
     outImg.useMemory(imgPtr);
 
     outImg.x0.set(0);
