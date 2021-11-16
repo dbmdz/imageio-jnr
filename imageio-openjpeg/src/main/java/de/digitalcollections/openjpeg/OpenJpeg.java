@@ -21,6 +21,8 @@ import java.awt.image.PixelInterleavedSampleModel;
 import java.awt.image.Raster;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.lang.reflect.Array;
+import java.lang.reflect.Constructor;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import jnr.ffi.LibraryLoader;
@@ -406,6 +408,69 @@ public class OpenJpeg {
     return bufImg;
   }
 
+  /**
+   * Hacky workaround for possible bug in {@link Struct#arrayOf(Runtime, Class, int)}.
+   *
+   * <p>For allocations smaller than 256 bytes, JNR-FFI does not use direct memory allocation, but a
+   * custom page-based allocator. We experienced frequent segfaults with this allocator, since it
+   * seems to preemptively deallocate memory still in use when GC pressure is high. To avoid this
+   * issue, this custotmization forces all allocations to be at least 512 bytes to force the use of
+   * the DirectMemoryIO allocator inside JNR-FFI's memory manager.
+   *
+   * <p>Except for this changed, this is copied verbatim from {@link Struct#arrayOf(Runtime, Class,
+   * int)} and thus licensed differently from the rest of the file:
+   *
+   * <p>Copyright (C) 2008-2010 Wayne Meissner
+   *
+   * <p>This method is based on code from the JNR project.
+   *
+   * <p>Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file
+   * except in compliance with the License. You may obtain a copy of the License at
+   *
+   * <p>http://www.apache.org/licenses/LICENSE-2.0
+   *
+   * <p>Unless required by applicable law or agreed to in writing, software distributed under the
+   * License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+   * either express or implied. See the License for the specific language governing permissions and
+   * limitations under the License.
+   *
+   * <p>Some of the design and code of this method is from the javolution project.
+   *
+   * <p>Copyright (C) 2006 - Javolution (http://javolution.org/) All rights reserved.
+   *
+   * <p>Permission to use, copy, modify, and distribute this software is freely granted, provided
+   * that this notice is preserved.
+   */
+  private static <T extends Struct> T[] arrayOfDirectlyAllocated(
+      Runtime runtime, Class<T> type, int length) {
+    try {
+      T[] array = (T[]) Array.newInstance(type, length);
+      Constructor<T> c = type.getConstructor(Runtime.class);
+      for (int i = 0; i < length; ++i) {
+        array[i] = c.newInstance(runtime);
+      }
+
+      if (array.length > 0) {
+        int align = Struct.alignment(array[0]);
+        final int structSize = (Struct.size(array[0]) + align - 1) & ~(align - 1);
+
+        // Cheat: We want to avoid allocating the backing memory in transient memory, so we force
+        // a minimum allocation size of 512 bytes (DirectMemoryIO is used for allocations >256
+        // bytes)
+        jnr.ffi.Pointer memory =
+            runtime.getMemoryManager().allocateDirect(Math.max(512, structSize * length));
+        for (int i = 0; i < array.length; ++i) {
+          array[i].useMemory(memory.slice(structSize * i, structSize));
+        }
+      }
+      return array;
+    } catch (RuntimeException ex) {
+      throw ex;
+    } catch (Exception ex) {
+      throw new RuntimeException(ex);
+    }
+  }
+
   private opj_image createImage(Raster img) {
     int numBands = img.getSampleModel().getNumBands();
     if (numBands != 3 && numBands != 1) {
@@ -414,7 +479,8 @@ public class OpenJpeg {
     if (!(img.getSampleModel() instanceof PixelInterleavedSampleModel)) {
       throw new IllegalArgumentException("Image must be of the 3BYTE_BGR or BYTE_GRAY");
     }
-    opj_image_comptparm[] params = Struct.arrayOf(runtime, opj_image_comptparm.class, numBands);
+    opj_image_comptparm[] params =
+        arrayOfDirectlyAllocated(runtime, opj_image_comptparm.class, numBands);
     for (int i = 0; i < numBands; i++) {
       params[i].prec.set(8); // One byte per component
       params[i].bpp.set(8); // 8bit depth
