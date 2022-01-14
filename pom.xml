@@ -54,7 +54,7 @@
 
     <version.assertj>3.22.0</version.assertj>
     <version.jnr-ffi>2.2.10</version.jnr-ffi>
-    <version.slf4j>2.0.0-alpha1</version.slf4j>
+    <version.slf4j>2.0.0-alpha6</version.slf4j>
     <version.junit-jupiter>5.8.2</version.junit-jupiter>
 
     <!-- plugins -->
