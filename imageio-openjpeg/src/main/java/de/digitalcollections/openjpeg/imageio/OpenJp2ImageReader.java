@@ -144,18 +144,20 @@ public class OpenJp2ImageReader extends ImageReader {
     if (sourceRegion == null) {
       return null;
     }
+    int maxWidth = getWidth(imageIndex);
+    int maxHeight = getHeight(imageIndex);
     if (sourceRegion.x == 0
         && sourceRegion.y == 0
-        && sourceRegion.width == getWidth(imageIndex)
-        && sourceRegion.height == getHeight(imageIndex)) {
+        && sourceRegion.width == maxWidth
+        && sourceRegion.height == maxHeight) {
       return null;
     }
-    double scaleFactor = (double) getWidth(0) / (double) getWidth(imageIndex);
+    double scaleFactor = (double) getWidth(0) / (double) maxWidth;
     return new Rectangle(
-        (int) Math.ceil(scaleFactor * sourceRegion.x),
-        (int) Math.ceil(scaleFactor * sourceRegion.y),
-        (int) Math.ceil(scaleFactor * sourceRegion.width),
-        (int) Math.ceil(scaleFactor * sourceRegion.height));
+        Math.min((int) Math.floor(scaleFactor * sourceRegion.x), maxWidth),
+        Math.min((int) Math.floor(scaleFactor * sourceRegion.y), maxHeight),
+        Math.min((int) Math.ceil(scaleFactor * sourceRegion.width), maxWidth),
+        Math.min((int) Math.ceil(scaleFactor * sourceRegion.height), maxHeight));
   }
 
   /** Read the image in the given resolution. */
