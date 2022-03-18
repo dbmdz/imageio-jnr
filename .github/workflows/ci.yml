@@ -54,7 +54,7 @@ jobs:
       - name: Set environment variable for OpenJPEG library
         run: echo "LD_LIBRARY_PATH=/tmp/openjpeg-v2.3.0-linux-x86_64/lib" >> $GITHUB_ENV
       - name: Install TurboJPEG library and XML utils
-        run: sudo apt install libturbojpeg libxml2-utils
+        run: sudo apt update && sudo apt install libturbojpeg libxml2-utils
       - name: Set project version
         run: echo "PROJECT_VERSION=$(xmllint --xpath '/*[local-name()="project"]/*[local-name()="version"]/text()' pom.xml)" >> $GITHUB_ENV
       - name: Publish to the Maven Central Repository
