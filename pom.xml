@@ -58,7 +58,7 @@
     <version.junit-jupiter>5.8.2</version.junit-jupiter>
 
     <!-- plugins -->
-    <version.jacoco-maven-plugin>0.8.7</version.jacoco-maven-plugin>
+    <version.jacoco-maven-plugin>0.8.8</version.jacoco-maven-plugin>
     <version.maven-compiler-plugin>3.10.1</version.maven-compiler-plugin>
     <version.maven-fmt-plugin>2.13</version.maven-fmt-plugin>
     <version.maven-gpg-plugin>3.0.1</version.maven-gpg-plugin>
