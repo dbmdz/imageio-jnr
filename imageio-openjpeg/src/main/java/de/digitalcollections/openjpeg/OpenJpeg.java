@@ -17,6 +17,7 @@ import java.awt.image.ColorModel;
 import java.awt.image.ComponentColorModel;
 import java.awt.image.DataBuffer;
 import java.awt.image.DataBufferByte;
+import java.awt.image.DataBufferUShort;
 import java.awt.image.PixelInterleavedSampleModel;
 import java.awt.image.Raster;
 import java.io.FileNotFoundException;
@@ -263,6 +264,7 @@ public class OpenJpeg {
         throw new IOException("Images with YUV color space are currently not supported.");
       }
 
+      // TODO: 11904212: Why is it necessary to scale down the color space?
       // 8bit color depth is assumed as default color depth here -> 2 ^ 8 = 256 colors are available
       // For 16bit color depth -> 2 ^ 16 = 65536 color are available.
       // To "scale down" images with 16bit color depth to 8 bit, just a color depth factor needs to
@@ -310,11 +312,20 @@ public class OpenJpeg {
                 }
               }
             } else {
-              // 8Bit/16Bit grayscale image
-              bufImg = new BufferedImage(targetWidth, targetHeight, BufferedImage.TYPE_BYTE_GRAY);
-              byte[] data = ((DataBufferByte) bufImg.getRaster().getDataBuffer()).getData();
-              for (int i = 0, j = 0; i < targetWidth * targetHeight; i++) {
-                data[i] = (byte) (ptr.getInt(i * 4) / colorDepthFactor);
+              if (comps[0].bpp.intValue() == 16) {
+                // 16Bit grayscale image
+                bufImg = new BufferedImage(targetWidth, targetHeight, BufferedImage.TYPE_USHORT_GRAY);
+                short[] data = ((DataBufferUShort) bufImg.getRaster().getDataBuffer()).getData();
+                for (int i = 0; i < targetWidth * targetHeight; i++) {
+                  data[i] = (short) (ptr.getInt(i * 4));
+                }
+              } else {
+                // 8Bit grayscale image
+                bufImg = new BufferedImage(targetWidth, targetHeight, BufferedImage.TYPE_BYTE_GRAY);
+                byte[] data = ((DataBufferByte) bufImg.getRaster().getDataBuffer()).getData();
+                for (int i = 0; i < targetWidth * targetHeight; i++) {
+                  data[i] = (byte) (ptr.getInt(i * 4) / colorDepthFactor);
+                }
               }
             }
           }
