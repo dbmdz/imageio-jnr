@@ -294,7 +294,8 @@ public class OpenJpeg {
         case 1:
           {
             Pointer ptr = comps[0].data.get();
-            if (comps[0].bpp.intValue() == 1) {
+            int bitPerPixel = comps[0].bpp.intValue();
+            if (bitPerPixel == 1) {
               // 1Bit binary image
               bufImg = new BufferedImage(targetWidth, targetHeight, BufferedImage.TYPE_BYTE_BINARY);
               byte[] data = ((DataBufferByte) bufImg.getRaster().getDataBuffer()).getData();
@@ -311,22 +312,22 @@ public class OpenJpeg {
                   }
                 }
               }
-            } else {
-              if (comps[0].bpp.intValue() == 16) {
-                // 16Bit grayscale image
-                bufImg = new BufferedImage(targetWidth, targetHeight, BufferedImage.TYPE_USHORT_GRAY);
-                short[] data = ((DataBufferUShort) bufImg.getRaster().getDataBuffer()).getData();
-                for (int i = 0; i < targetWidth * targetHeight; i++) {
-                  data[i] = (short) (ptr.getInt(i * 4));
-                }
-              } else {
-                // 8Bit grayscale image
-                bufImg = new BufferedImage(targetWidth, targetHeight, BufferedImage.TYPE_BYTE_GRAY);
-                byte[] data = ((DataBufferByte) bufImg.getRaster().getDataBuffer()).getData();
-                for (int i = 0; i < targetWidth * targetHeight; i++) {
-                  data[i] = (byte) (ptr.getInt(i * 4) / colorDepthFactor);
-                }
+            } else if (bitPerPixel <= 8) {
+              // 8Bit grayscale image
+              bufImg = new BufferedImage(targetWidth, targetHeight, BufferedImage.TYPE_BYTE_GRAY);
+              byte[] data = ((DataBufferByte) bufImg.getRaster().getDataBuffer()).getData();
+              for (int i = 0; i < targetWidth * targetHeight; i++) {
+                data[i] = (byte) (ptr.getInt(i * 4) / colorDepthFactor);
               }
+            } else if (bitPerPixel <= 16) {
+              // 16Bit grayscale image
+              bufImg = new BufferedImage(targetWidth, targetHeight, BufferedImage.TYPE_USHORT_GRAY);
+              short[] data = ((DataBufferUShort) bufImg.getRaster().getDataBuffer()).getData();
+              for (int i = 0; i < targetWidth * targetHeight; i++) {
+                data[i] = (short) (ptr.getInt(i * 4));
+              }
+            } else {
+              throw new IOException("unsupported bit depth (>16bit)");
             }
           }
           break;
