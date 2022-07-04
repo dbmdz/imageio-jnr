@@ -174,7 +174,7 @@ class OpenJp2ImageReaderTest {
 
   @Test
   public void testReadGray16bitWithoutAlpha() throws Exception {
-    assertImageEquals("gray16bitWithoutAlpha.tif", "gray16bitWithoutAlpha.jp2");
+    assertImageEquals("gray16bitWithoutAlpha.png", "gray16bitWithoutAlpha.jp2");
   }
 
   @Test
