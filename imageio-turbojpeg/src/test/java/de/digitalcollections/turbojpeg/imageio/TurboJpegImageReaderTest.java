@@ -1,25 +1,25 @@
 package de.digitalcollections.turbojpeg.imageio;
 
-import static de.digitalcollections.turbojpeg.imageio.CustomAssertions.assertThat;
+import org.assertj.core.util.Lists;
+import org.junit.jupiter.api.Test;
 
-import java.awt.Dimension;
-import java.awt.Graphics;
-import java.awt.Rectangle;
+import javax.imageio.ImageIO;
+import javax.imageio.ImageReadParam;
+import javax.imageio.ImageReader;
+import javax.imageio.stream.ImageInputStream;
+import java.awt.*;
 import java.awt.image.BufferedImage;
+import java.awt.image.RasterFormatException;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 import java.util.function.Supplier;
-import javax.imageio.ImageIO;
-import javax.imageio.ImageReadParam;
-import javax.imageio.ImageReader;
-import javax.imageio.stream.ImageInputStream;
-import org.assertj.core.util.Lists;
-import org.junit.jupiter.api.Test;
+
+import static de.digitalcollections.turbojpeg.imageio.CustomAssertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class TurboJpegImageReaderTest {
-
   @Test
   public void testReaderIsRegistered() {
     Supplier<List<ImageReader>> getReaderIter =
@@ -281,5 +281,52 @@ class TurboJpegImageReaderTest {
     assertThat(input).isNotNull();
     BufferedImage controlImg = ImageIO.read(input);
     assertThat(img).isEqualTo(controlImg);
+  }
+
+  @Test
+  public void testReadRotatedAndCropped() throws IOException {
+    ImageReader reader = getReader("crop_rotation.jpg");
+    TurboJpegImageReadParam param = (TurboJpegImageReadParam) reader.getDefaultReadParam();
+    BufferedImage img = reader.read(0, param);
+
+    /* Original image has 1500 x 2303, incl. to-be-cropped region:
+     _______________
+    |               |
+    |               |
+    |               |
+    |               |
+    |               |
+    |               |
+    |       ^-----^ |
+    |       |     | |
+    |       v-----v |
+    |_______________|
+     */
+    img = img.getSubimage(965, 1583, 480, 289);
+
+    assertThat(img).hasDimensions(480, 289);
+
+    /* We have a bug in cropping and rotation order.
+    The region should be cropped first and then rotated.
+    The actual implemention rotates the image first and then rotates it:
+
+     ______________________
+    |                      |
+    |                      |
+    |                      |
+    |                      |
+    |                      |
+    |_________^_____^______|
+              |     |
+              v-----v
+
+    That means to be cropped region is out the raster, because the image was rotated before!
+     */
+    param.setRotationDegree(90);
+    BufferedImage rotatedImage = reader.read(0, param);
+
+    Throwable exception = assertThrows(RasterFormatException.class, () -> rotatedImage.getSubimage(965, 1583, 480, 289));
+
+    assertThat(exception.getMessage()).isEqualTo("(y + height) is outside of Raster");
   }
 }
