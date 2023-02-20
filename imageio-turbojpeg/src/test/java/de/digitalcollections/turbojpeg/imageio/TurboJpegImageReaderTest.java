@@ -9,7 +9,6 @@ import javax.imageio.ImageReader;
 import javax.imageio.stream.ImageInputStream;
 import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.awt.image.RasterFormatException;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -288,45 +287,19 @@ class TurboJpegImageReaderTest {
     ImageReader reader = getReader("crop_rotation.jpg");
     TurboJpegImageReadParam param = (TurboJpegImageReadParam) reader.getDefaultReadParam();
     BufferedImage img = reader.read(0, param);
-
-    /* Original image has 1500 x 2303, incl. to-be-cropped region:
-     _______________
-    |               |
-    |               |
-    |               |
-    |               |
-    |               |
-    |               |
-    |       ^-----^ |
-    |       |     | |
-    |       v-----v |
-    |_______________|
-     */
     img = img.getSubimage(965, 1583, 480, 289);
-
     assertThat(img).hasDimensions(480, 289);
 
-    /* We have a bug in cropping and rotation order.
-    The region should be cropped first and then rotated.
-    The actual implemention rotates the image first and then rotates it:
-
-     ______________________
-    |                      |
-    |                      |
-    |                      |
-    |                      |
-    |                      |
-    |_________^_____^______|
-              |     |
-              v-----v
-
-    That means to be cropped region is out the raster, because the image was rotated before!
-     */
     param.setRotationDegree(90);
+    param.setSourceRegion(new Rectangle(965, 1583, 480, 289));
     BufferedImage rotatedImage = reader.read(0, param);
+    assertThat(rotatedImage).hasDimensions(289, 480);
 
-    Throwable exception = assertThrows(RasterFormatException.class, () -> rotatedImage.getSubimage(965, 1583, 480, 289));
+    // Not rotate it 270 -> this is not working!
+    param.setRotationDegree(270);
+    Throwable exception = assertThrows(IOException.class, () -> reader.read(0, param));
 
-    assertThat(exception.getMessage()).isEqualTo("(y + height) is outside of Raster");
+    // Currently results in: Could not compress image (crop: 1568,48,-68,496, rotate: 270)
+    assertThat(exception.getMessage()).isEqualTo("de.digitalcollections.turbojpeg.TurboJpegException: Invalid crop request");
   }
 }
