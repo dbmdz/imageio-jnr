@@ -120,15 +120,16 @@ public class TurboJpegImageReader extends ImageReader {
   }
 
   /**
-   * Calculate closest value to a given minimum. This function should be used when defining min sizes
-   * of region height or width, because Math.min is not sufficent in rare cases, when the returned minimum
+   * Calculate the closest value to a given minimum. This function should be used when defining min sizes
+   * of region height or width, because Math.min is not sufficient in rare cases, when the returned minimum
    * value is smaller than the desired size. Consider this example:
    * First value is 44 and second value is 112 with a user-specified min value of 100. Math.min would select 44,
    * which is wrong, because it is under the user-specified threshold of 100.
    * @param firstValue The first value to be checked
    * @param secondValue The second value to be checked
    * @param minValue The minimum value
-   * @return Integer of closest value w.r.t. a given min value. If both values are under the min value, min value will be returned
+   * @return Integer of the closest value w.r.t. a given min value.
+   *         If both values are under the min value, min value will be returned
    */
   int getClosestValue(int firstValue, int secondValue, int minValue) {
     Set<Integer> possibleValues = new HashSet<>();
