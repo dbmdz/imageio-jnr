@@ -22,6 +22,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static java.awt.image.BufferedImage.TYPE_3BYTE_BGR;
@@ -132,21 +133,8 @@ public class TurboJpegImageReader extends ImageReader {
    *         If both values are under the min value, min value will be returned
    */
   int getClosestValue(int firstValue, int secondValue, int minValue) {
-    Set<Integer> possibleValues = new HashSet<>();
-
-    if (firstValue >= minValue) {
-      possibleValues.add(firstValue);
-    }
-
-    if (secondValue >= minValue) {
-      possibleValues.add(secondValue);
-    }
-
-    if (possibleValues.isEmpty()) {
-      return minValue;
-    }
-
-    return Collections.min(possibleValues);
+    Set<Integer> collectedValues = Stream.of(firstValue, secondValue).filter(val -> val >= minValue).collect(Collectors.toSet());
+    return collectedValues.isEmpty() ? minValue : Collections.min(collectedValues);
   }
 
   /**
