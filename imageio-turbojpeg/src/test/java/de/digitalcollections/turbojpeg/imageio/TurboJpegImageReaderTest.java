@@ -283,23 +283,57 @@ class TurboJpegImageReaderTest {
   }
 
   @Test
-  public void testReadRotatedAndCropped() throws IOException {
+  public void testReadRotatedAndCroppedGridSearch() throws IOException {
+    ImageReader reader = getReader("crop_rotation.jpg");
+
+    // Unit-test it hard
+    int originalHeight = reader.getHeight(0);
+    int originalWidth = reader.getWidth(0);
+
+    // defines distance between new regions
+    int padding = 20;
+
+    int regionHeight = 100;
+    int regionWidth = 50;
+
+    int[] rotationSizes = {90, 180, 270};
+
+    for (int rotationSize : rotationSizes) {
+      for (int y = padding; y < originalHeight; y += regionHeight + padding) {
+        if (y + regionHeight > originalHeight) {
+          break;
+        }
+
+        for (int x = padding; x < originalWidth; x += regionWidth + padding) {
+          if (x + regionWidth > originalWidth) {
+            break;
+          }
+
+          TurboJpegImageReadParam current_param = (TurboJpegImageReadParam) reader.getDefaultReadParam();
+          current_param.setSourceRegion(new Rectangle(x, y, regionWidth, regionHeight));
+          current_param.setRotationDegree(rotationSize);
+
+          BufferedImage currentCroppedImage = reader.read(0, current_param);
+
+          int referenceRegionHeight = rotationSize == 90 || rotationSize == 270 ? regionWidth : regionHeight;
+          int referenceRegionWidth = rotationSize == 90 || rotationSize == 270 ? regionHeight : regionWidth;
+          assertThat(currentCroppedImage.getHeight()).isEqualTo(referenceRegionHeight);
+          assertThat(currentCroppedImage.getWidth()).isEqualTo(referenceRegionWidth);
+        }
+      }
+    }
+  }
+
+  @Test
+  public void testReadRotatedAndCroppedSpecial() throws IOException {
     ImageReader reader = getReader("crop_rotation.jpg");
     TurboJpegImageReadParam param = (TurboJpegImageReadParam) reader.getDefaultReadParam();
-    BufferedImage img = reader.read(0, param);
-    img = img.getSubimage(965, 1583, 480, 289);
-    assertThat(img).hasDimensions(480, 289);
-
+    param.setSourceRegion(new Rectangle(160, 740, 50, 100));
     param.setRotationDegree(90);
-    param.setSourceRegion(new Rectangle(965, 1583, 480, 289));
-    BufferedImage rotatedImage = reader.read(0, param);
-    assertThat(rotatedImage).hasDimensions(289, 480);
+    BufferedImage rotatedCroppedImage = reader.read(0, param);
 
-    // Not rotate it 270 -> this is not working!
-    param.setRotationDegree(270);
-    Throwable exception = assertThrows(IOException.class, () -> reader.read(0, param));
-
-    // Currently results in: Could not compress image (crop: 1568,48,-68,496, rotate: 270)
-    assertThat(exception.getMessage()).isEqualTo("de.digitalcollections.turbojpeg.TurboJpegException: Invalid crop request");
+    assertThat(rotatedCroppedImage.getHeight()).isEqualTo(50);
+    assertThat(rotatedCroppedImage.getWidth()).isEqualTo(100);
   }
+
 }
