@@ -195,7 +195,11 @@ public class TurboJpegImageReader extends ImageReader {
     if (region.x % mcuSize.width != 0) {
       extraCrop.x = region.x % mcuSize.width;
       region.x -= extraCrop.x;
-      region.width = getClosestValue(region.width + extraCrop.x, originalWidth - region.x, originalRegionWidth);
+      region.width = getClosestValue(
+              region.width + extraCrop.x,
+              originalWidth - region.x,
+              originalRegionWidth
+      );
     }
     // Y-Offset + Height
     if (region.y % mcuSize.height != 0) {
@@ -221,7 +225,7 @@ public class TurboJpegImageReader extends ImageReader {
               (int) (mcuSize.height * (Math.ceil(region.getHeight() / mcuSize.height))),
               imageSize.height - region.y,
               originalRegionHeight
-              );
+      );
     }
     boolean modified =
         originalRegion.x != region.x
