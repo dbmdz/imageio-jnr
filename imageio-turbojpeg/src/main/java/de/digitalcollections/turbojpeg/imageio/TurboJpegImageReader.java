@@ -130,7 +130,7 @@ public class TurboJpegImageReader extends ImageReader {
    * @param minValue The minimum value
    * @return Integer of closest value w.r.t. a given min value. If both values are under the min value, min value will be returned
    */
-  int getClosestValues(int firstValue, int secondValue, int minValue) {
+  int getClosestValue(int firstValue, int secondValue, int minValue) {
     Set<Integer> possibleValues = new HashSet<>();
 
     if (firstValue >= minValue) {
@@ -206,14 +206,14 @@ public class TurboJpegImageReader extends ImageReader {
     if (region.x % mcuSize.width != 0) {
       extraCrop.x = region.x % mcuSize.width;
       region.x -= extraCrop.x;
-      region.width = getClosestValues(region.width + extraCrop.x, originalWidth - region.x, originalRegionWidth);
+      region.width = getClosestValue(region.width + extraCrop.x, originalWidth - region.x, originalRegionWidth);
     }
     // Y-Offset + Height
     if (region.y % mcuSize.height != 0) {
       extraCrop.y = region.y % mcuSize.height;
       region.y -= extraCrop.y;
       if (region.height > 0) {
-        region.height = getClosestValues(
+        region.height = getClosestValue(
                 region.height + extraCrop.y,
                 originalHeight - region.y,
                 originalRegionHeight
@@ -224,7 +224,7 @@ public class TurboJpegImageReader extends ImageReader {
       if (imageSize.width - region.x < 0) {
         region.width = (int) (mcuSize.width * (Math.ceil(region.getWidth() / mcuSize.width)));
       } else {
-        region.width = getClosestValues(
+        region.width = getClosestValue(
                 imageSize.width - region.x,
                 (int) (mcuSize.width * (Math.ceil(region.getWidth() / mcuSize.width))),
                 originalRegionWidth
@@ -232,7 +232,7 @@ public class TurboJpegImageReader extends ImageReader {
       }
     }
     if ((region.y + region.height) != originalHeight && region.height % mcuSize.height != 0) {
-      region.height = getClosestValues(
+      region.height = getClosestValue(
               (int) (mcuSize.height * (Math.ceil(region.getHeight() / mcuSize.height))),
               imageSize.height - region.y,
               originalRegionHeight
