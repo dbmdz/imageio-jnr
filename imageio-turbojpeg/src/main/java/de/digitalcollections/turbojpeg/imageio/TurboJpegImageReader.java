@@ -1,28 +1,31 @@
 package de.digitalcollections.turbojpeg.imageio;
 
-import static java.awt.image.BufferedImage.TYPE_3BYTE_BGR;
-import static java.awt.image.BufferedImage.TYPE_BYTE_GRAY;
-
 import de.digitalcollections.turbojpeg.Info;
 import de.digitalcollections.turbojpeg.TurboJpeg;
 import de.digitalcollections.turbojpeg.TurboJpegException;
 import de.digitalcollections.turbojpeg.lib.enums.TJCS;
-import java.awt.Dimension;
-import java.awt.Rectangle;
-import java.awt.image.BufferedImage;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.util.Iterator;
-import java.util.stream.Stream;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import javax.imageio.ImageReadParam;
 import javax.imageio.ImageReader;
 import javax.imageio.ImageTypeSpecifier;
 import javax.imageio.metadata.IIOMetadata;
 import javax.imageio.spi.ImageReaderSpi;
 import javax.imageio.stream.ImageInputStream;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.awt.*;
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Set;
+import java.util.stream.Stream;
+
+import static java.awt.image.BufferedImage.TYPE_3BYTE_BGR;
+import static java.awt.image.BufferedImage.TYPE_BYTE_GRAY;
 
 public class TurboJpegImageReader extends ImageReader {
 
@@ -117,6 +120,35 @@ public class TurboJpegImageReader extends ImageReader {
   }
 
   /**
+   * Calculate closest value to a given minimum. This function should be used when defining min sizes
+   * of region height or width, because Math.min is not sufficent in rare cases, when the returned minimum
+   * value is smaller than the desired size. Consider this example:
+   * First value is 44 and second value is 112 with a user-specified min value of 100. Math.min would select 44,
+   * which is wrong, because it is under the user-specified threshold of 100.
+   * @param firstValue The first value to be checked
+   * @param secondValue The second value to be checked
+   * @param minValue The minimum value
+   * @return Integer of closest value w.r.t. a given min value. If both values are under the min value, min value will be returned
+   */
+  int getClosestValues(int firstValue, int secondValue, int minValue) {
+    Set<Integer> possibleValues = new HashSet<>();
+
+    if (firstValue >= minValue) {
+      possibleValues.add(firstValue);
+    }
+
+    if (secondValue >= minValue) {
+      possibleValues.add(secondValue);
+    }
+
+    if (possibleValues.isEmpty()) {
+      return minValue;
+    }
+
+    return Collections.min(possibleValues);
+  }
+
+  /**
    * Since TurboJPEG can only crop to values divisible by the MCU size, we may need to expand the
    * cropping area to get a suitable rectangle. Thus, cropping becomes a two-stage process: 1. Crop
    * to to nearest MCU boundaries (TurboJPEG) 2. Crop to the actual region (Java). <strong>This
@@ -161,6 +193,8 @@ public class TurboJpegImageReader extends ImageReader {
       region.height = w;
     }
 
+    int originalRegionWidth = region.width;
+    int originalRegionHeight = region.height;
     // Calculate how much of the region returned from libjpeg has to be cropped on the JVM-side
     Rectangle extraCrop =
         new Rectangle(
@@ -172,33 +206,38 @@ public class TurboJpegImageReader extends ImageReader {
     if (region.x % mcuSize.width != 0) {
       extraCrop.x = region.x % mcuSize.width;
       region.x -= extraCrop.x;
-      if (region.width > 0) {
-        region.width = Math.min(region.width + extraCrop.x, originalWidth - region.x);
-      }
+      region.width = getClosestValues(region.width + extraCrop.x, originalWidth - region.x, originalRegionWidth);
     }
     // Y-Offset + Height
     if (region.y % mcuSize.height != 0) {
       extraCrop.y = region.y % mcuSize.height;
       region.y -= extraCrop.y;
       if (region.height > 0) {
-        region.height = Math.min(region.height + extraCrop.y, originalHeight - region.y);
+        region.height = getClosestValues(
+                region.height + extraCrop.y,
+                originalHeight - region.y,
+                originalRegionHeight
+        );
       }
     }
-
     if ((region.x + region.width) != originalWidth && region.width % mcuSize.width != 0) {
-      region.width =
-          Math.min(
-              (int) (mcuSize.width * (Math.ceil(region.getWidth() / mcuSize.width))),
-              imageSize.width - region.x);
+      if (imageSize.width - region.x < 0) {
+        region.width = (int) (mcuSize.width * (Math.ceil(region.getWidth() / mcuSize.width)));
+      } else {
+        region.width = getClosestValues(
+                imageSize.width - region.x,
+                (int) (mcuSize.width * (Math.ceil(region.getWidth() / mcuSize.width))),
+                originalRegionWidth
+        );
+      }
     }
-
     if ((region.y + region.height) != originalHeight && region.height % mcuSize.height != 0) {
-      region.height =
-          Math.min(
+      region.height = getClosestValues(
               (int) (mcuSize.height * (Math.ceil(region.getHeight() / mcuSize.height))),
-              imageSize.height - region.y);
+              imageSize.height - region.y,
+              originalRegionHeight
+              );
     }
-
     boolean modified =
         originalRegion.x != region.x
             || originalRegion.y != region.y
@@ -280,17 +319,22 @@ public class TurboJpegImageReader extends ImageReader {
           region = null;
         }
       }
+
+      int finalHeight = getHeight(0);
+      int finalWidth = getWidth(0);
+
+      // Rotations 90 and 270 switch image dimensions!
+      if (rotation == 90 || rotation == 270) {
+        finalHeight = getWidth(0);
+        finalWidth = getHeight(0);
+      }
+
       if (region != null
-          && (region.x + region.width > getWidth(0) || region.y + region.height > getHeight(0))) {
+          && (region.x + region.width > finalWidth || region.y + region.height > finalHeight)) {
         throw new IllegalArgumentException(
             String.format(
                 "Selected region (%dx%d+%d+%d) exceeds the image boundaries (%dx%d).",
-                region.width,
-                region.height,
-                region.x,
-                region.y,
-                getWidth(imageIndex),
-                getHeight(imageIndex)));
+                region.width, region.height, region.x, region.y, finalWidth, finalHeight));
       }
       if (region != null || rotation != 0) {
         data = lib.transform(data.array(), info, region, rotation);
