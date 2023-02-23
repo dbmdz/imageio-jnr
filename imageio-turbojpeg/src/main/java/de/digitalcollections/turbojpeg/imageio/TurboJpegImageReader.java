@@ -221,15 +221,11 @@ public class TurboJpegImageReader extends ImageReader {
       }
     }
     if ((region.x + region.width) != originalWidth && region.width % mcuSize.width != 0) {
-      if (imageSize.width - region.x < 0) {
-        region.width = (int) (mcuSize.width * (Math.ceil(region.getWidth() / mcuSize.width)));
-      } else {
-        region.width = getClosestValue(
-                imageSize.width - region.x,
-                (int) (mcuSize.width * (Math.ceil(region.getWidth() / mcuSize.width))),
-                originalRegionWidth
-        );
-      }
+      region.width = getClosestValue(
+              imageSize.width - region.x,
+              (int) (mcuSize.width * (Math.ceil(region.getWidth() / mcuSize.width))),
+              originalRegionWidth
+      );
     }
     if ((region.y + region.height) != originalHeight && region.height % mcuSize.height != 0) {
       region.height = getClosestValue(
