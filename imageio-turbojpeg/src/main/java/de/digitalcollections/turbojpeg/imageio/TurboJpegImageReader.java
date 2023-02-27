@@ -126,15 +126,22 @@ public class TurboJpegImageReader extends ImageReader {
    * value is smaller than the desired size. Consider this example:
    * First value is 44 and second value is 112 with a user-specified min value of 100. Math.min would select 44,
    * which is wrong, because it is under the user-specified threshold of 100.
-   * @param firstValue The first value to be checked
-   * @param secondValue The second value to be checked
    * @param minValue The minimum value
+   * @param xs Integer values
    * @return Integer of the closest value w.r.t. a given min value.
-   *         If both values are under the min value, min value will be returned
+   *         If all values are under the min value, min value will be returned
    */
-  int getClosestValue(int firstValue, int secondValue, int minValue) {
-    Set<Integer> collectedValues = Stream.of(firstValue, secondValue).filter(val -> val >= minValue).collect(Collectors.toSet());
-    return collectedValues.isEmpty() ? minValue : Collections.min(collectedValues);
+  int getClosestValue(int minValue, int... xs) {
+    Integer min = null;
+    for (int x : xs) {
+      if (x < minValue) {
+        continue;
+      }
+      if (min == null || x < min) {
+        min = x;
+      }
+    }
+    return min == null ? minValue : min;
   }
 
   /**
@@ -196,9 +203,9 @@ public class TurboJpegImageReader extends ImageReader {
       extraCrop.x = region.x % mcuSize.width;
       region.x -= extraCrop.x;
       region.width = getClosestValue(
+              originalRegionWidth,
               region.width + extraCrop.x,
-              originalWidth - region.x,
-              originalRegionWidth
+              originalWidth - region.x
       );
     }
     // Y-Offset + Height
@@ -207,24 +214,24 @@ public class TurboJpegImageReader extends ImageReader {
       region.y -= extraCrop.y;
       if (region.height > 0) {
         region.height = getClosestValue(
+                originalRegionHeight,
                 region.height + extraCrop.y,
-                originalHeight - region.y,
-                originalRegionHeight
+                originalHeight - region.y
         );
       }
     }
     if ((region.x + region.width) != originalWidth && region.width % mcuSize.width != 0) {
       region.width = getClosestValue(
+              originalRegionWidth,
               imageSize.width - region.x,
-              (int) (mcuSize.width * (Math.ceil(region.getWidth() / mcuSize.width))),
-              originalRegionWidth
+              (int) (mcuSize.width * (Math.ceil(region.getWidth() / mcuSize.width)))
       );
     }
     if ((region.y + region.height) != originalHeight && region.height % mcuSize.height != 0) {
       region.height = getClosestValue(
+              originalRegionHeight,
               (int) (mcuSize.height * (Math.ceil(region.getHeight() / mcuSize.height))),
-              imageSize.height - region.y,
-              originalRegionHeight
+              imageSize.height - region.y
       );
     }
     boolean modified =
