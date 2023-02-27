@@ -26,7 +26,10 @@ public class OpenJp2ImageWriteParam extends ImageWriteParam {
     PROG_ORDER toNative() {
       // Exception should never been thrown since this is static, but unchecked
       // Optional.get() triggers warnings
-      return Arrays.stream(PROG_ORDER.values()).filter(v -> v.value == this.val).findFirst().orElseThrow(RuntimeException::new);
+      return Arrays.stream(PROG_ORDER.values())
+          .filter(v -> v.value == this.val)
+          .findFirst()
+          .orElseThrow(RuntimeException::new);
     }
   }
 

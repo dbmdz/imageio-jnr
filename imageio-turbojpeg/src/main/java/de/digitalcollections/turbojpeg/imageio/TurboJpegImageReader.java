@@ -1,32 +1,27 @@
 package de.digitalcollections.turbojpeg.imageio;
 
+import static java.awt.image.BufferedImage.TYPE_3BYTE_BGR;
+import static java.awt.image.BufferedImage.TYPE_BYTE_GRAY;
+
 import de.digitalcollections.turbojpeg.Info;
 import de.digitalcollections.turbojpeg.TurboJpeg;
 import de.digitalcollections.turbojpeg.TurboJpegException;
 import de.digitalcollections.turbojpeg.lib.enums.TJCS;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
+import java.awt.*;
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.util.Iterator;
+import java.util.stream.Stream;
 import javax.imageio.ImageReadParam;
 import javax.imageio.ImageReader;
 import javax.imageio.ImageTypeSpecifier;
 import javax.imageio.metadata.IIOMetadata;
 import javax.imageio.spi.ImageReaderSpi;
 import javax.imageio.stream.ImageInputStream;
-import java.awt.*;
-import java.awt.image.BufferedImage;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
-import static java.awt.image.BufferedImage.TYPE_3BYTE_BGR;
-import static java.awt.image.BufferedImage.TYPE_BYTE_GRAY;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class TurboJpegImageReader extends ImageReader {
 
@@ -121,15 +116,16 @@ public class TurboJpegImageReader extends ImageReader {
   }
 
   /**
-   * Calculate the closest value to a given minimum. This function should be used when defining min sizes
-   * of region height or width, because Math.min is not sufficient in rare cases, when the returned minimum
-   * value is smaller than the desired size. Consider this example:
-   * First value is 44 and second value is 112 with a user-specified min value of 100. Math.min would select 44,
+   * Calculate the closest value to a given minimum. This function should be used when defining min
+   * sizes of region height or width, because Math.min is not sufficient in rare cases, when the
+   * returned minimum value is smaller than the desired size. Consider this example: First value is
+   * 44 and second value is 112 with a user-specified min value of 100. Math.min would select 44,
    * which is wrong, because it is under the user-specified threshold of 100.
+   *
    * @param minValue The minimum value
    * @param xs Integer values
-   * @return Integer of the closest value w.r.t. a given min value.
-   *         If all values are under the min value, min value will be returned
+   * @return Integer of the closest value w.r.t. a given min value. If all values are under the min
+   *     value, min value will be returned
    */
   int getClosestValue(int minValue, int... xs) {
     Integer min = null;
@@ -202,37 +198,33 @@ public class TurboJpegImageReader extends ImageReader {
     if (region.x % mcuSize.width != 0) {
       extraCrop.x = region.x % mcuSize.width;
       region.x -= extraCrop.x;
-      region.width = getClosestValue(
-              originalRegionWidth,
-              region.width + extraCrop.x,
-              originalWidth - region.x
-      );
+      region.width =
+          getClosestValue(
+              originalRegionWidth, region.width + extraCrop.x, originalWidth - region.x);
     }
     // Y-Offset + Height
     if (region.y % mcuSize.height != 0) {
       extraCrop.y = region.y % mcuSize.height;
       region.y -= extraCrop.y;
       if (region.height > 0) {
-        region.height = getClosestValue(
-                originalRegionHeight,
-                region.height + extraCrop.y,
-                originalHeight - region.y
-        );
+        region.height =
+            getClosestValue(
+                originalRegionHeight, region.height + extraCrop.y, originalHeight - region.y);
       }
     }
     if ((region.x + region.width) != originalWidth && region.width % mcuSize.width != 0) {
-      region.width = getClosestValue(
+      region.width =
+          getClosestValue(
               originalRegionWidth,
               imageSize.width - region.x,
-              (int) (mcuSize.width * (Math.ceil(region.getWidth() / mcuSize.width)))
-      );
+              (int) (mcuSize.width * (Math.ceil(region.getWidth() / mcuSize.width))));
     }
     if ((region.y + region.height) != originalHeight && region.height % mcuSize.height != 0) {
-      region.height = getClosestValue(
+      region.height =
+          getClosestValue(
               originalRegionHeight,
               (int) (mcuSize.height * (Math.ceil(region.getHeight() / mcuSize.height))),
-              imageSize.height - region.y
-      );
+              imageSize.height - region.y);
     }
     boolean modified =
         originalRegion.x != region.x
