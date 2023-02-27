@@ -1,25 +1,24 @@
 package de.digitalcollections.turbojpeg.imageio;
 
-import static de.digitalcollections.turbojpeg.imageio.CustomAssertions.assertThat;
+import org.assertj.core.util.Lists;
+import org.junit.jupiter.api.Test;
 
-import java.awt.Dimension;
-import java.awt.Graphics;
-import java.awt.Rectangle;
+import javax.imageio.ImageIO;
+import javax.imageio.ImageReadParam;
+import javax.imageio.ImageReader;
+import javax.imageio.stream.ImageInputStream;
+import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 import java.util.function.Supplier;
-import javax.imageio.ImageIO;
-import javax.imageio.ImageReadParam;
-import javax.imageio.ImageReader;
-import javax.imageio.stream.ImageInputStream;
-import org.assertj.core.util.Lists;
-import org.junit.jupiter.api.Test;
+
+import static de.digitalcollections.turbojpeg.imageio.CustomAssertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class TurboJpegImageReaderTest {
-
   @Test
   public void testReaderIsRegistered() {
     Supplier<List<ImageReader>> getReaderIter =
@@ -282,4 +281,59 @@ class TurboJpegImageReaderTest {
     BufferedImage controlImg = ImageIO.read(input);
     assertThat(img).isEqualTo(controlImg);
   }
+
+  @Test
+  public void testReadRotatedAndCroppedGridSearch() throws IOException {
+    ImageReader reader = getReader("crop_rotation.jpg");
+
+    // Unit-test it hard
+    int originalHeight = reader.getHeight(0);
+    int originalWidth = reader.getWidth(0);
+
+    // defines distance between new regions
+    int padding = 20;
+
+    int regionHeight = 100;
+    int regionWidth = 50;
+
+    int[] rotationSizes = {90, 180, 270};
+
+    for (int rotationSize : rotationSizes) {
+      for (int y = padding; y < originalHeight; y += regionHeight + padding) {
+        if (y + regionHeight > originalHeight) {
+          break;
+        }
+
+        for (int x = padding; x < originalWidth; x += regionWidth + padding) {
+          if (x + regionWidth > originalWidth) {
+            break;
+          }
+
+          TurboJpegImageReadParam current_param = (TurboJpegImageReadParam) reader.getDefaultReadParam();
+          current_param.setSourceRegion(new Rectangle(x, y, regionWidth, regionHeight));
+          current_param.setRotationDegree(rotationSize);
+
+          BufferedImage currentCroppedImage = reader.read(0, current_param);
+
+          int referenceRegionHeight = rotationSize == 90 || rotationSize == 270 ? regionWidth : regionHeight;
+          int referenceRegionWidth = rotationSize == 90 || rotationSize == 270 ? regionHeight : regionWidth;
+          assertThat(currentCroppedImage.getHeight()).isEqualTo(referenceRegionHeight);
+          assertThat(currentCroppedImage.getWidth()).isEqualTo(referenceRegionWidth);
+        }
+      }
+    }
+  }
+
+  @Test
+  public void testReadRotatedAndCroppedSpecial() throws IOException {
+    ImageReader reader = getReader("crop_rotation.jpg");
+    TurboJpegImageReadParam param = (TurboJpegImageReadParam) reader.getDefaultReadParam();
+    param.setSourceRegion(new Rectangle(160, 740, 50, 100));
+    param.setRotationDegree(90);
+    BufferedImage rotatedCroppedImage = reader.read(0, param);
+
+    assertThat(rotatedCroppedImage.getHeight()).isEqualTo(50);
+    assertThat(rotatedCroppedImage.getWidth()).isEqualTo(100);
+  }
+
 }
