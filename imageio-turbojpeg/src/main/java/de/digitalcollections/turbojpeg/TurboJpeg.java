@@ -20,7 +20,6 @@ import java.nio.Buffer;
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
 import java.nio.ShortBuffer;
-
 import jnr.ffi.LibraryLoader;
 import jnr.ffi.Pointer;
 import jnr.ffi.Runtime;
@@ -358,8 +357,7 @@ public class TurboJpeg {
       int[] pixelData = ((DataBufferInt) dataBuffer).getData();
       byteBuffer = ByteBuffer.allocate(pixelData.length * 4).order(runtime.byteOrder());
       byteBuffer.asIntBuffer().put(IntBuffer.wrap(pixelData));
-    }
-    else {
+    } else {
       throw new IllegalArgumentException("Unsupported DataBuffer type: " + dataBuffer.getClass());
     }
     return byteBuffer;

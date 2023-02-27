@@ -1,12 +1,7 @@
 package de.digitalcollections.turbojpeg.imageio;
 
-import org.assertj.core.util.Lists;
-import org.junit.jupiter.api.Test;
+import static de.digitalcollections.turbojpeg.imageio.CustomAssertions.assertThat;
 
-import javax.imageio.ImageIO;
-import javax.imageio.ImageReadParam;
-import javax.imageio.ImageReader;
-import javax.imageio.stream.ImageInputStream;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -14,9 +9,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 import java.util.function.Supplier;
-
-import static de.digitalcollections.turbojpeg.imageio.CustomAssertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import javax.imageio.ImageIO;
+import javax.imageio.ImageReadParam;
+import javax.imageio.ImageReader;
+import javax.imageio.stream.ImageInputStream;
+import org.assertj.core.util.Lists;
+import org.junit.jupiter.api.Test;
 
 class TurboJpegImageReaderTest {
   @Test
@@ -309,14 +307,17 @@ class TurboJpegImageReaderTest {
             break;
           }
 
-          TurboJpegImageReadParam current_param = (TurboJpegImageReadParam) reader.getDefaultReadParam();
+          TurboJpegImageReadParam current_param =
+              (TurboJpegImageReadParam) reader.getDefaultReadParam();
           current_param.setSourceRegion(new Rectangle(x, y, regionWidth, regionHeight));
           current_param.setRotationDegree(rotationSize);
 
           BufferedImage currentCroppedImage = reader.read(0, current_param);
 
-          int referenceRegionHeight = rotationSize == 90 || rotationSize == 270 ? regionWidth : regionHeight;
-          int referenceRegionWidth = rotationSize == 90 || rotationSize == 270 ? regionHeight : regionWidth;
+          int referenceRegionHeight =
+              rotationSize == 90 || rotationSize == 270 ? regionWidth : regionHeight;
+          int referenceRegionWidth =
+              rotationSize == 90 || rotationSize == 270 ? regionHeight : regionWidth;
           assertThat(currentCroppedImage.getHeight()).isEqualTo(referenceRegionHeight);
           assertThat(currentCroppedImage.getWidth()).isEqualTo(referenceRegionWidth);
         }
@@ -335,5 +336,4 @@ class TurboJpegImageReaderTest {
     assertThat(rotatedCroppedImage.getHeight()).isEqualTo(50);
     assertThat(rotatedCroppedImage.getWidth()).isEqualTo(100);
   }
-
 }
