@@ -30,13 +30,13 @@ To use the ImageIO plugins, include them in your dependencies:
 <dependency>
   <groupId>de.digitalcollections.imageio</groupId>
   <artifactId>imageio-turbojpeg</artifactId>
-  <version>0.3.0</version>
+  <version>0.6.3</version>
 </dependency>
 
 <dependency>
   <groupId>de.digitalcollections.imageio</groupId>
   <artifactId>imageio-openjpeg</artifactId>
-  <version>0.3.0</version>
+  <version>0.6.3</version>
 </dependency>
 ```
 
@@ -44,7 +44,7 @@ Before using them, make sure that you have all the required native libraries
 installed, e.g. on Debian-based systems:
 
 ```
-$ sudo apt install libturbojpeg1 libopenjp2-7
+$ sudo apt install libturbojpeg libopenjp2-7
 ```
 
 
