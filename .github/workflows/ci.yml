@@ -9,9 +9,6 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        java: [11, 17]
     steps:
       - uses: actions/checkout@v3
       - name: Install specific version 2.3 of OpenJPEG library
@@ -26,14 +23,22 @@ jobs:
           check-latest: true
           distribution: temurin
           java-version: ${{ matrix.java }}
-      - uses: actions/cache@v3
+      - name: Set up cache
+        uses: actions/cache@v3
         env:
           cache-name: cache-maven-artifacts
         with:
-          path: ~/.m2/repository
-          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          key: dc-model-cache-java-${{ matrix.java }}-${{ github.run_id }}
+          path: |
+            ~/.m2/repository
+            **/target
+      - name: Check Java codestyle
+        run: mvn com.spotify.fmt:fmt-maven-plugin:check
       - name: Build with Maven
-        run: mvn -B verify
+        run: mvn -B -U clean verify
+    strategy:
+      matrix:
+        java: [11, 17]
   publish:
     if: (github.event_name == 'push' && (contains(github.ref, 'main') || startsWith(github.ref, 'release/'))) || github.event_name == 'release'
     needs: build
