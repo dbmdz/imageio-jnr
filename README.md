@@ -13,7 +13,7 @@ libraries are installed on the target system. However, thanks to JNR-FFI, no
 compiler is neccessary, the plugins will directly use the installed native
 libraries and you can install them directly from Maven Central.
 
-Please note that the plugins need at least Java 8 and Ubuntu 16.04.
+Please note that the plugins need at least Java 11 and Ubuntu 20.04.
 
 ## Currently available plugins
 
