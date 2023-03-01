@@ -28,7 +28,7 @@ jobs:
         env:
           cache-name: cache-maven-artifacts
         with:
-          key: dc-model-cache-java-${{ matrix.java }}-${{ github.run_id }}
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
           path: |
             ~/.m2/repository
             **/target
@@ -51,7 +51,7 @@ jobs:
         env:
           cache-name: cache-maven-artifacts
         with:
-          key: dc-model-cache-java-17-${{ github.run_id }}
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
           path: |
             ~/.m2/repository
             **/target
