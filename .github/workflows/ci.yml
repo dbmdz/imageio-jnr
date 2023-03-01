@@ -59,7 +59,7 @@ jobs:
         run: wget https://github.com/uclouvain/openjpeg/releases/download/v2.3.0/openjpeg-v2.3.0-linux-x86_64.tar.gz -O /tmp/openjpeg.tar.gz && cd /tmp/ && tar -xvf /tmp/openjpeg.tar.gz
       - name: Set environment variable for OpenJPEG library
         run: echo "LD_LIBRARY_PATH=/tmp/openjpeg-v2.3.0-linux-x86_64/lib" >> $GITHUB_ENV
-      - name: Install TurboJPEG library
+      - name: Install TurboJPEG library and XML utils
         run: sudo apt update && sudo apt install libturbojpeg libxml2-utils
       - name: Extract project version
         run: echo "PROJECT_VERSION=$(xmllint --xpath '/*[local-name()="project"]/*[local-name()="version"]/text()' pom.xml)" >> $GITHUB_ENV
