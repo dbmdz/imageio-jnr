@@ -214,10 +214,19 @@ class TurboJpegImageReaderTest {
   @Test
   public void testCropToOnePixel() throws IOException {
     ImageReader reader = getReader("prime_shaped.jpg");
-    TurboJpegImageReadParam param = (TurboJpegImageReadParam) reader.getDefaultReadParam();
-    param.setSourceRegion(new Rectangle(0, 0, reader.getWidth(2), 1));
-    BufferedImage img = reader.read(2, param);
-    assertThat(img).hasDimensions(reader.getWidth(2), 1);
+    TurboJpegImageReadParam scaledParam = (TurboJpegImageReadParam) reader.getDefaultReadParam();
+    scaledParam.setSourceRegion(new Rectangle(0, 0, reader.getWidth(2), 1));
+    BufferedImage img = reader.read(2, scaledParam);
+
+    // Special case (imageIndex > 0), so we have Math.round will return 2 pixel height
+    assertThat(img).hasDimensions(reader.getWidth(2), 2);
+
+    TurboJpegImageReadParam unscaledParam = (TurboJpegImageReadParam) reader.getDefaultReadParam();
+    unscaledParam.setSourceRegion(new Rectangle(0, 0, reader.getWidth(0), 1));
+    BufferedImage newImg = reader.read(0, unscaledParam);
+
+    // In case of imageIndex == 0, we expect a 1 pixel height image
+    assertThat(newImg).hasDimensions(reader.getWidth(0), 1);
   }
 
   @Test
