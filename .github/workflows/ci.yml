@@ -35,36 +35,59 @@ jobs:
       - name: Build with Maven
         run: mvn -B verify
   publish:
-    if: github.event_name == 'push' && contains(github.ref, 'main')
-    runs-on: ubuntu-latest
+    if: (github.event_name == 'push' && (contains(github.ref, 'main') || startsWith(github.ref, 'release/'))) || github.event_name == 'release'
     needs: build
+    runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - name: Set up JDK 11
+      - name: Check out repository
+        uses: actions/checkout@v3
+      - name: Set up cache
+        uses: actions/cache@v3
+        env:
+          cache-name: cache-maven-artifacts
+        with:
+          key: dc-model-cache-java-17-${{ github.run_id }}
+          path: |
+            ~/.m2/repository
+            **/target
+      - name: Install XML utils
+        run: sudo apt update && sudo apt install libxml2-utils
+      - name: Extract project version
+        run: echo "PROJECT_VERSION=$(xmllint --xpath '/*[local-name()="project"]/*[local-name()="version"]/text()' pom.xml)" >> $GITHUB_ENV
+      # Publish snapshot
+      - name: Set up JDK 17 for publishing a snapshot
+        if: github.event_name == 'push' && endswith(env.PROJECT_VERSION, 'SNAPSHOT')
         uses: actions/setup-java@v3
         with:
           check-latest: true
           distribution: temurin
-          java-version: 11
+          java-version: 17
           server-id: ossrh-snapshots
-          server-username: MAVEN_USERNAME
           server-password: MAVEN_PASSWORD
-      - uses: actions/cache@v3
+          server-username: MAVEN_USERNAME
+      - name: Publish snapshot to the Maven Central Repository
+        if: github.event_name == 'push' && endswith(env.PROJECT_VERSION, 'SNAPSHOT')
+        run: mvn -B deploy -DskipTests
         env:
-          cache-name: cache-maven-artifacts
-        with:
-          path: ~/.m2/repository
-          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
-      - name: Install specific version 2.3 of OpenJPEG library
-        run: wget https://github.com/uclouvain/openjpeg/releases/download/v2.3.0/openjpeg-v2.3.0-linux-x86_64.tar.gz -O /tmp/openjpeg.tar.gz && cd /tmp/ && tar -xvf /tmp/openjpeg.tar.gz
-      - name: Set environment variable for OpenJPEG library
-        run: echo "LD_LIBRARY_PATH=/tmp/openjpeg-v2.3.0-linux-x86_64/lib" >> $GITHUB_ENV
-      - name: Install TurboJPEG library and XML utils
-        run: sudo apt update && sudo apt install libturbojpeg libxml2-utils
-      - name: Set project version
-        run: echo "PROJECT_VERSION=$(xmllint --xpath '/*[local-name()="project"]/*[local-name()="version"]/text()' pom.xml)" >> $GITHUB_ENV
-      - name: Publish to the Maven Central Repository
-        run: if [[ "$PROJECT_VERSION" =~ .*SNAPSHOT ]]; then mvn -B deploy; fi
-        env:
-          MAVEN_USERNAME: ${{ secrets.OSSRH_USERNAME }}
           MAVEN_PASSWORD: ${{ secrets.OSSRH_PASSWORD }}
+          MAVEN_USERNAME: ${{ secrets.OSSRH_USERNAME }}
+      # Publish release
+      - name: Set up JDK 17 for publishing a release
+        if: github.event_name == 'release' && !endswith(env.PROJECT_VERSION, 'SNAPSHOT')
+        uses: actions/setup-java@v3
+        with:
+          check-latest: true
+          distribution: temurin
+          gpg-passphrase: MAVEN_GPG_PASSPHRASE
+          gpg-private-key: ${{ secrets.GPG_PRIVATE_KEY }}
+          java-version: 17
+          server-id: ossrh
+          server-password: MAVEN_PASSWORD
+          server-username: MAVEN_USERNAME
+      - name: Publish release to the Maven Central Repository
+        if: github.event_name == 'release' && !endswith(env.PROJECT_VERSION, 'SNAPSHOT')
+        run: mvn -B deploy -DskipTests -Pdeploy
+        env:
+          MAVEN_GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
+          MAVEN_PASSWORD: ${{ secrets.OSSRH_PASSWORD }}
+          MAVEN_USERNAME: ${{ secrets.OSSRH_USERNAME }}
