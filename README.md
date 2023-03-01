@@ -3,7 +3,7 @@
 [![Javadocs](https://javadoc.io/badge/de.digitalcollections.imageio/imageio-jnr.svg)](https://javadoc.io/doc/de.digitalcollections.imageio/imageio-jnr)
 [![License](https://img.shields.io/github/license/dbmdz/imageio-jnr.svg)](LICENSE)
 [![GitHub release](https://img.shields.io/github/release/dbmdz/imageio-jnr.svg)](https://github.com/dbmdz/imageio-jnr/releases)
-[![Maven Central](https://img.shields.io/maven-central/v/de.digitalcollections.imageio/imageio-jnr.svg)](https://search.maven.org/search?q=a:imageio-jnr)
+[![Maven Central](https://img.shields.io/maven-central/v/de.digitalcollections.imageio/imageio-jnr.svg)](https://central.sonatype.com/search?q=imageio-jnr)
 
 This repository contains ImageIO plugins that wrap the most common native
 libraries for various image formats with [JNR-FFI](https://github.com/jnr/jnr-ffi).
@@ -13,7 +13,7 @@ libraries are installed on the target system. However, thanks to JNR-FFI, no
 compiler is neccessary, the plugins will directly use the installed native
 libraries and you can install them directly from Maven Central.
 
-Please note that the plugins need at least Java 8 and Ubuntu 16.04.
+Please note that the plugins need at least Java 11 and Ubuntu 20.04.
 
 ## Currently available plugins
 
@@ -30,13 +30,13 @@ To use the ImageIO plugins, include them in your dependencies:
 <dependency>
   <groupId>de.digitalcollections.imageio</groupId>
   <artifactId>imageio-turbojpeg</artifactId>
-  <version>0.3.0</version>
+  <version>0.6.3</version>
 </dependency>
 
 <dependency>
   <groupId>de.digitalcollections.imageio</groupId>
   <artifactId>imageio-openjpeg</artifactId>
-  <version>0.3.0</version>
+  <version>0.6.3</version>
 </dependency>
 ```
 
@@ -44,7 +44,7 @@ Before using them, make sure that you have all the required native libraries
 installed, e.g. on Debian-based systems:
 
 ```
-$ sudo apt install libturbojpeg1 libopenjp2-7
+$ sudo apt install libturbojpeg libopenjp2-7
 ```
 
 
