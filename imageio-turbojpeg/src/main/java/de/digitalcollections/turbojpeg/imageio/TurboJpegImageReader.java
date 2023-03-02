@@ -317,12 +317,16 @@ public class TurboJpegImageReader extends ImageReader {
         finalWidth = getHeight(0);
       }
 
-      if (region != null
-          && (region.x + region.width > finalWidth || region.y + region.height > finalHeight)) {
-        throw new IllegalArgumentException(
-            String.format(
-                "Selected region (%dx%d+%d+%d) exceeds the image boundaries (%dx%d).",
-                region.width, region.height, region.x, region.y, finalWidth, finalHeight));
+      if (region != null) {
+        int selectedWidth = extraCrop != null ? extraCrop.width : region.width;
+        int selectedHeight = extraCrop != null ? extraCrop.height : region.height;
+
+        if (region.x + selectedWidth > finalWidth || region.y + selectedHeight > finalHeight) {
+          throw new IllegalArgumentException(
+              String.format(
+                  "Selected region (%dx%d+%d+%d) exceeds the image boundaries (%dx%d).",
+                  selectedWidth, selectedHeight, region.x, region.y, finalWidth, finalHeight));
+        }
       }
       if (region != null || rotation != 0) {
         data = lib.transform(data.array(), info, region, rotation);
