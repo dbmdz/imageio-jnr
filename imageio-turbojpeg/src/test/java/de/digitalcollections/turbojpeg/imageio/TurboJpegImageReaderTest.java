@@ -1,7 +1,12 @@
 package de.digitalcollections.turbojpeg.imageio;
 
-import static de.digitalcollections.turbojpeg.imageio.CustomAssertions.assertThat;
+import org.assertj.core.util.Lists;
+import org.junit.jupiter.api.Test;
 
+import javax.imageio.ImageIO;
+import javax.imageio.ImageReadParam;
+import javax.imageio.ImageReader;
+import javax.imageio.stream.ImageInputStream;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -9,13 +14,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 import java.util.function.Supplier;
-import javax.imageio.ImageIO;
-import javax.imageio.ImageReadParam;
-import javax.imageio.ImageReader;
-import javax.imageio.stream.ImageInputStream;
-import org.assertj.core.api.Assertions;
-import org.assertj.core.util.Lists;
-import org.junit.jupiter.api.Test;
+
+import static de.digitalcollections.turbojpeg.imageio.CustomAssertions.assertThat;
 
 class TurboJpegImageReaderTest {
   @Test
@@ -364,6 +364,6 @@ class TurboJpegImageReaderTest {
     param.setRotationDegree(90);
     BufferedImage image = reader.read(4, param);
 
-    Assertions.assertThat(image.getHeight()).isEqualTo(750);
+    assertThat(image.getHeight()).isEqualTo(750);
   }
 }
