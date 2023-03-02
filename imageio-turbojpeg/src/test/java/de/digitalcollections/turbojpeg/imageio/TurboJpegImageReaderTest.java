@@ -1,12 +1,7 @@
 package de.digitalcollections.turbojpeg.imageio;
 
-import org.assertj.core.util.Lists;
-import org.junit.jupiter.api.Test;
+import static de.digitalcollections.turbojpeg.imageio.CustomAssertions.assertThat;
 
-import javax.imageio.ImageIO;
-import javax.imageio.ImageReadParam;
-import javax.imageio.ImageReader;
-import javax.imageio.stream.ImageInputStream;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -14,8 +9,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 import java.util.function.Supplier;
-
-import static de.digitalcollections.turbojpeg.imageio.CustomAssertions.assertThat;
+import javax.imageio.ImageIO;
+import javax.imageio.ImageReadParam;
+import javax.imageio.ImageReader;
+import javax.imageio.stream.ImageInputStream;
+import org.assertj.core.util.Lists;
+import org.junit.jupiter.api.Test;
 
 class TurboJpegImageReaderTest {
   @Test
