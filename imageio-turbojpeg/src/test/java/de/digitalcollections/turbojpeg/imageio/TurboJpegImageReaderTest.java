@@ -354,4 +354,15 @@ class TurboJpegImageReaderTest {
     assertThat(rotatedCroppedImage.getHeight()).isEqualTo(50);
     assertThat(rotatedCroppedImage.getWidth()).isEqualTo(100);
   }
+
+  @Test
+  public void testRegionSelect() throws IOException {
+    ImageReader reader = getReader("mock-page-106245331.jpg");
+    TurboJpegImageReadParam param = (TurboJpegImageReadParam) reader.getDefaultReadParam();
+    param.setSourceRegion(new Rectangle(0, 0, 750, 1024));
+    param.setRotationDegree(90);
+    BufferedImage image = reader.read(4, param);
+
+    assertThat(image.getHeight()).isEqualTo(750);
+  }
 }
