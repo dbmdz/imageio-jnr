@@ -13,6 +13,7 @@ import javax.imageio.ImageIO;
 import javax.imageio.ImageReadParam;
 import javax.imageio.ImageReader;
 import javax.imageio.stream.ImageInputStream;
+import org.assertj.core.api.Assertions;
 import org.assertj.core.util.Lists;
 import org.junit.jupiter.api.Test;
 
@@ -353,5 +354,16 @@ class TurboJpegImageReaderTest {
 
     assertThat(rotatedCroppedImage.getHeight()).isEqualTo(50);
     assertThat(rotatedCroppedImage.getWidth()).isEqualTo(100);
+  }
+
+  @Test
+  public void testRegionSelect() throws IOException {
+    ImageReader reader = getReader("mock-page-106245331.jpg");
+    TurboJpegImageReadParam param = (TurboJpegImageReadParam) reader.getDefaultReadParam();
+    param.setSourceRegion(new Rectangle(0, 0, 750, 1024));
+    param.setRotationDegree(90);
+    BufferedImage image = reader.read(4, param);
+
+    Assertions.assertThat(image.getHeight()).isEqualTo(750);
   }
 }
