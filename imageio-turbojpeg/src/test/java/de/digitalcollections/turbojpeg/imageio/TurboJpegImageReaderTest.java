@@ -365,4 +365,16 @@ class TurboJpegImageReaderTest {
 
     assertThat(image.getHeight()).isEqualTo(750);
   }
+
+  @Test
+  public void testSubsamplingTJSAMP_411() throws IOException {
+    ImageReader reader = getReader("subsampling.jpg");
+    TurboJpegImageReadParam param = (TurboJpegImageReadParam) reader.getDefaultReadParam();
+    // Rotation is currently not working, see:
+    // https://github.com/libjpeg-turbo/libjpeg-turbo/issues/659
+    param.setSourceRegion(new Rectangle(50, 100, 50, 100));
+    BufferedImage image = reader.read(0, param);
+    assertThat(image.getHeight()).isEqualTo(100);
+    assertThat(image.getWidth()).isEqualTo(50);
+  }
 }
