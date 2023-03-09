@@ -8,7 +8,8 @@ public enum TJSAMP implements IntegerEnum {
   TJSAMP_422(1),
   TJSAMP_420(2),
   TJSAMP_GRAY(3),
-  TJSAMP_440(4);
+  TJSAMP_440(4),
+  TJSAMP_411(5);
 
   private final int val;
 

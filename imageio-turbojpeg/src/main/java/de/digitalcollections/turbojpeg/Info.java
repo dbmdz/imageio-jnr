@@ -74,6 +74,8 @@ public class Info {
         return new Dimension(16, 16);
       case TJSAMP_440:
         return new Dimension(8, 16);
+      case TJSAMP_411:
+        return new Dimension(32,8);
       default:
         return new Dimension(8, 8);
     }
