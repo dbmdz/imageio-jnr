@@ -4,6 +4,9 @@ import static de.digitalcollections.turbojpeg.imageio.CustomAssertions.assertTha
 import static de.digitalcollections.turbojpeg.imageio.TurboJpegImageReader.bufferFromStream;
 import static de.digitalcollections.turbojpeg.lib.enums.TJSAMP.TJSAMP_411;
 
+import de.digitalcollections.turbojpeg.Info;
+import de.digitalcollections.turbojpeg.TurboJpeg;
+import de.digitalcollections.turbojpeg.TurboJpegException;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -16,10 +19,6 @@ import javax.imageio.ImageIO;
 import javax.imageio.ImageReadParam;
 import javax.imageio.ImageReader;
 import javax.imageio.stream.ImageInputStream;
-
-import de.digitalcollections.turbojpeg.Info;
-import de.digitalcollections.turbojpeg.TurboJpeg;
-import de.digitalcollections.turbojpeg.TurboJpegException;
 import org.assertj.core.util.Lists;
 import org.junit.jupiter.api.Test;
 
@@ -379,7 +378,10 @@ class TurboJpegImageReaderTest {
     ImageReader reader = getReader(fixtureFile);
 
     TurboJpeg turboJpeg = new TurboJpeg();
-    ByteBuffer jpegData = bufferFromStream(ImageIO.createImageInputStream(new File(ClassLoader.getSystemResource(fixtureFile).getFile())));
+    ByteBuffer jpegData =
+        bufferFromStream(
+            ImageIO.createImageInputStream(
+                new File(ClassLoader.getSystemResource(fixtureFile).getFile())));
     Info info = turboJpeg.getInfo(jpegData.array());
     assertThat(info.getSubsampling()).isEqualTo(TJSAMP_411);
 
