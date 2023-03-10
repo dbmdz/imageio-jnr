@@ -1,18 +1,25 @@
 package de.digitalcollections.turbojpeg.imageio;
 
 import static de.digitalcollections.turbojpeg.imageio.CustomAssertions.assertThat;
+import static de.digitalcollections.turbojpeg.imageio.TurboJpegImageReader.bufferFromStream;
+import static de.digitalcollections.turbojpeg.lib.enums.TJSAMP.TJSAMP_411;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.ByteBuffer;
 import java.util.List;
 import java.util.function.Supplier;
 import javax.imageio.ImageIO;
 import javax.imageio.ImageReadParam;
 import javax.imageio.ImageReader;
 import javax.imageio.stream.ImageInputStream;
+
+import de.digitalcollections.turbojpeg.Info;
+import de.digitalcollections.turbojpeg.TurboJpeg;
+import de.digitalcollections.turbojpeg.TurboJpegException;
 import org.assertj.core.util.Lists;
 import org.junit.jupiter.api.Test;
 
@@ -367,9 +374,17 @@ class TurboJpegImageReaderTest {
   }
 
   @Test
-  public void testSubsamplingTJSAMP_411() throws IOException {
-    ImageReader reader = getReader("subsampling_411.jpg");
+  public void testSubsamplingTJSAMP_411() throws IOException, TurboJpegException {
+    String fixtureFile = "subsampling_411.jpg";
+    ImageReader reader = getReader(fixtureFile);
+
+    TurboJpeg turboJpeg = new TurboJpeg();
+    ByteBuffer jpegData = bufferFromStream(ImageIO.createImageInputStream(new File(ClassLoader.getSystemResource(fixtureFile).getFile())));
+    Info info = turboJpeg.getInfo(jpegData.array());
+    assertThat(info.getSubsampling()).isEqualTo(TJSAMP_411);
+
     TurboJpegImageReadParam param = (TurboJpegImageReadParam) reader.getDefaultReadParam();
+
     // Rotation is currently not working, see:
     // https://github.com/libjpeg-turbo/libjpeg-turbo/issues/659
     param.setSourceRegion(new Rectangle(50, 100, 50, 100));
