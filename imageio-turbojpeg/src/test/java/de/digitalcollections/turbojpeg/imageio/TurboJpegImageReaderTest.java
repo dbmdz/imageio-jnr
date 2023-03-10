@@ -368,7 +368,7 @@ class TurboJpegImageReaderTest {
 
   @Test
   public void testSubsamplingTJSAMP_411() throws IOException {
-    ImageReader reader = getReader("subsampling.jpg");
+    ImageReader reader = getReader("subsampling_411.jpg");
     TurboJpegImageReadParam param = (TurboJpegImageReadParam) reader.getDefaultReadParam();
     // Rotation is currently not working, see:
     // https://github.com/libjpeg-turbo/libjpeg-turbo/issues/659
