@@ -30,13 +30,13 @@ To use the ImageIO plugins, include them in your dependencies:
 <dependency>
   <groupId>de.digitalcollections.imageio</groupId>
   <artifactId>imageio-turbojpeg</artifactId>
-  <version>0.6.4</version>
+  <version>0.6.5</version>
 </dependency>
 
 <dependency>
   <groupId>de.digitalcollections.imageio</groupId>
   <artifactId>imageio-openjpeg</artifactId>
-  <version>0.6.4</version>
+  <version>0.6.5</version>
 </dependency>
 ```
 
@@ -44,7 +44,7 @@ Before using them, make sure that you have all the required native libraries
 installed, e.g. on Debian-based systems:
 
 ```
-$ sudo apt install libturbojpeg libopenjp2-7
+$ sudo apt install libturbojpeg0 libopenjp2-7
 ```
 
 
@@ -76,10 +76,5 @@ $ sudo apt install libturbojpeg libopenjp2-7
 
 JNR-FFI itself is compatible with [a large number of architectures](https://github.com/jnr/jffi/tree/master/archive),
 so you merely need to make sure that the backing native libraries are compatible with your architecture.
-Both [OpenJPEG](https://packages.debian.org/stretch/libopenjp2-7) and [TurboJPEG](https://packages.debian.org/stretch/libturbojpeg0)
+Both [OpenJPEG](https://packages.debian.org/bullseye/libopenjp2-7) and [TurboJPEG](https://packages.debian.org/bullseye/libturbojpeg0)
 are available for the majority of commonly used platforms.
-
-## FAQ
-
-- Q: I get a `Failed to read JPEG info.` `IllegalArgumentException` when using the TwelveMonkeys ImageIO libraries in version 3.4.1 when reading a TIFF with JPEG compressed data.
-  A: Stick to Twelvemonkeys version 3.3.2 for now. We're currently investigating the issue.
