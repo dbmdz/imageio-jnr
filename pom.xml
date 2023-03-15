@@ -53,9 +53,9 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
     <version.assertj>3.24.2</version.assertj>
-    <version.jnr-ffi>2.2.12</version.jnr-ffi>
+    <version.jnr-ffi>2.2.13</version.jnr-ffi>
     <version.slf4j>2.0.6</version.slf4j>
-    <version.junit-jupiter>5.9.1</version.junit-jupiter>
+    <version.junit-jupiter>5.9.2</version.junit-jupiter>
 
     <!-- plugins -->
     <version.jacoco-maven-plugin>0.8.8</version.jacoco-maven-plugin>
@@ -67,7 +67,7 @@
     <version.maven-source-plugin>3.2.1</version.maven-source-plugin>
     <version.maven-surefire-plugin>3.0.0</version.maven-surefire-plugin>
     <version.nexus-staging-maven-plugin>1.6.13</version.nexus-staging-maven-plugin>
-    <version.versions-maven-plugin>2.12.0</version.versions-maven-plugin>
+    <version.versions-maven-plugin>2.15.0</version.versions-maven-plugin>
   </properties>
 
   <dependencyManagement>
