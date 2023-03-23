@@ -1,9 +1,6 @@
 package de.digitalcollections.turbojpeg;
 
-import de.digitalcollections.turbojpeg.lib.enums.TJPF;
-import de.digitalcollections.turbojpeg.lib.enums.TJSAMP;
-import de.digitalcollections.turbojpeg.lib.enums.TJXOP;
-import de.digitalcollections.turbojpeg.lib.enums.TJXOPT;
+import de.digitalcollections.turbojpeg.lib.enums.*;
 import de.digitalcollections.turbojpeg.lib.libturbojpeg;
 import de.digitalcollections.turbojpeg.lib.structs.tjscalingfactor;
 import de.digitalcollections.turbojpeg.lib.structs.tjtransform;
@@ -144,8 +141,19 @@ public class TurboJpeg {
               isGray ? TJPF.TJPF_GRAY : TJPF.TJPF_BGR,
               0);
       if (rv != 0) {
-        LOG.error("Could not decompress JPEG (dimensions: {}x{}, gray: {})", width, height, isGray);
-        throw new TurboJpegException(lib.tjGetErrorStr());
+        TJERR errorCode = TJERR.fromInt(lib.tjGetErrorCode(codec));
+        String errorMessage = lib.tjGetErrorStr();
+        if (errorCode == TJERR.TJERR_FATAL) {
+          LOG.error(
+              "Could not decompress JPEG (dimensions: {}x{}, gray: {})", width, height, isGray);
+          throw new TurboJpegException(errorMessage);
+        }
+        LOG.warn(
+            "Could not decompress JPEG (dimensions: {}x{}, gray: {}, message: {})",
+            width,
+            height,
+            isGray,
+            errorMessage);
       }
       return img;
     } finally {
@@ -314,14 +322,26 @@ public class TurboJpeg {
       bufPtrRef = new PointerByReference();
       int rv = lib.tjTransform(codec, inBuf, jpegData.length, 1, bufPtrRef, lenRef, transform, 0);
       if (rv != 0) {
-        LOG.error(
-            "Could not compress image (crop: {},{},{},{}, rotate: {})",
+        TJERR errorCode = TJERR.fromInt(lib.tjGetErrorCode(codec));
+        String errorMessage = lib.tjGetErrorStr();
+        if (errorCode == TJERR.TJERR_FATAL) {
+          LOG.error(
+              "Could not compress image (crop: {},{},{},{}, rotate: {})",
+              transform.r.x,
+              transform.r.y,
+              transform.r.w,
+              transform.r.h,
+              rotation);
+          throw new TurboJpegException(errorMessage);
+        }
+        LOG.warn(
+            "Could not compress image (crop: {},{},{},{}, rotate: {}, message: {})",
             transform.r.x,
             transform.r.y,
             transform.r.w,
             transform.r.h,
-            rotation);
-        throw new TurboJpegException(lib.tjGetErrorStr());
+            rotation,
+            errorMessage);
       }
       ByteBuffer outBuf =
           ByteBuffer.allocate(lenRef.getValue().intValue()).order(runtime.byteOrder());
