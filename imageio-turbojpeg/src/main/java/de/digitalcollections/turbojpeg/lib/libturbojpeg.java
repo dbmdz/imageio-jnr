@@ -74,4 +74,6 @@ public interface libturbojpeg {
   Pointer tjAlloc(int bytes);
 
   long tjBufSize(int width, int height, TJSAMP subsamp);
+
+  int tjGetErrorCode(Pointer handle);
 }
