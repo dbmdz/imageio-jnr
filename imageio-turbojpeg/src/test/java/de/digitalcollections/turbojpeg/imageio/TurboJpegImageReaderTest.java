@@ -394,4 +394,44 @@ class TurboJpegImageReaderTest {
     assertThat(image.getHeight()).isEqualTo(100);
     assertThat(image.getWidth()).isEqualTo(50);
   }
+
+  @Test
+  public void testRecoverable() throws IOException {
+    ImageReader reader = getReader("bsb10505468_01132.jpg");
+    TurboJpegImageReadParam param = (TurboJpegImageReadParam) reader.getDefaultReadParam();
+    BufferedImage image = reader.read(0, param);
+    assertThat(image.getHeight()).isEqualTo(1799);
+    assertThat(image.getWidth()).isEqualTo(1500);
+  }
+
+  @Test
+  public void testRecoverableWithRotation() throws IOException {
+    ImageReader reader = getReader("bsb10505468_01132.jpg");
+    TurboJpegImageReadParam param = (TurboJpegImageReadParam) reader.getDefaultReadParam();
+    param.setRotationDegree(90);
+    BufferedImage image = reader.read(0, param);
+    assertThat(image.getHeight()).isEqualTo(1500);
+    assertThat(image.getWidth()).isEqualTo(1799);
+  }
+
+  @Test
+  public void testRecoverableWithCropping() throws IOException {
+    ImageReader reader = getReader("bsb10505468_01132.jpg");
+    TurboJpegImageReadParam param = (TurboJpegImageReadParam) reader.getDefaultReadParam();
+    param.setSourceRegion(new Rectangle(500, 250, 350, 250));
+    BufferedImage image = reader.read(0, param);
+    assertThat(image.getHeight()).isEqualTo(250);
+    assertThat(image.getWidth()).isEqualTo(350);
+  }
+
+  @Test
+  public void testRecoverableWithRotationAndCropping() throws IOException {
+    ImageReader reader = getReader("bsb10505468_01132.jpg");
+    TurboJpegImageReadParam param = (TurboJpegImageReadParam) reader.getDefaultReadParam();
+    param.setRotationDegree(90);
+    param.setSourceRegion(new Rectangle(500, 250, 350, 250));
+    BufferedImage image = reader.read(0, param);
+    assertThat(image.getHeight()).isEqualTo(350);
+    assertThat(image.getWidth()).isEqualTo(250);
+  }
 }
