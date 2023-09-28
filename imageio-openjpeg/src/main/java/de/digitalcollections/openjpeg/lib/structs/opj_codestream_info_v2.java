@@ -8,14 +8,19 @@ import jnr.ffi.byref.AddressByReference;
 public class opj_codestream_info_v2 extends Struct {
   /** tile origin in x = XTOsiz */
   public Unsigned32 tx0;
+
   /** tile origin in y = YTOsiz */
   public Unsigned32 ty0;
+
   /** tile size in x = XTsiz */
   public Unsigned32 tdx;
+
   /** tile size in y = YTsiz */
   public Unsigned32 tdy;
+
   /** number of tiles in X */
   public Unsigned32 tw;
+
   /** number of tiles in Y */
   public Unsigned32 th;
 
