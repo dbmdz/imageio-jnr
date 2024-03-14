@@ -18,7 +18,7 @@
   <packaging>jar</packaging>
 
   <properties>
-    <version.guava>33.0.0-jre</version.guava>
+    <version.guava>33.1.0-jre</version.guava>
     <version.imageio-tiff>3.10.1</version.imageio-tiff>
   </properties>
 
