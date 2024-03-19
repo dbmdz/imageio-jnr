@@ -62,7 +62,7 @@
     <version.maven-compiler-plugin>3.12.1</version.maven-compiler-plugin>
     <version.maven-fmt-plugin>2.23</version.maven-fmt-plugin>
     <version.maven-githook-plugin>1.0.5</version.maven-githook-plugin>
-    <version.maven-gpg-plugin>3.2.0</version.maven-gpg-plugin>
+    <version.maven-gpg-plugin>3.2.1</version.maven-gpg-plugin>
     <version.maven-javadoc-plugin>3.6.3</version.maven-javadoc-plugin>
     <version.maven-source-plugin>3.3.0</version.maven-source-plugin>
     <version.maven-surefire-plugin>3.2.5</version.maven-surefire-plugin>
