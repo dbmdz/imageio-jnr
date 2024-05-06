@@ -42,10 +42,10 @@ public interface libturbojpeg {
       Pointer handle,
       Buffer jpegBuf,
       @u_int32_t long jpegSize,
-      @Out IntByReference width,
-      @Out IntByReference height,
-      @Out IntByReference jpegSubsamp,
-      @Out IntByReference jpegColorspace);
+      @Out @In IntByReference width,
+      @Out @In IntByReference height,
+      @Out @In IntByReference jpegSubsamp,
+      @Out @In IntByReference jpegColorspace);
 
   int tjTransform(
       Pointer handle,
