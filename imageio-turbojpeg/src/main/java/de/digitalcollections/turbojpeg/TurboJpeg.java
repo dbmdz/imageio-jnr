@@ -30,7 +30,9 @@ import org.slf4j.LoggerFactory;
 /** Java bindings for libturbojpeg via JFFI * */
 public class TurboJpeg {
 
+  private static final int INITIAL_PTR_VALUE = 31337;
   private static final Logger LOG = LoggerFactory.getLogger(TurboJpeg.class);
+
   public libturbojpeg lib;
   public Runtime runtime;
 
@@ -52,10 +54,13 @@ public class TurboJpeg {
     try {
       codec = lib.tjInitDecompress();
 
-      IntByReference width = new IntByReference();
-      IntByReference height = new IntByReference();
-      IntByReference jpegSubsamp = new IntByReference();
-      IntByReference jpegColorspace = new IntByReference();
+      ByteBuffer infoBuf = ByteBuffer.allocate(4 * 4).order(runtime.byteOrder());
+      Pointer buf = Pointer.wrap(runtime, infoBuf);
+
+      IntByReference width = new IntByReference(INITIAL_PTR_VALUE);
+      IntByReference height = new IntByReference(INITIAL_PTR_VALUE);
+      IntByReference jpegSubsamp = new IntByReference(INITIAL_PTR_VALUE);
+      IntByReference jpegColorspace = new IntByReference(INITIAL_PTR_VALUE);
       int rv =
           lib.tjDecompressHeader3(
               codec,
@@ -67,6 +72,13 @@ public class TurboJpeg {
               jpegColorspace);
       if (rv != 0) {
         throw new TurboJpegException(lib.tjGetErrorStr());
+      }
+
+      if (width.getValue() == INITIAL_PTR_VALUE
+          && height.getValue() == INITIAL_PTR_VALUE
+          && jpegSubsamp.getValue() == INITIAL_PTR_VALUE
+          && jpegColorspace.getValue() == INITIAL_PTR_VALUE) {
+        return null;
       }
 
       IntByReference numRef = new IntByReference();
