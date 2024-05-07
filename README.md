@@ -30,13 +30,13 @@ To use the ImageIO plugins, include them in your dependencies:
 <dependency>
   <groupId>de.digitalcollections.imageio</groupId>
   <artifactId>imageio-turbojpeg</artifactId>
-  <version>0.6.7</version>
+  <version>0.6.8</version>
 </dependency>
 
 <dependency>
   <groupId>de.digitalcollections.imageio</groupId>
   <artifactId>imageio-openjpeg</artifactId>
-  <version>0.6.7</version>
+  <version>0.6.8</version>
 </dependency>
 ```
 
