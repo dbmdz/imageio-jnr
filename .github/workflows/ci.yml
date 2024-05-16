@@ -11,7 +11,7 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v3
       - name: Install specific version 2.3 of OpenJPEG library
@@ -43,7 +43,7 @@ jobs:
   publish:
     if: (github.event_name == 'push' && (contains(github.ref, 'main') || startsWith(github.ref, 'release/'))) || github.event_name == 'release'
     needs: build
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - name: Check out repository
         uses: actions/checkout@v3
