@@ -19,7 +19,7 @@
 
   <properties>
     <version.guava>33.2.1-jre</version.guava>
-    <version.imageio-tiff>3.10.1</version.imageio-tiff>
+    <version.imageio-tiff>3.11.0</version.imageio-tiff>
   </properties>
 
   <dependencies>
