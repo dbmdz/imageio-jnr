@@ -55,6 +55,13 @@ public class TurboJpegImageReader extends ImageReader {
         // called from the TIFFImageReader.
         // Users should have checked with the TurboJpegImageReaderSpi#canDecode method beforehand,
         // anyways.
+      } finally {
+        try {
+          ((ImageInputStream) input).close();
+          this.input = null;
+        } catch (IOException e) {
+          throw new RuntimeException(e);
+        }
       }
     } else {
       throw new IllegalArgumentException("Bad input.");
@@ -362,5 +369,18 @@ public class TurboJpegImageReader extends ImageReader {
   @Override
   public IIOMetadata getImageMetadata(int imageIndex) {
     return null;
+  }
+
+  @Override
+  public void dispose() {
+    super.dispose();
+    if (this.input != null && this.input instanceof ImageInputStream) {
+      try {
+        ((ImageInputStream) this.input).close();
+        this.input = null;
+      } catch (IOException e) {
+        throw new RuntimeException(e);
+      }
+    }
   }
 }
