@@ -67,7 +67,7 @@
     <version.maven-source-plugin>3.3.1</version.maven-source-plugin>
     <version.maven-surefire-plugin>3.3.0</version.maven-surefire-plugin>
     <version.nexus-staging-maven-plugin>1.7.0</version.nexus-staging-maven-plugin>
-    <version.versions-maven-plugin>2.16.2</version.versions-maven-plugin>
+    <version.versions-maven-plugin>2.17.1</version.versions-maven-plugin>
   </properties>
 
   <dependencyManagement>
