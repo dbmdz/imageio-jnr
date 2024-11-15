@@ -11,7 +11,9 @@
     ],
     "groupName":"all dependencies",
     "groupSlug":"all",
-    "labels":["dependencies"],
+    "labels":[
+        "dependencies"
+    ],
     "lockFileMaintenance":{
         "enabled":false
     },
@@ -23,5 +25,8 @@
                 "*"
             ]
         }
+    ],
+    "schedule":[
+        "every weekend"
     ]
 }
