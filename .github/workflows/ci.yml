@@ -13,7 +13,7 @@ jobs:
   build:
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Install specific version 2.3 of OpenJPEG library
         run: wget https://github.com/uclouvain/openjpeg/releases/download/v2.3.0/openjpeg-v2.3.0-linux-x86_64.tar.gz -O /tmp/openjpeg.tar.gz && cd /tmp/ && tar -xvf /tmp/openjpeg.tar.gz
       - name: Set environment variable for OpenJPEG library
@@ -21,13 +21,13 @@ jobs:
       - name: Install TurboJPEG library
         run: sudo apt update && sudo apt install libturbojpeg
       - name: Set up JDK
-        uses: actions/setup-java@v3
+        uses: actions/setup-java@v4
         with:
           check-latest: true
           distribution: temurin
           java-version: ${{ matrix.java }}
       - name: Set up cache
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         env:
           cache-name: cache-maven-artifacts
         with:
@@ -46,9 +46,9 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - name: Check out repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Set up cache
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         env:
           cache-name: cache-maven-artifacts
         with:
@@ -65,7 +65,7 @@ jobs:
       # Publish snapshot
       - name: Set up JDK 11 for publishing a snapshot
         if: github.event_name == 'push' && endswith(env.PROJECT_VERSION, 'SNAPSHOT')
-        uses: actions/setup-java@v3
+        uses: actions/setup-java@v4
         with:
           check-latest: true
           distribution: temurin
@@ -82,7 +82,7 @@ jobs:
       # Publish release
       - name: Set up JDK 11 for publishing a release
         if: github.event_name == 'release' && !endswith(env.PROJECT_VERSION, 'SNAPSHOT')
-        uses: actions/setup-java@v3
+        uses: actions/setup-java@v4
         with:
           check-latest: true
           distribution: temurin
