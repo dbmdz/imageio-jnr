@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
+import java.awt.image.Raster;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -152,29 +153,79 @@ class OpenJp2ImageReaderTest {
     assertImageEquals(expectedImg, actualImage);
   }
 
+  public static void compareImagesByRaster(BufferedImage expectedImage, BufferedImage actualImage,
+      Raster actualRaster, int tolerance) {
+    int width = expectedImage.getWidth();
+    assertEquals(width, actualImage.getWidth());
+    int height = expectedImage.getHeight();
+    assertEquals(height, actualImage.getHeight());
+
+    Raster expectedRaster = expectedImage.getData();
+    int bands = expectedRaster.getNumBands();
+
+    for (int y = 0; y < height; y++) {
+      for (int x = 0; x < width; x++) {
+        int totalDiff = 0;
+        for (int b = 0; b < bands; b++) {
+          int expectedSample = expectedRaster.getSample(x, y, b);
+          int actualSample = actualRaster.getSample(x, y, b);
+          totalDiff += Math.abs(expectedSample - actualSample);
+        }
+        if (totalDiff > tolerance) {
+          assertEquals(totalDiff, tolerance, "Tolerance of Raster " + x + "," + y);
+        }
+      }
+    }
+  }
+
+  private void assertRasterEquals(String expectedImageName, String actualImageName)
+      throws IOException {
+    assertRasterEquals(expectedImageName, actualImageName, 5);
+  }
+
+  private void assertRasterEquals(String expectedImageName, String actualImageName, int tolerance)
+      throws IOException {
+    OpenJp2ImageReader reader = getReader(actualImageName);
+    BufferedImage actualImage = reader.read(0, null);
+    reader = getReader(actualImageName);
+    Raster actualRaster = reader.readRaster(0, null);
+    InputStream input = ClassLoader.getSystemResourceAsStream(expectedImageName);
+    assertThat(input).isNotNull();
+    BufferedImage expectedImg = ImageIO.read(input);
+
+    compareImagesByRaster(expectedImg, actualImage, actualRaster, tolerance);
+  }
+
   @Test
   public void testReadRGBA() throws Exception {
     assertImageEquals("rgba.png", "rgba.jp2");
+    assertRasterEquals("rgba.png", "rgba.jp2");
   }
 
   @Test
   public void testReadCMYK() throws Exception {
     assertImageEquals("cmyk.png", "cmyk.jp2");
+    // need higher tolerance due to lower image quality which will appear in raster sample
+    assertRasterEquals("cmyk.png", "cmyk.jp2", 1500);
   }
 
   @Test
   public void testReadCMYK_withAlpha() throws Exception {
     assertImageEquals("cmykWithAlpha.png", "cmykWithAlpha.jp2");
+    // need higher tolerance due to lower image quality which will appear in raster sample
+    assertRasterEquals("cmykWithAlpha.png", "cmykWithAlpha.jp2",1500);
   }
 
   @Test
   public void testReadGrayWithAlpha() throws Exception {
     assertImageEquals("grayWithAlpha.png", "grayWithAlpha.jp2");
+    assertRasterEquals("grayWithAlpha.png", "grayWithAlpha.jp2");
   }
 
   @Test
   public void testReadGray16bitWithoutAlpha() throws Exception {
     assertImageEquals("gray16bitWithoutAlpha.png", "gray16bitWithoutAlpha.jp2");
+    assertRasterEquals("gray16bitWithoutAlpha.png", "gray16bitWithoutAlpha.jp2");
   }
 
   @Test
@@ -190,5 +241,6 @@ class OpenJp2ImageReaderTest {
   @Test
   public void testReadWeirdGrayscale() throws IOException {
     assertImageEquals("gray2_control.png", "gray2.jp2");
+    assertRasterEquals("gray2_control.png", "gray2.jp2");
   }
 }

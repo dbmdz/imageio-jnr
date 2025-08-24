@@ -5,6 +5,7 @@ import de.digitalcollections.openjpeg.OpenJpeg;
 import de.digitalcollections.openjpeg.lib.enums.COLOR_SPACE;
 import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
+import java.awt.image.Raster;
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.stream.Stream;
@@ -226,6 +227,21 @@ public class OpenJp2ImageReader extends ImageReader {
     ImageReadParam param = getDefaultReadParam();
     param.setSourceRegion(region);
     return this.read(imageIndex, param);
+  }
+
+  @Override
+  public boolean canReadRaster() {
+    return true;
+  }
+
+  @Override
+  public Raster readRaster(int imageIndex, ImageReadParam param) throws IOException {
+    return this.read(imageIndex, param).getData();
+  }
+
+  @Override
+  public Raster readTileRaster(int imageIndex, int tileX, int tileY) throws IOException {
+    return this.readTile(imageIndex,tileX,tileY).getData();
   }
 
   @Override
