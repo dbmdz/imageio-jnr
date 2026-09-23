@@ -5,6 +5,9 @@
 [![GitHub release](https://img.shields.io/github/release/dbmdz/imageio-jnr.svg)](https://github.com/dbmdz/imageio-jnr/releases)
 [![Maven Central](https://img.shields.io/maven-central/v/de.digitalcollections.imageio/imageio-jnr.svg)](https://central.sonatype.com/search?q=imageio-jnr)
 
+[!CAUTION]
+This library is no longer actively maintained. We strongly encourage you to switch to better alternatives, foremost [vips-ffm](https://github.com/lopcode/vips-ffm), which is more performant, stable and has a much nicer API.
+
 This repository contains ImageIO plugins that wrap the most common native
 libraries for various image formats with [JNR-FFI](https://github.com/jnr/jnr-ffi).
 This has the advantage of being generally the fastest available option on the
